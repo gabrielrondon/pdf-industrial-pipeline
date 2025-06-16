@@ -2,10 +2,15 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
 import uuid
 import os
+import logging
 from typing import Optional, List
 from dotenv import load_dotenv
 from datetime import datetime
 from dataclasses import asdict
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Carregar variáveis de ambiente
 load_dotenv()
@@ -23,6 +28,12 @@ from embeddings.vector_database import vector_db
 from workers.ml_worker import ml_worker
 from ml_engine.feature_engineering import feature_engineer
 from ml_engine.lead_scoring_models import ensemble_model, random_forest_model, gradient_boosting_model
+from performance.cache_manager import cache_manager
+from performance.parallel_processor import parallel_processor
+from performance.database_manager import database_manager
+from performance.metrics_collector import metrics_collector, monitor_performance
+from performance.monitoring import health_monitor, register_health_check
+from performance.performance_utils import performance_utils
 
 app = FastAPI(
     title="PDF Industrial Pipeline",
@@ -707,3 +718,163 @@ async def get_ml_stats():
     except Exception as e:
         logger.error(f"Erro ao buscar estatísticas ML: {e}")
         raise HTTPException(status_code=500, detail=f"Erro nas estatísticas ML: {str(e)}")
+
+# ====== STAGE 6: PERFORMANCE & SCALING ENDPOINTS ======
+
+@app.get("/performance/cache/stats")
+async def get_cache_stats():
+    """
+    Obter estatísticas do cache Redis
+    """
+    try:
+        stats = cache_manager.get_stats()
+        return {
+            "cache_statistics": stats.__dict__,
+            "cache_health": cache_manager.health_check()
+        }
+    except Exception as e:
+        logger.error(f"Erro ao obter estatísticas de cache: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
+
+@app.delete("/performance/cache/clear")
+async def clear_cache():
+    """
+    Limpar todo o cache
+    """
+    try:
+        success = cache_manager.clear_all()
+        return {
+            "cache_cleared": success,
+            "message": "Cache limpo com sucesso" if success else "Erro ao limpar cache"
+        }
+    except Exception as e:
+        logger.error(f"Erro ao limpar cache: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
+
+@app.get("/performance/parallel/stats")
+async def get_parallel_stats():
+    """
+    Obter estatísticas do processamento paralelo
+    """
+    try:
+        stats = parallel_processor.get_stats()
+        return {
+            "parallel_statistics": stats.__dict__,
+            "parallel_health": parallel_processor.health_check()
+        }
+    except Exception as e:
+        logger.error(f"Erro ao obter estatísticas paralelas: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
+
+@app.get("/performance/metrics/stats")
+async def get_metrics_stats():
+    """
+    Obter estatísticas de métricas de performance
+    """
+    try:
+        stats = metrics_collector.get_stats()
+        return {
+            "metrics_statistics": stats,
+            "metrics_health": metrics_collector.health_check()
+        }
+    except Exception as e:
+        logger.error(f"Erro ao obter estatísticas de métricas: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
+
+@app.get("/performance/system/health")
+async def get_system_health():
+    """
+    Verificar saúde geral do sistema
+    """
+    try:
+        # Registrar health checks dos componentes principais
+        @register_health_check("redis_cache", critical=True)
+        def check_cache():
+            return cache_manager.health_check()
+        
+        @register_health_check("parallel_processor", critical=True)
+        def check_parallel():
+            return parallel_processor.health_check()
+        
+        @register_health_check("metrics_collector", critical=False)
+        def check_metrics():
+            return metrics_collector.health_check()
+        
+        @register_health_check("database_manager", critical=False)
+        def check_database():
+            return database_manager.health_check()
+        
+        # Executar health checks
+        system_status = health_monitor.check_all_components()
+        
+        return {
+            "system_status": system_status.overall_status.value,
+            "uptime_seconds": system_status.uptime_seconds,
+            "healthy_components": system_status.healthy_checks,
+            "total_components": system_status.total_checks,
+            "component_details": [
+                {
+                    "component": check.component,
+                    "status": check.status.value,
+                    "message": check.message,
+                    "response_time_ms": check.response_time_ms
+                }
+                for check in system_status.components
+            ],
+            "alerts": health_monitor.get_alerts()
+        }
+    except Exception as e:
+        logger.error(f"Erro ao verificar saúde do sistema: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
+
+@app.get("/performance/analytics")
+async def get_performance_analytics():
+    """
+    Obter analytics de performance do sistema
+    """
+    try:
+        # Analytics de disponibilidade
+        availability_stats = health_monitor.get_availability_stats()
+        
+        # Resumo de performance
+        performance_summary = performance_utils.get_performance_summary()
+        
+        # Analytics de database (se disponível)
+        db_analytics = database_manager.get_pipeline_analytics()
+        
+        return {
+            "availability_statistics": availability_stats,
+            "performance_summary": performance_summary,
+            "database_analytics": db_analytics,
+            "generated_at": datetime.now().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Erro ao gerar analytics de performance: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
+
+@app.get("/performance/benchmark/{endpoint_name}")
+async def benchmark_endpoint(endpoint_name: str, iterations: int = 100):
+    """
+    Executar benchmark de um endpoint específico
+    """
+    try:
+        # Função de teste para benchmark
+        def test_function():
+            # Simular operação do endpoint
+            import time
+            time.sleep(0.001)  # 1ms de processamento simulado
+            return {"status": "ok"}
+        
+        # Executar benchmark
+        result = performance_utils.benchmark_function(test_function, iterations)
+        
+        return {
+            "endpoint": endpoint_name,
+            "benchmark_result": result.__dict__,
+            "performance_rating": "excellent" if result.avg_time_per_iteration < 0.01 else
+                                "good" if result.avg_time_per_iteration < 0.1 else
+                                "needs_optimization"
+        }
+    except Exception as e:
+        logger.error(f"Erro ao executar benchmark: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")

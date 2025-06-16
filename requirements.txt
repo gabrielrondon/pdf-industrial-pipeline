@@ -7,7 +7,7 @@ Pillow==10.4.0
 pytesseract==0.3.10
 
 # Web Framework
-fastapi==0.111.0
+fastapi==0.104.1
 uvicorn==0.30.1
 python-multipart==0.0.9
 
@@ -17,7 +17,7 @@ redis==5.0.7
 # Text Processing & NLP - Etapa 3
 nltk==3.8.1
 langdetect==1.0.9
-spacy==3.7.4
+spacy==3.7.2
 textblob==0.17.1
 regex==2023.12.25
 
@@ -33,3 +33,9 @@ joblib==1.4.2
 xgboost==2.0.3
 lightgbm==4.3.0
 optuna==3.6.1
+
+# Performance & Scaling - Etapa 6
+psutil==5.9.8
+aioredis==2.0.1
+asyncpg==0.29.0
+prometheus-client==0.20.0
