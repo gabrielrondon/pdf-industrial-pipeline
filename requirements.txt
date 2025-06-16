@@ -23,3 +23,10 @@ spacy>=3.6.0
 # python -m spacy download en_core_news_sm
 textblob>=0.17.1
 regex>=2023.6.3
+
+# Embeddings & Vectorization - Etapa 4
+sentence-transformers>=2.7.0
+scikit-learn>=1.3.2
+numpy>=1.24.4
+faiss-cpu>=1.7.4
+torch>=2.1.2

@@ -1,0 +1,29 @@
+{
+  "document_id": "e4ef6e91-6da1-42c0-9706-1d1efabbc9b1",
+  "job_id": "stage4-test-job",
+  "page_number": 1,
+  "text": "Esta é uma empresa de tecnologia chamada TechSolutions Brasil Ltda. CNPJ: 12.345.678/0001-90. Contato: João Silva, telefone (11) 99999-8888, email: joao@techsolutions.com.br. Projeto de desenvolvimento de sistema de gestão empresarial no valor de R$ 250.000,00. Prazo urgente de 6 meses.",
+  "vector_dimension": 768,
+  "model_name": "neuralmind/bert-base-portuguese-cased",
+  "created_at": "2025-06-16T21:30:17.646250",
+  "metadata": {
+    "job_id": "stage4-test-job",
+    "page_number": 1,
+    "word_count": 38,
+    "entities_found": 6,
+    "keywords": [
+      "techsolutions"
+    ],
+    "language": "unknown",
+    "language_confidence": 0,
+    "processing_time": 0.201532,
+    "text_length": 287
+  },
+  "vector_preview": [
+    -0.09449788928031921,
+    -0.27763861417770386,
+    0.36801913380622864,
+    0.18421082198619843,
+    0.34603220224380493
+  ]
+}

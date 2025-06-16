@@ -12,9 +12,12 @@ load_dotenv()
 from workers.split_worker import split_pdf_task, pdf_split_worker
 from workers.ocr_worker import ocr_worker
 from workers.text_worker import text_worker
+from workers.embedding_worker import embedding_worker
 from utils.file_utils import validate_pdf_file, clean_filename, format_file_size
 from utils.storage_manager import storage_manager
 from ocr.tesseract_engine import tesseract_engine
+from embeddings.embedding_engine import embedding_engine
+from embeddings.vector_database import vector_db
 
 app = FastAPI(
     title="PDF Industrial Pipeline",
@@ -217,6 +220,150 @@ async def get_text_processing_stats():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao obter estatísticas: {str(e)}")
 
+# ================================
+# STAGE 4: EMBEDDINGS & VECTORIZATION ENDPOINTS  
+# ================================
+
+@app.post("/generate-embeddings/{job_id}")
+async def generate_job_embeddings(job_id: str):
+    """
+    Gera embeddings para todas as análises de texto de um job (Etapa 4)
+    """
+    try:
+        result = await embedding_worker.process_job_embeddings(job_id)
+        
+        return {
+            "job_id": job_id,
+            "status": "embeddings_processed",
+            "result": result,
+            "worker_stats": embedding_worker.get_worker_stats()
+        }
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro na geração de embeddings: {str(e)}")
+
+@app.get("/job/{job_id}/embeddings")
+async def get_job_embeddings_info(job_id: str):
+    """
+    Obter informações sobre embeddings de um job
+    """
+    try:
+        info = await embedding_worker.get_job_embeddings_info(job_id)
+        
+        if info.get('status') == 'no_embeddings':
+            raise HTTPException(status_code=404, detail=info.get('message', 'Embeddings não encontrados'))
+        
+        return info
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao obter informações de embeddings: {str(e)}")
+
+@app.post("/search/semantic")
+async def semantic_search(
+    query: str,
+    k: Optional[int] = 10,
+    threshold: Optional[float] = 0.7,
+    job_id: Optional[str] = None
+):
+    """
+    Busca semântica por similaridade de texto
+    """
+    try:
+        if not query or len(query.strip()) < 3:
+            raise HTTPException(status_code=400, detail="Query deve ter pelo menos 3 caracteres")
+        
+        result = await embedding_worker.search_similar_documents(
+            query_text=query,
+            k=k,
+            threshold=threshold,
+            job_id=job_id
+        )
+        
+        return result
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro na busca semântica: {str(e)}")
+
+@app.get("/search/leads")
+async def search_high_score_leads(min_score: Optional[float] = 70.0):
+    """
+    Busca leads com alta pontuação no banco vectorial
+    """
+    try:
+        # Buscar documentos com score alto
+        high_score_docs = vector_db.search_by_lead_score(min_score)
+        
+        if not high_score_docs:
+            return {
+                "message": f"Nenhum lead encontrado com score >= {min_score}",
+                "leads": [],
+                "total": 0
+            }
+        
+        # Preparar resultados
+        leads = []
+        for doc in high_score_docs[:50]:  # Limitar a 50 resultados
+            lead_data = {
+                'document_id': doc.id,
+                'job_id': doc.job_id,
+                'page_number': doc.page_number,
+                'lead_score': doc.lead_score,
+                'text_preview': doc.text[:200] + "..." if len(doc.text) > 200 else doc.text,
+                'created_at': doc.created_at,
+                'metadata': doc.metadata
+            }
+            leads.append(lead_data)
+        
+        return {
+            "leads": leads,
+            "total": len(leads),
+            "min_score_used": min_score,
+            "total_in_database": len(high_score_docs)
+        }
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro na busca de leads: {str(e)}")
+
+@app.get("/embeddings/stats")
+async def get_embeddings_stats():
+    """
+    Obter estatísticas do sistema de embeddings
+    """
+    try:
+        worker_stats = embedding_worker.get_worker_stats()
+        vector_db_stats = vector_db.get_stats()
+        embedding_engine_info = embedding_engine.get_model_info()
+        
+        return {
+            "worker_stats": worker_stats,
+            "vector_database": vector_db_stats,
+            "embedding_engine": embedding_engine_info,
+            "system_status": "operational"
+        }
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao obter estatísticas: {str(e)}")
+
+@app.delete("/embeddings/clear")
+async def clear_vector_database():
+    """
+    Limpar todo o banco de dados vectorial (USE COM CUIDADO!)
+    """
+    try:
+        vector_db.clear_all()
+        
+        return {
+            "message": "Banco de dados vectorial limpo com sucesso",
+            "warning": "Todos os embeddings foram removidos permanentemente"
+        }
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao limpar banco vectorial: {str(e)}")
+
 @app.get("/")
 async def root():
     """
@@ -229,7 +376,8 @@ async def root():
         "stages": {
             "stage_1": "✅ Ingestion & Partitioning (Complete)",
             "stage_2": "✅ OCR Processing (Complete)", 
-            "stage_3": "🔄 Text Processing & NLP (In Development)"
+            "stage_3": "✅ Text Processing & NLP (Complete)",
+            "stage_4": "🚀 Embeddings & Vectorization (Ready)"
         },
         "endpoints": {
             "upload": "/upload (POST) - Upload e processamento de PDF",
@@ -239,6 +387,12 @@ async def root():
             "process_text": "/process-text/{job_id} (POST) - Processar análise de texto",
             "text_analysis": "/job/{job_id}/text-analysis (GET) - Obter análise de texto",
             "text_stats": "/text-processing/stats (GET) - Estatísticas de processamento de texto",
+            "generate_embeddings": "/generate-embeddings/{job_id} (POST) - Gerar embeddings",
+            "job_embeddings": "/job/{job_id}/embeddings (GET) - Info embeddings do job",
+            "semantic_search": "/search/semantic (POST) - Busca semântica",
+            "lead_search": "/search/leads (GET) - Buscar leads alta pontuação",
+            "embeddings_stats": "/embeddings/stats (GET) - Estatísticas de embeddings",
+            "clear_vectors": "/embeddings/clear (DELETE) - Limpar banco vectorial",
             "docs": "/docs - Documentação interativa"
         }
     }
