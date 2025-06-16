@@ -2,6 +2,5 @@ fastapi
 uvicorn
 boto3
 pdfminer.six
-qpdf
 python-multipart
 python-dotenv
