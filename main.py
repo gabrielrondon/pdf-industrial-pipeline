@@ -10,8 +10,10 @@ load_dotenv()
 
 # Importar nossos módulos
 from workers.split_worker import split_pdf_task, pdf_split_worker
+from workers.ocr_worker import ocr_worker
 from utils.file_utils import validate_pdf_file, clean_filename, format_file_size
 from utils.storage_manager import storage_manager
+from ocr.tesseract_engine import tesseract_engine
 
 app = FastAPI(
     title="PDF Industrial Pipeline",

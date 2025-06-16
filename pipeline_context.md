@@ -1,6 +1,6 @@
 # 📚 Industrial PDF Analysis Pipeline – Contexto Mestre
 
-> **Status Atual:** 🚧 Etapa 1 - Ingestão & Particionamento (98% concluída)  
+> **Status Atual:** 🚧 Etapa 2 - OCR & Pré-processamento de Imagem (0% - Iniciando)  
 > **Última Atualização:** Junho 2025  
 > **Desenvolvedor:** Gabriel Rondon
 
@@ -21,8 +21,8 @@ Desenvolver um pipeline altamente escalável, modular e econômico para:
 
 | # | Etapa | Status | Prioridade |
 |---|-------|--------|------------|
-| 1 | **Ingestão & Particionamento** | 🟢 98% | ATUAL |
-| 2 | **OCR & Pré-processamento de Imagem** | ⚪ 0% | PRÓXIMA |
+| 1 | **Ingestão & Particionamento** | 🟢 98% | CONCLUÍDA |
+| 2 | **OCR & Pré-processamento de Imagem** | 🟡 0% | ATUAL |
 | 3 | **Limpeza & Estruturação do Texto** | ⚪ 0% | FUTURA |
 | 4 | **Geração de Embeddings e Vetorização** | ⚪ 0% | FUTURA |
 | 5 | **Identificação de Leads e Oportunidades** | ⚪ 0% | FUTURA |
@@ -171,9 +171,87 @@ curl http://localhost:8000/health
 |------|------------|------------|
 | ~~Sistema de filas (Redis)~~ | ✅ Concluído | ✅ |
 | ~~Sistema de storage flexível~~ | ✅ Concluído | ✅ |
-| Banco de dados (PostgreSQL) | Média | 1-2 dias |
-| Métricas e monitoramento | Baixa | 1 dia |
-| HTTPS obrigatório | Baixa | 0.5 dia |
+| **FUTURO:** Banco de dados (PostgreSQL) | Baixa | 1-2 dias |
+| **FUTURO:** Métricas e monitoramento | Baixa | 1 dia |
+| **FUTURO:** HTTPS obrigatório | Baixa | 0.5 dia |
+
+> **Nota:** Etapa 1 está funcionalmente completa (98%). As pendências acima são melhorias futuras que não bloqueiam o avanço para Etapa 2.
+
+---
+
+## 🔍 ETAPA 2 – OCR & Pré-processamento de Imagem [ATUAL]
+
+### 🎯 Objetivo
+- [ ] Detectar páginas que precisam de OCR (já implementado na Etapa 1)
+- [ ] Implementar worker de OCR usando Tesseract
+- [ ] Pré-processar imagens para melhorar qualidade do OCR
+- [ ] Extrair texto de PDFs escaneados ou com baixa qualidade
+- [ ] Integrar com sistema de filas existente
+- [ ] Armazenar texto extraído no storage
+- [ ] Atualizar manifests com resultados do OCR
+
+### 📋 Componentes Planejados
+
+#### 🔤 OCR Engine
+- [ ] **Tesseract OCR** - Engine principal de reconhecimento
+- [ ] **Configuração de idiomas** - Português, Inglês, Espanhol
+- [ ] **Configuração de qualidade** - Diferentes níveis de precisão
+- [ ] **Fallback strategies** - Múltiplas tentativas com configurações diferentes
+
+#### 🖼️ Pré-processamento de Imagem
+- [ ] **Conversão PDF → Imagem** - Usando pdf2image/Poppler
+- [ ] **Melhoria de qualidade** - Contraste, brilho, nitidez
+- [ ] **Correção de rotação** - Detecção automática de orientação
+- [ ] **Remoção de ruído** - Filtros para limpar imagem
+- [ ] **Binarização** - Conversão para preto e branco otimizada
+
+#### 🔄 OCR Worker
+- [ ] **Worker assíncrono** - Processamento em background
+- [ ] **Integração com Redis** - Consumir fila de páginas
+- [ ] **Retry logic** - Tentar novamente em caso de falha
+- [ ] **Progress tracking** - Acompanhar progresso do OCR
+- [ ] **Error handling** - Tratamento robusto de erros
+
+#### 💾 Armazenamento de Texto
+- [ ] **Texto extraído** - Salvar em arquivos .txt
+- [ ] **Metadados OCR** - Confiança, idioma detectado, etc.
+- [ ] **Integração storage** - Usar sistema existente
+- [ ] **Estrutura organizada** - `storage/jobs/{job_id}/ocr/`
+
+### 🛠️ Tecnologias a Implementar
+
+```bash
+# Dependências principais
+tesseract-ocr          # Engine OCR
+pytesseract           # Python wrapper
+pdf2image             # Conversão PDF → Imagem  
+Pillow                # Processamento de imagem
+opencv-python         # Visão computacional (opcional)
+```
+
+### 📁 Estrutura de Arquivos Planejada
+```
+pdf-industrial-pipeline/
+├── 📄 workers/
+│   ├── split_worker.py     ✅ Existente
+│   ├── queue_manager.py    ✅ Existente  
+│   └── ocr_worker.py       🔄 NOVO - Worker de OCR
+├── 📄 utils/
+│   ├── file_utils.py       ✅ Existente
+│   ├── storage_manager.py  ✅ Existente
+│   └── image_utils.py      🔄 NOVO - Processamento de imagem
+└── 📄 ocr/
+    ├── tesseract_engine.py 🔄 NOVO - Engine OCR
+    └── preprocessor.py     🔄 NOVO - Pré-processamento
+```
+
+### 🧪 Plano de Testes
+- [ ] **Teste com PDF escaneado** - Documento totalmente em imagem
+- [ ] **Teste com PDF misto** - Texto + imagens
+- [ ] **Teste com qualidade baixa** - Documentos mal escaneados
+- [ ] **Teste de idiomas** - Português, inglês, espanhol
+- [ ] **Teste de performance** - Tempo de processamento
+- [ ] **Teste de integração** - Com sistema de filas existente
 
 ---
 
