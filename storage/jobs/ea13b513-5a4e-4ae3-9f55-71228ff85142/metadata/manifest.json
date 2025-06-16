@@ -1,0 +1,76 @@
+{
+  "job_id": "ea13b513-5a4e-4ae3-9f55-71228ff85142",
+  "processing_info": {
+    "processed_at": "2025-06-16T18:48:49.205211",
+    "processor": "qpdf",
+    "status": "completed"
+  },
+  "original_file": {
+    "filename": "ea13b513-5a4e-4ae3-9f55-71228ff85142.pdf",
+    "file_path": "uploads/ea13b513-5a4e-4ae3-9f55-71228ff85142.pdf",
+    "file_size": 7066,
+    "created_at": "2025-06-16T18:48:49.067762"
+  },
+  "output_info": {
+    "output_directory": "temp_splits/ea13b513-5a4e-4ae3-9f55-71228ff85142",
+    "total_pages": 5,
+    "pages": [
+      {
+        "page_number": 1,
+        "filename": "page-1.pdf",
+        "file_path": "temp_splits/ea13b513-5a4e-4ae3-9f55-71228ff85142/page-1.pdf",
+        "file_size": 1625,
+        "created_at": "2025-06-16T18:48:49.112577"
+      },
+      {
+        "page_number": 2,
+        "filename": "page-2.pdf",
+        "file_path": "temp_splits/ea13b513-5a4e-4ae3-9f55-71228ff85142/page-2.pdf",
+        "file_size": 1626,
+        "created_at": "2025-06-16T18:48:49.113055"
+      },
+      {
+        "page_number": 3,
+        "filename": "page-3.pdf",
+        "file_path": "temp_splits/ea13b513-5a4e-4ae3-9f55-71228ff85142/page-3.pdf",
+        "file_size": 1627,
+        "created_at": "2025-06-16T18:48:49.113495"
+      },
+      {
+        "page_number": 4,
+        "filename": "page-4.pdf",
+        "file_path": "temp_splits/ea13b513-5a4e-4ae3-9f55-71228ff85142/page-4.pdf",
+        "file_size": 1626,
+        "created_at": "2025-06-16T18:48:49.113809"
+      },
+      {
+        "page_number": 5,
+        "filename": "page-5.pdf",
+        "file_path": "temp_splits/ea13b513-5a4e-4ae3-9f55-71228ff85142/page-5.pdf",
+        "file_size": 1625,
+        "created_at": "2025-06-16T18:48:49.114107"
+      }
+    ]
+  },
+  "next_steps": {
+    "ocr_required": false,
+    "ready_for_processing": true,
+    "queue_status": "completed"
+  },
+  "pipeline_status": {
+    "stage": "split_complete",
+    "next_stage": "analysis",
+    "estimated_completion": "immediate"
+  },
+  "queue_info": {
+    "ocr": 0,
+    "analysis": 0,
+    "failed": 0,
+    "completed": 0,
+    "redis_available": false
+  },
+  "storage_info": {
+    "backend": "LocalStorage",
+    "files_uploaded": true
+  }
+}

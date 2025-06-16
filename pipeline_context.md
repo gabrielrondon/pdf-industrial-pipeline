@@ -1,7 +1,7 @@
 # 📚 Industrial PDF Analysis Pipeline – Contexto Mestre
 
-> **Status Atual:** 🚧 Etapa 1 - Ingestão & Particionamento (90% concluída)  
-> **Última Atualização:** Janeiro 2024  
+> **Status Atual:** 🚧 Etapa 1 - Ingestão & Particionamento (98% concluída)  
+> **Última Atualização:** Junho 2025  
 > **Desenvolvedor:** Gabriel Rondon
 
 ---
@@ -21,7 +21,7 @@ Desenvolver um pipeline altamente escalável, modular e econômico para:
 
 | # | Etapa | Status | Prioridade |
 |---|-------|--------|------------|
-| 1 | **Ingestão & Particionamento** | 🟢 90% | ATUAL |
+| 1 | **Ingestão & Particionamento** | 🟢 98% | ATUAL |
 | 2 | **OCR & Pré-processamento de Imagem** | ⚪ 0% | PRÓXIMA |
 | 3 | **Limpeza & Estruturação do Texto** | ⚪ 0% | FUTURA |
 | 4 | **Geração de Embeddings e Vetorização** | ⚪ 0% | FUTURA |
@@ -40,7 +40,7 @@ Desenvolver um pipeline altamente escalável, modular e econômico para:
 - [x] Armazenar de forma segura e rastreável
 - [x] Dividir o arquivo em páginas independentes (`page-1.pdf`, `page-2.pdf`, etc.)
 - [x] Marcar páginas que precisam de OCR
-- [ ] Colocar os jobs na fila para processamento futuro
+- [x] Colocar os jobs na fila para processamento futuro
 - [x] Gerar manifest.json com metadados completos
 
 ### 📋 Componentes e Status
@@ -56,7 +56,9 @@ Desenvolver um pipeline altamente escalável, modular e econômico para:
 #### 🗂️ Armazenamento Inicial
 - [x] Armazenamento local em `uploads/`
 - [x] Estrutura organizada por job_id
-- [ ] **PENDENTE:** Migração para S3 (`s3://bucket/jobs/{job_id}/orig.pdf`)
+- [x] **IMPLEMENTADO:** Sistema de storage flexível (Local/S3/MinIO)
+- [x] **IMPLEMENTADO:** Upload automático para storage após processamento
+- [x] **IMPLEMENTADO:** Estrutura organizada: `storage/jobs/{job_id}/{file_type}/`
 - [x] Geração de `manifest.json` com metadados
 
 #### ✂️ Particionamento (Split PDF)
@@ -74,9 +76,20 @@ Desenvolver um pipeline altamente escalável, modular e econômico para:
 - [x] Marcação no manifest.json
 
 #### 🔁 Enfileiramento
-- [ ] **PENDENTE:** Sistema de filas (RabbitMQ/SQS)
-- [ ] **PENDENTE:** Mensagens JSON para fila `OCR`
-- [x] **SIMULADO:** Estrutura preparada no manifest
+- [x] **IMPLEMENTADO:** Sistema de filas Redis-based
+- [x] **IMPLEMENTADO:** QueueManager com fallback mode
+- [x] **IMPLEMENTADO:** Integração com split_worker
+- [x] **IMPLEMENTADO:** Monitoramento de status de fila
+- [x] **IMPLEMENTADO:** Estrutura preparada no manifest
+
+#### 💾 Sistema de Storage
+- [x] **IMPLEMENTADO:** StorageManager com padrão Strategy
+- [x] **IMPLEMENTADO:** Backend LocalStorage funcional
+- [x] **IMPLEMENTADO:** Interface abstrata para S3/MinIO
+- [x] **IMPLEMENTADO:** Upload automático após processamento
+- [x] **IMPLEMENTADO:** Estrutura organizada: `jobs/{job_id}/{file_type}/`
+- [x] **IMPLEMENTADO:** Configuração via variáveis de ambiente
+- [x] **IMPLEMENTADO:** Integração com health check
 
 #### 🛢️ Banco de Dados
 - [ ] **PENDENTE:** PostgreSQL/DynamoDB
@@ -102,9 +115,11 @@ Desenvolver um pipeline altamente escalável, modular e econômico para:
 pdf-industrial-pipeline/
 ├── 📄 main.py              ✅ API FastAPI completa
 ├── 📄 workers/
-│   └── split_worker.py     ✅ Worker de divisão completo
+│   ├── split_worker.py     ✅ Worker de divisão completo
+│   └── queue_manager.py    ✅ Sistema de filas Redis
 ├── 📄 utils/
-│   └── file_utils.py       ✅ Utilitários de arquivo
+│   ├── file_utils.py       ✅ Utilitários de arquivo
+│   └── storage_manager.py  ✅ Sistema de storage flexível
 ├── 📄 test_pipeline.py     ✅ Script de teste
 ├── 📄 requirements.txt     ✅ Dependências
 ├── 📄 README.md            ✅ Documentação
@@ -154,8 +169,8 @@ curl http://localhost:8000/health
 
 | Item | Prioridade | Estimativa |
 |------|------------|------------|
-| Sistema de filas (RabbitMQ/SQS) | Alta | 2-3 dias |
-| Migração para S3/MinIO | Média | 1-2 dias |
+| ~~Sistema de filas (Redis)~~ | ✅ Concluído | ✅ |
+| ~~Sistema de storage flexível~~ | ✅ Concluído | ✅ |
 | Banco de dados (PostgreSQL) | Média | 1-2 dias |
 | Métricas e monitoramento | Baixa | 1 dia |
 | HTTPS obrigatório | Baixa | 0.5 dia |

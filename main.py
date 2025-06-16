@@ -3,10 +3,15 @@ from fastapi.responses import JSONResponse
 import uuid
 import os
 from typing import Optional
+from dotenv import load_dotenv
+
+# Carregar variáveis de ambiente
+load_dotenv()
 
 # Importar nossos módulos
 from workers.split_worker import split_pdf_task, pdf_split_worker
 from utils.file_utils import validate_pdf_file, clean_filename, format_file_size
+from utils.storage_manager import storage_manager
 
 app = FastAPI(
     title="PDF Industrial Pipeline",
@@ -157,13 +162,18 @@ async def health_check():
         qpdf_result = subprocess.run(["qpdf", "--version"], capture_output=True)
         qpdf_available = qpdf_result.returncode == 0
         
+        # Verificar storage
+        storage_info = storage_manager.get_storage_info()
+        
         return {
             "status": "healthy",
             "checks": {
                 "upload_directory": upload_exists,
                 "temp_directory": temp_exists,
-                "qpdf_available": qpdf_available
-            }
+                "qpdf_available": qpdf_available,
+                "storage_available": storage_info["available"]
+            },
+            "storage": storage_info
         }
     
     except Exception as e:

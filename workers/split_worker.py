@@ -7,8 +7,9 @@ from typing import Dict, List, Optional
 from pathlib import Path
 import logging
 
-# Importar o gerenciador de filas
+# Importar o gerenciador de filas e storage
 from .queue_manager import enqueue_ocr_pages, queue_manager
+from utils.storage_manager import storage_manager
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
@@ -78,6 +79,11 @@ class PDFSplitWorker:
             
             logger.info(f"Manifest gerado: {manifest_path}")
             
+            # ✨ NOVO: Upload dos arquivos para o storage
+            storage_results = self._upload_to_storage(job_id, original_file=file_path, 
+                                                    page_files=page_files, 
+                                                    manifest_path=manifest_path)
+            
             # ✨ NOVO: Enfileirar páginas que precisam de OCR
             pages_needing_ocr = []
             for page_info in manifest['output_info']['pages']:
@@ -110,7 +116,8 @@ class PDFSplitWorker:
                 "queue_info": {
                     "ocr_pages_enqueued": len(pages_needing_ocr),
                     "queue_available": queue_manager.is_available()
-                }
+                },
+                "storage_info": storage_results
             }
             
         except Exception as e:
@@ -123,6 +130,62 @@ class PDFSplitWorker:
                 "job_id": job_id,
                 "error": str(e)
             }
+    
+    def _upload_to_storage(self, job_id: str, original_file: str, 
+                          page_files: List[str], manifest_path: str) -> Dict:
+        """
+        Upload dos arquivos processados para o storage
+        """
+        storage_results = {
+            "original": None,
+            "pages": [],
+            "manifest": None,
+            "errors": []
+        }
+        
+        try:
+            # Upload do arquivo original
+            original_result = storage_manager.upload_job_file(
+                job_id=job_id,
+                local_path=original_file,
+                file_type="original"
+            )
+            storage_results["original"] = original_result
+            
+            if not original_result.get("success"):
+                storage_results["errors"].append(f"Falha no upload do arquivo original: {original_result.get('error')}")
+            
+            # Upload das páginas
+            for page_file in page_files:
+                page_result = storage_manager.upload_job_file(
+                    job_id=job_id,
+                    local_path=page_file,
+                    file_type="pages"
+                )
+                storage_results["pages"].append(page_result)
+                
+                if not page_result.get("success"):
+                    storage_results["errors"].append(f"Falha no upload da página {page_file}: {page_result.get('error')}")
+            
+            # Upload do manifest
+            manifest_result = storage_manager.upload_job_file(
+                job_id=job_id,
+                local_path=manifest_path,
+                file_type="metadata"
+            )
+            storage_results["manifest"] = manifest_result
+            
+            if not manifest_result.get("success"):
+                storage_results["errors"].append(f"Falha no upload do manifest: {manifest_result.get('error')}")
+            
+            logger.info(f"Storage upload concluído para job {job_id} - {len(storage_results['errors'])} erros")
+            
+        except Exception as e:
+            error_msg = f"Erro no upload para storage: {str(e)}"
+            logger.error(error_msg)
+            storage_results["errors"].append(error_msg)
+        
+        return storage_results
     
     def _generate_manifest(self, job_id: str, original_file: str, output_dir: str, 
                           page_files: List[str], page_count: int) -> Dict:
@@ -175,6 +238,11 @@ class PDFSplitWorker:
                 "stage": "split_complete",
                 "next_stage": "ocr" if ocr_required else "analysis",
                 "estimated_completion": self._estimate_completion_time(page_count, ocr_required)
+            },
+            "queue_info": queue_manager.get_queue_status(),
+            "storage_info": {
+                "backend": storage_manager.get_storage_info()["backend"],
+                "files_uploaded": True  # Será atualizado após upload
             }
         }
         
