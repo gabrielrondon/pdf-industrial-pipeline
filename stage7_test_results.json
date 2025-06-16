@@ -1,0 +1,158 @@
+{
+  "stage": "Stage 7: Frontend & Dashboard",
+  "total_tests": 8,
+  "passed_tests": 7,
+  "success_rate": 87.5,
+  "total_time_seconds": 0.47881,
+  "test_results": [
+    {
+      "test": "Server Health Check",
+      "success": true,
+      "details": "Server is healthy. Status: healthy",
+      "response_time_ms": 50.28,
+      "timestamp": "2025-06-16T23:08:23.676608"
+    },
+    {
+      "test": "CORS Configuration",
+      "success": true,
+      "details": "CORS headers: {'access-control-allow-origin': 'http://localhost:3000', 'access-control-allow-methods': 'DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT', 'access-control-allow-headers': 'Content-Type'}",
+      "response_time_ms": 2.41,
+      "timestamp": "2025-06-16T23:08:23.679122"
+    },
+    {
+      "test": "API Endpoint: /",
+      "success": true,
+      "details": "Root endpoint - Status: 200 - Keys: ['message', 'status', 'version', 'stages', 'endpoints']",
+      "response_time_ms": 8.22,
+      "timestamp": "2025-06-16T23:08:23.687481"
+    },
+    {
+      "test": "API Endpoint: /health",
+      "success": true,
+      "details": "Health check - Status: 200 - Keys: ['status', 'checks', 'storage']",
+      "response_time_ms": 229.04,
+      "timestamp": "2025-06-16T23:08:23.916585"
+    },
+    {
+      "test": "API Endpoint: /performance/system/health",
+      "success": true,
+      "details": "System health - Status: 200 - Keys: ['system_status', 'uptime_seconds', 'healthy_components', 'total_components', 'component_details']",
+      "response_time_ms": 114.53,
+      "timestamp": "2025-06-16T23:08:24.031210"
+    },
+    {
+      "test": "API Endpoint: /performance/cache/stats",
+      "success": true,
+      "details": "Cache statistics - Status: 200 - Keys: ['cache_statistics', 'cache_health']",
+      "response_time_ms": 5.05,
+      "timestamp": "2025-06-16T23:08:24.036323"
+    },
+    {
+      "test": "API Endpoint: /performance/parallel/stats",
+      "success": true,
+      "details": "Parallel processing stats - Status: 200 - Keys: ['parallel_statistics', 'parallel_health']",
+      "response_time_ms": 2.65,
+      "timestamp": "2025-06-16T23:08:24.039016"
+    },
+    {
+      "test": "API Endpoint: /performance/metrics/stats",
+      "success": true,
+      "details": "Metrics statistics - Status: 200 - Keys: ['metrics_statistics', 'metrics_health']",
+      "response_time_ms": 1.63,
+      "timestamp": "2025-06-16T23:08:24.040683"
+    },
+    {
+      "test": "API Endpoint: /performance/analytics",
+      "success": true,
+      "details": "Performance analytics - Status: 200 - Keys: ['availability_statistics', 'performance_summary', 'database_analytics', 'generated_at']",
+      "response_time_ms": 3.17,
+      "timestamp": "2025-06-16T23:08:24.043896"
+    },
+    {
+      "test": "Frontend Build Files",
+      "success": true,
+      "details": "Build dir: True, Index.html: True, Static dir: True",
+      "response_time_ms": 0,
+      "timestamp": "2025-06-16T23:08:24.043973"
+    },
+    {
+      "test": "Static File Serving",
+      "success": true,
+      "details": "Status: 200, Content-Type: text/html; charset=utf-8, Content length: 14579 bytes",
+      "response_time_ms": 6.79,
+      "timestamp": "2025-06-16T23:08:24.050781"
+    },
+    {
+      "test": "Frontend Route: /dashboard",
+      "success": true,
+      "details": "Status: 200",
+      "response_time_ms": 2.8,
+      "timestamp": "2025-06-16T23:08:24.053668"
+    },
+    {
+      "test": "Frontend Route: /upload",
+      "success": true,
+      "details": "Status: 200",
+      "response_time_ms": 2.58,
+      "timestamp": "2025-06-16T23:08:24.056275"
+    },
+    {
+      "test": "Frontend Route: /jobs",
+      "success": true,
+      "details": "Status: 200",
+      "response_time_ms": 3.76,
+      "timestamp": "2025-06-16T23:08:24.060069"
+    },
+    {
+      "test": "Frontend Route: /analytics",
+      "success": true,
+      "details": "Status: 200",
+      "response_time_ms": 7.47,
+      "timestamp": "2025-06-16T23:08:24.067570"
+    },
+    {
+      "test": "Frontend Route: /performance",
+      "success": true,
+      "details": "Status: 200",
+      "response_time_ms": 2.53,
+      "timestamp": "2025-06-16T23:08:24.070131"
+    },
+    {
+      "test": "Frontend Route: /search",
+      "success": true,
+      "details": "Status: 200",
+      "response_time_ms": 1.97,
+      "timestamp": "2025-06-16T23:08:24.072124"
+    },
+    {
+      "test": "Frontend Route: /settings",
+      "success": true,
+      "details": "Status: 200",
+      "response_time_ms": 2.42,
+      "timestamp": "2025-06-16T23:08:24.074568"
+    },
+    {
+      "test": "Performance Integration",
+      "success": true,
+      "details": "System status: healthy, Components: 4, Healthy: 3/4",
+      "response_time_ms": 23.1,
+      "timestamp": "2025-06-16T23:08:24.097742"
+    },
+    {
+      "test": "WebSocket Readiness",
+      "success": false,
+      "details": "Server handled WebSocket upgrade request appropriately: 200",
+      "response_time_ms": 0,
+      "timestamp": "2025-06-16T23:08:24.105019"
+    }
+  ],
+  "summary": {
+    "server_health": true,
+    "cors_configured": true,
+    "api_endpoints_working": true,
+    "frontend_build_ready": true,
+    "static_serving_working": true,
+    "frontend_routes_working": true,
+    "performance_integrated": true
+  }
+}

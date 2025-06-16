@@ -1,0 +1,57 @@
+{
+  "tests_run": 10,
+  "tests_passed": 9,
+  "tests_failed": 1,
+  "details": [
+    {
+      "test": "Docker Files Exist",
+      "status": "PASS",
+      "message": "Test completed successfully"
+    },
+    {
+      "test": "Dockerfile Syntax",
+      "status": "FAIL",
+      "message": "Test failed"
+    },
+    {
+      "test": "Environment Configurations",
+      "status": "PASS",
+      "message": "Test completed successfully"
+    },
+    {
+      "test": "CI/CD Pipeline",
+      "status": "PASS",
+      "message": "Test completed successfully"
+    },
+    {
+      "test": "Deployment Scripts",
+      "status": "PASS",
+      "message": "Test completed successfully"
+    },
+    {
+      "test": "Monitoring Configuration",
+      "status": "PASS",
+      "message": "Test completed successfully"
+    },
+    {
+      "test": "Security Configurations",
+      "status": "PASS",
+      "message": "Test completed successfully"
+    },
+    {
+      "test": "Health Endpoints",
+      "status": "PASS",
+      "message": "Test completed successfully"
+    },
+    {
+      "test": "Docker Compose Syntax",
+      "status": "PASS",
+      "message": "Test completed successfully"
+    },
+    {
+      "test": "Production Readiness",
+      "status": "PASS",
+      "message": "Test completed successfully"
+    }
+  ]
+}

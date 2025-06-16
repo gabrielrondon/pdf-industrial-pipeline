@@ -939,6 +939,12 @@ curl "http://localhost:8000/job/abc123/ml-analysis"
 - **Relatórios:** PDF reports automatizados
 - **User Management:** Sistema de autenticação
 
+### 🔹 Stage 8: Deployment em produção e DevOps ✨
+- **Docker Compose:** Configuração completa para produção
+- **CI/CD Pipeline:** Automatização de build e deploy
+- **Prometheus & Grafana:** Monitoramento completo
+- **Backup Automático:** Segurança dos dados
+
 ---
 
 ## 🤝 Contribuição

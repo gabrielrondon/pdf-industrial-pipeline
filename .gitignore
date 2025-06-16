@@ -61,3 +61,17 @@ Thumbs.db
 *.temp
 *.bak
 *.backup
+
+# Security - Stage 8 additions
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+secrets/
+.secrets
+*.secret
+.env.local
+.env.production
+.env.staging
+docker-compose.override.yml

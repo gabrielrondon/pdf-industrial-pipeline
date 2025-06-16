@@ -1,5 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 import uuid
 import os
 import logging
@@ -7,6 +9,7 @@ from typing import Optional, List
 from dotenv import load_dotenv
 from datetime import datetime
 from dataclasses import asdict
+import uvicorn
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -40,6 +43,19 @@ app = FastAPI(
     description="Pipeline para processamento industrial de arquivos PDF",
     version="1.0.0"
 )
+
+# Add CORS middleware for frontend integration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:8000", "http://127.0.0.1:8000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Serve static files (frontend build)
+if os.path.exists("frontend/build"):
+    app.mount("/static", StaticFiles(directory="frontend/build/static"), name="static")
 
 UPLOAD_DIR = "uploads/"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -383,35 +399,23 @@ async def clear_vector_database():
 @app.get("/")
 async def root():
     """
-    Endpoint de saúde da API
+    Serve the frontend application at the root path
     """
-    return {
-        "message": "PDF Industrial Pipeline API",
-        "status": "online",
-        "version": "1.0.0",
-        "stages": {
-            "stage_1": "✅ Ingestion & Partitioning (Complete)",
-            "stage_2": "✅ OCR Processing (Complete)", 
-            "stage_3": "✅ Text Processing & NLP (Complete)",
-            "stage_4": "🚀 Embeddings & Vectorization (Ready)"
-        },
-        "endpoints": {
-            "upload": "/upload (POST) - Upload e processamento de PDF",
-            "status": "/job/{job_id}/status (GET) - Status do job",
-            "manifest": "/job/{job_id}/manifest (GET) - Manifest completo",
-            "cleanup": "/job/{job_id} (DELETE) - Remover arquivos do job",
-            "process_text": "/process-text/{job_id} (POST) - Processar análise de texto",
-            "text_analysis": "/job/{job_id}/text-analysis (GET) - Obter análise de texto",
-            "text_stats": "/text-processing/stats (GET) - Estatísticas de processamento de texto",
-            "generate_embeddings": "/generate-embeddings/{job_id} (POST) - Gerar embeddings",
-            "job_embeddings": "/job/{job_id}/embeddings (GET) - Info embeddings do job",
-            "semantic_search": "/search/semantic (POST) - Busca semântica",
-            "lead_search": "/search/leads (GET) - Buscar leads alta pontuação",
-            "embeddings_stats": "/embeddings/stats (GET) - Estatísticas de embeddings",
-            "clear_vectors": "/embeddings/clear (DELETE) - Limpar banco vectorial",
-            "docs": "/docs - Documentação interativa"
+    # Check if frontend build exists
+    frontend_path = "frontend/build/index.html"
+    if os.path.exists(frontend_path):
+        return FileResponse(frontend_path)
+    else:
+        # Fallback to API info if frontend build doesn't exist
+        return {
+            "message": "PDF Industrial Pipeline API",
+            "status": "online",
+            "version": "1.0.0",
+            "frontend": "not_built",
+            "note": "Build the frontend with 'npm run build' in the frontend directory",
+            "api_docs": "/docs",
+            "health_check": "/health"
         }
-    }
 
 @app.get("/health")
 async def health_check():
@@ -450,6 +454,48 @@ async def health_check():
                 "error": str(e)
             }
         )
+
+@app.get("/api/info")
+async def api_info():
+    """
+    API information and available endpoints
+    """
+    return {
+        "message": "PDF Industrial Pipeline API",
+        "status": "online",
+        "version": "1.0.0",
+        "stages": {
+            "stage_1": "✅ Ingestion & Partitioning (Complete)",
+            "stage_2": "✅ OCR Processing (Complete)", 
+            "stage_3": "✅ Text Processing & NLP (Complete)",
+            "stage_4": "✅ Embeddings & Vectorization (Complete)",
+            "stage_5": "✅ Machine Learning & Lead Scoring (Complete)",
+            "stage_6": "✅ Performance & Monitoring (Complete)",
+            "stage_7": "✅ Frontend Dashboard (Complete)"
+        },
+        "endpoints": {
+            "upload": "/upload (POST) - Upload e processamento de PDF",
+            "status": "/job/{job_id}/status (GET) - Status do job",
+            "manifest": "/job/{job_id}/manifest (GET) - Manifest completo",
+            "cleanup": "/job/{job_id} (DELETE) - Remover arquivos do job",
+            "process_text": "/process-text/{job_id} (POST) - Processar análise de texto",
+            "text_analysis": "/job/{job_id}/text-analysis (GET) - Obter análise de texto",
+            "text_stats": "/text-processing/stats (GET) - Estatísticas de processamento de texto",
+            "generate_embeddings": "/generate-embeddings/{job_id} (POST) - Gerar embeddings",
+            "job_embeddings": "/job/{job_id}/embeddings (GET) - Info embeddings do job",
+            "semantic_search": "/search/semantic (POST) - Busca semântica",
+            "lead_search": "/search/leads (GET) - Buscar leads alta pontuação",
+            "embeddings_stats": "/embeddings/stats (GET) - Estatísticas de embeddings",
+            "clear_vectors": "/embeddings/clear (DELETE) - Limpar banco vectorial",
+            "extract_features": "/extract-features/{job_id} (POST) - Extrair features ML",
+            "train_models": "/train-models (POST) - Treinar modelos ML",
+            "predict_leads": "/predict-leads/{job_id} (POST) - Predições ML",
+            "ml_analysis": "/job/{job_id}/ml-analysis (GET) - Análise ML completa",
+            "performance_health": "/performance/system/health (GET) - Saúde do sistema",
+            "docs": "/docs - Documentação interativa Swagger",
+            "documentation": "/documentation - Documentação completa do usuário"
+        }
+    }
 
 # === ENDPOINTS ETAPA 5: MACHINE LEARNING & LEAD SCORING ===
 
@@ -878,3 +924,30 @@ async def benchmark_endpoint(endpoint_name: str, iterations: int = 100):
     except Exception as e:
         logger.error(f"Erro ao executar benchmark: {e}")
         raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
+
+# ====== FRONTEND SERVING ======
+
+@app.get("/{full_path:path}")
+async def serve_frontend(full_path: str):
+    """
+    Serve the frontend for all non-API routes
+    This should be the last route to catch all remaining paths
+    """
+    # Don't serve frontend for API routes, docs, or other special paths
+    if (full_path.startswith("api/") or 
+        full_path.startswith("docs") or 
+        full_path.startswith("redoc") or
+        full_path.startswith("openapi.json") or
+        full_path.startswith("static/")):
+        raise HTTPException(status_code=404, detail="Not found")
+    
+    # Check if frontend build exists
+    frontend_path = "frontend/build/index.html"
+    if os.path.exists(frontend_path):
+        return FileResponse(frontend_path)
+    else:
+        # Fallback to a simple message if frontend build doesn't exist
+        return {"message": "PDF Industrial Pipeline API", "frontend": "not_built", "path_requested": full_path}
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)

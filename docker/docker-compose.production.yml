@@ -1,0 +1,277 @@
+# Stage 8: Production Docker Compose Configuration
+# PDF Industrial Pipeline - Production Deployment
+
+version: '3.8'
+
+services:
+  # ================================
+  # Application Services
+  # ================================
+  pdf-pipeline-1:
+    image: ghcr.io/your-org/pdf-industrial-pipeline:latest
+    container_name: pdf-pipeline-1
+    restart: unless-stopped
+    environment:
+      - ENVIRONMENT=production
+      - REDIS_HOST=redis
+      - POSTGRES_HOST=postgres
+    env_file:
+      - production.env
+    volumes:
+      - app-storage:/app/storage
+      - app-uploads:/app/uploads
+      - app-logs:/app/logs
+      - app-ml-models:/app/ml_models
+    networks:
+      - pipeline-network
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+
+  pdf-pipeline-2:
+    image: ghcr.io/your-org/pdf-industrial-pipeline:latest
+    container_name: pdf-pipeline-2
+    restart: unless-stopped
+    environment:
+      - ENVIRONMENT=production
+      - REDIS_HOST=redis
+      - POSTGRES_HOST=postgres
+    env_file:
+      - production.env
+    volumes:
+      - app-storage:/app/storage
+      - app-uploads:/app/uploads
+      - app-logs:/app/logs
+      - app-ml-models:/app/ml_models
+    networks:
+      - pipeline-network
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+
+  # ================================
+  # Load Balancer
+  # ================================
+  nginx:
+    image: nginx:alpine
+    container_name: pdf-pipeline-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../nginx.conf:/etc/nginx/nginx.conf:ro
+      - nginx-logs:/var/log/nginx
+      - ssl-certs:/etc/nginx/ssl:ro
+    networks:
+      - pipeline-network
+    depends_on:
+      - pdf-pipeline-1
+      - pdf-pipeline-2
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ================================
+  # Data Services
+  # ================================
+  redis:
+    image: redis:7-alpine
+    container_name: pdf-pipeline-redis
+    restart: unless-stopped
+    command: >
+      redis-server 
+      --appendonly yes 
+      --maxmemory 1gb 
+      --maxmemory-policy allkeys-lru
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+    volumes:
+      - redis-data:/data
+    networks:
+      - pipeline-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: pdf-pipeline-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: pdf_pipeline
+      POSTGRES_USER: pipeline_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - postgres-backups:/backups
+      - ../init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - pipeline-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pipeline_user -d pdf_pipeline"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+
+  # ================================
+  # Monitoring Services
+  # ================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: pdf-pipeline-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - pipeline-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: pdf-pipeline-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ../grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ../grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    networks:
+      - pipeline-network
+    depends_on:
+      - prometheus
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1G
+
+  # ================================
+  # Backup Service
+  # ================================
+  backup:
+    image: postgres:15-alpine
+    container_name: pdf-pipeline-backup
+    restart: "no"
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-backups:/backups
+      - ../scripts/backup.sh:/backup.sh:ro
+    networks:
+      - pipeline-network
+    depends_on:
+      - postgres
+    command: /backup.sh
+    profiles:
+      - backup
+
+# ================================
+# Volumes
+# ================================
+volumes:
+  app-storage:
+    driver: local
+  app-uploads:
+    driver: local
+  app-logs:
+    driver: local
+  app-ml-models:
+    driver: local
+  redis-data:
+    driver: local
+  postgres-data:
+    driver: local
+  postgres-backups:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+  nginx-logs:
+    driver: local
+  ssl-certs:
+    driver: local
+
+# ================================
+# Networks
+# ================================
+networks:
+  pipeline-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16 
