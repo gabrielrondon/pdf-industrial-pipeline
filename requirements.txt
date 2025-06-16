@@ -13,3 +13,13 @@ pytesseract>=0.3.10
 pdf2image>=1.16.0
 Pillow>=10.0.0
 opencv-python>=4.8.0
+
+# Text Processing & NLP - Etapa 3
+nltk>=3.8.1
+langdetect>=1.0.9
+spacy>=3.6.0
+# Modelos spaCy (instalar separadamente):
+# python -m spacy download pt_core_news_sm
+# python -m spacy download en_core_news_sm
+textblob>=0.17.1
+regex>=2023.6.3

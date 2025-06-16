@@ -212,17 +212,74 @@ class StorageManager:
         return self.backend.list_files(prefix)
     
     def get_storage_info(self) -> Dict[str, Any]:
-        """Obter informações sobre o storage atual"""
-        backend_type = type(self.backend).__name__
-        info = {
-            "backend": backend_type,
-            "available": True
+        """Obter informações do sistema de storage"""
+        return {
+            "backend": type(self.backend).__name__,
+            "available": True,
+            "base_path": getattr(self.backend, 'base_path', None)
         }
-        
+    
+    def ensure_directory(self, directory_path: str):
+        """Garante que um diretório existe"""
         if isinstance(self.backend, LocalStorage):
-            info["base_path"] = str(self.backend.base_path.absolute())
-        
-        return info
+            full_path = self.backend.base_path / directory_path
+            full_path.mkdir(parents=True, exist_ok=True)
+            logger.debug(f"Diretório garantido: {full_path}")
+    
+    def directory_exists(self, directory_path: str) -> bool:
+        """Verifica se um diretório existe"""
+        if isinstance(self.backend, LocalStorage):
+            return (self.backend.base_path / directory_path).exists()
+        return False
+    
+    def save_json(self, file_path: str, data: Any):
+        """Salva dados JSON no storage"""
+        if isinstance(self.backend, LocalStorage):
+            import json
+            full_path = self.backend.base_path / file_path
+            full_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            with open(full_path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            logger.debug(f"JSON salvo: {full_path}")
+    
+    def save_text(self, file_path: str, text: str):
+        """Salva texto no storage"""
+        if isinstance(self.backend, LocalStorage):
+            full_path = self.backend.base_path / file_path
+            full_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            with open(full_path, 'w', encoding='utf-8') as f:
+                f.write(text)
+            logger.debug(f"Texto salvo: {full_path}")
+    
+    def load_json(self, file_path: str) -> Any:
+        """Carrega dados JSON do storage"""
+        if isinstance(self.backend, LocalStorage):
+            import json
+            full_path = self.backend.base_path / file_path
+            
+            if not full_path.exists():
+                raise FileNotFoundError(f"Arquivo não encontrado: {full_path}")
+            
+            with open(full_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        return None
+    
+    def list_files(self, directory_path: str) -> List[str]:
+        """Lista arquivos em um diretório"""
+        if isinstance(self.backend, LocalStorage):
+            full_path = self.backend.base_path / directory_path
+            if not full_path.exists():
+                return []
+            
+            files = []
+            for file_path in full_path.rglob("*"):
+                if file_path.is_file():
+                    relative_path = file_path.relative_to(self.backend.base_path)
+                    files.append(str(relative_path))
+            return files
+        return []
 
 # Instância global do storage manager
 storage_manager = StorageManager()

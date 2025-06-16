@@ -11,6 +11,7 @@ load_dotenv()
 # Importar nossos módulos
 from workers.split_worker import split_pdf_task, pdf_split_worker
 from workers.ocr_worker import ocr_worker
+from workers.text_worker import text_worker
 from utils.file_utils import validate_pdf_file, clean_filename, format_file_size
 from utils.storage_manager import storage_manager
 from ocr.tesseract_engine import tesseract_engine
@@ -131,6 +132,91 @@ async def cleanup_job(job_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao remover job: {str(e)}")
 
+@app.post("/process-text/{job_id}")
+async def process_text_analysis(job_id: str):
+    """
+    Processa análise de texto para um job específico (Etapa 3)
+    """
+    try:
+        # Simular resultado OCR para teste
+        test_ocr_result = {
+            'job_id': job_id,
+            'page_number': 1,
+            'text_extracted': 'Esta é uma empresa de tecnologia chamada TechSolutions Brasil Ltda. CNPJ: 12.345.678/0001-90. Contato: João Silva, telefone (11) 99999-8888, email: joao@techsolutions.com.br. Projeto de desenvolvimento de sistema de gestão empresarial no valor de R$ 250.000,00. Prazo urgente de 6 meses.',
+            'confidence_avg': 85.0
+        }
+        
+        # Processar com o text worker
+        result = text_worker.process_text_job(job_id, test_ocr_result)
+        
+        return {
+            "job_id": job_id,
+            "status": "text_processed",
+            "result": result,
+            "processing_stats": text_worker.get_processing_stats()
+        }
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro no processamento de texto: {str(e)}")
+
+@app.get("/job/{job_id}/text-analysis")
+async def get_text_analysis(job_id: str):
+    """
+    Obter resultados da análise de texto de um job
+    """
+    try:
+        # Verificar se existem análises de texto para o job
+        text_dir = f"text_analysis/{job_id}"
+        
+        if not storage_manager.directory_exists(text_dir):
+            raise HTTPException(status_code=404, detail="Análise de texto não encontrada para este job")
+        
+        # Listar arquivos de análise
+        analysis_files = storage_manager.list_files(text_dir)
+        
+        if not analysis_files:
+            raise HTTPException(status_code=404, detail="Nenhum arquivo de análise encontrado")
+        
+        # Carregar primeira análise como exemplo
+        first_analysis_file = None
+        for file_path in analysis_files:
+            if file_path.endswith('_analysis.json'):
+                first_analysis_file = file_path
+                break
+        
+        if not first_analysis_file:
+            raise HTTPException(status_code=404, detail="Arquivo de análise não encontrado")
+        
+        analysis_data = storage_manager.load_json(first_analysis_file)
+        
+        return {
+            "job_id": job_id,
+            "analysis_files": analysis_files,
+            "sample_analysis": analysis_data,
+            "total_files": len(analysis_files)
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao obter análise de texto: {str(e)}")
+
+@app.get("/text-processing/stats")
+async def get_text_processing_stats():
+    """
+    Obter estatísticas do processamento de texto
+    """
+    try:
+        stats = text_worker.get_processing_stats()
+        
+        return {
+            "text_processing_stats": stats,
+            "system_status": "operational"
+        }
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao obter estatísticas: {str(e)}")
+
 @app.get("/")
 async def root():
     """
@@ -140,11 +226,19 @@ async def root():
         "message": "PDF Industrial Pipeline API",
         "status": "online",
         "version": "1.0.0",
+        "stages": {
+            "stage_1": "✅ Ingestion & Partitioning (Complete)",
+            "stage_2": "✅ OCR Processing (Complete)", 
+            "stage_3": "🔄 Text Processing & NLP (In Development)"
+        },
         "endpoints": {
             "upload": "/upload (POST) - Upload e processamento de PDF",
             "status": "/job/{job_id}/status (GET) - Status do job",
             "manifest": "/job/{job_id}/manifest (GET) - Manifest completo",
             "cleanup": "/job/{job_id} (DELETE) - Remover arquivos do job",
+            "process_text": "/process-text/{job_id} (POST) - Processar análise de texto",
+            "text_analysis": "/job/{job_id}/text-analysis (GET) - Obter análise de texto",
+            "text_stats": "/text-processing/stats (GET) - Estatísticas de processamento de texto",
             "docs": "/docs - Documentação interativa"
         }
     }
