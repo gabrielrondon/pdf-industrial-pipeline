@@ -4,3 +4,6 @@ boto3
 pdfminer.six
 python-multipart
 python-dotenv
+redis
+celery
+python-json-logger

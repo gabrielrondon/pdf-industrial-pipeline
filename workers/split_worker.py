@@ -7,6 +7,9 @@ from typing import Dict, List, Optional
 from pathlib import Path
 import logging
 
+# Importar o gerenciador de filas
+from .queue_manager import enqueue_ocr_pages, queue_manager
+
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -75,17 +78,46 @@ class PDFSplitWorker:
             
             logger.info(f"Manifest gerado: {manifest_path}")
             
+            # ✨ NOVO: Enfileirar páginas que precisam de OCR
+            pages_needing_ocr = []
+            for page_info in manifest['output_info']['pages']:
+                if manifest['next_steps']['ocr_required']:
+                    pages_needing_ocr.append(page_info['file_path'])
+            
+            # Enfileirar jobs OCR se necessário
+            if pages_needing_ocr:
+                queue_success = enqueue_ocr_pages(job_id, pages_needing_ocr, file_path)
+                if queue_success:
+                    logger.info(f"✅ {len(pages_needing_ocr)} páginas enfileiradas para OCR")
+                else:
+                    logger.warning(f"⚠️ Falha ao enfileirar páginas para OCR")
+            else:
+                logger.info(f"✅ Nenhuma página precisa de OCR - job completo")
+                # Marcar job como completo se não precisa de OCR
+                queue_manager.mark_job_completed(job_id, {
+                    "stage": "split_complete",
+                    "pages": page_count,
+                    "ocr_needed": False
+                })
+            
             return {
                 "status": "success",
                 "job_id": job_id,
                 "page_count": page_count,
                 "output_dir": output_dir,
                 "manifest_path": manifest_path,
-                "page_files": page_files
+                "page_files": page_files,
+                "queue_info": {
+                    "ocr_pages_enqueued": len(pages_needing_ocr),
+                    "queue_available": queue_manager.is_available()
+                }
             }
             
         except Exception as e:
             logger.error(f"Erro no processamento do job {job_id}: {str(e)}")
+            # Marcar job como falhado na fila
+            queue_manager.mark_job_failed(job_id, str(e))
+            
             return {
                 "status": "error",
                 "job_id": job_id,
@@ -113,6 +145,9 @@ class PDFSplitWorker:
                 "created_at": datetime.fromtimestamp(page_stats.st_ctime).isoformat()
             })
         
+        # Verificar necessidade de OCR
+        ocr_required = self._check_ocr_required(original_file)
+        
         manifest = {
             "job_id": job_id,
             "processing_info": {
@@ -132,8 +167,14 @@ class PDFSplitWorker:
                 "pages": pages_info
             },
             "next_steps": {
-                "ocr_required": self._check_ocr_required(original_file),
-                "ready_for_processing": True
+                "ocr_required": ocr_required,
+                "ready_for_processing": not ocr_required,  # Se não precisa OCR, já está pronto
+                "queue_status": "enqueued" if ocr_required else "completed"
+            },
+            "pipeline_status": {
+                "stage": "split_complete",
+                "next_stage": "ocr" if ocr_required else "analysis",
+                "estimated_completion": self._estimate_completion_time(page_count, ocr_required)
             }
         }
         
@@ -167,6 +208,22 @@ class PDFSplitWorker:
             # Em caso de erro, assumir que precisa de OCR
             return True
     
+    def _estimate_completion_time(self, page_count: int, ocr_required: bool) -> str:
+        """
+        Estima tempo de conclusão baseado no número de páginas
+        """
+        base_time = 30  # segundos por página para OCR
+        if not ocr_required:
+            return "immediate"
+        
+        estimated_seconds = page_count * base_time
+        if estimated_seconds < 60:
+            return f"{estimated_seconds}s"
+        elif estimated_seconds < 3600:
+            return f"{estimated_seconds // 60}min"
+        else:
+            return f"{estimated_seconds // 3600}h"
+    
     def get_job_status(self, job_id: str) -> Optional[Dict]:
         """
         Recupera o status de um job através do manifest
@@ -178,7 +235,14 @@ class PDFSplitWorker:
         
         try:
             with open(manifest_path, 'r', encoding='utf-8') as f:
-                return json.load(f)
+                manifest = json.load(f)
+            
+            # ✨ NOVO: Adicionar informações das filas
+            queue_status = queue_manager.get_queue_status()
+            manifest["queue_info"] = queue_status
+            
+            return manifest
+            
         except Exception as e:
             logger.error(f"Erro ao ler manifest do job {job_id}: {e}")
             return None
