@@ -228,8 +228,14 @@ class StorageManager:
     
     def directory_exists(self, directory_path: str) -> bool:
         """Verifica se um diretório existe"""
+        full_path = os.path.join(self.backend.base_path, directory_path)
+        return os.path.exists(full_path) and os.path.isdir(full_path)
+    
+    def file_exists(self, file_path: str) -> bool:
+        """Verifica se um arquivo existe"""
         if isinstance(self.backend, LocalStorage):
-            return (self.backend.base_path / directory_path).exists()
+            full_path = self.backend.base_path / file_path
+            return full_path.exists() and full_path.is_file()
         return False
     
     def save_json(self, file_path: str, data: Any):

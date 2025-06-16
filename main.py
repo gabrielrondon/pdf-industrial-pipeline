@@ -2,8 +2,10 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
 import uuid
 import os
-from typing import Optional
+from typing import Optional, List
 from dotenv import load_dotenv
+from datetime import datetime
+from dataclasses import asdict
 
 # Carregar variáveis de ambiente
 load_dotenv()
@@ -18,6 +20,9 @@ from utils.storage_manager import storage_manager
 from ocr.tesseract_engine import tesseract_engine
 from embeddings.embedding_engine import embedding_engine
 from embeddings.vector_database import vector_db
+from workers.ml_worker import ml_worker
+from ml_engine.feature_engineering import feature_engineer
+from ml_engine.lead_scoring_models import ensemble_model, random_forest_model, gradient_boosting_model
 
 app = FastAPI(
     title="PDF Industrial Pipeline",
@@ -434,3 +439,271 @@ async def health_check():
                 "error": str(e)
             }
         )
+
+# === ENDPOINTS ETAPA 5: MACHINE LEARNING & LEAD SCORING ===
+
+@app.post("/extract-features/{job_id}")
+async def extract_features(job_id: str):
+    """
+    Extrai features de ML das análises de texto de um job
+    
+    Converte análises de texto e embeddings em features estruturadas
+    para uso em modelos de Machine Learning
+    """
+    try:
+        logger.info(f"Iniciando extração de features ML para job {job_id}")
+        
+        result = await ml_worker.extract_features_from_job(job_id)
+        
+        if result['status'] == 'completed':
+            return {
+                "message": f"Features extraídas com sucesso para job {job_id}",
+                "job_id": job_id,
+                "features_extracted": result['features_extracted'],
+                "statistics": result.get('feature_statistics', {}),
+                "high_value_leads": result.get('high_value_leads', 0),
+                "processing_time": result.get('processing_time', 0)
+            }
+        else:
+            return {
+                "message": f"Erro na extração de features: {result.get('message', 'Erro desconhecido')}",
+                "job_id": job_id,
+                "status": result['status'],
+                "error": result.get('error')
+            }
+    
+    except Exception as e:
+        logger.error(f"Erro no endpoint de extração de features: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro na extração de features: {str(e)}")
+
+@app.post("/train-models")
+async def train_ml_models(
+    job_ids: Optional[List[str]] = None,
+    min_samples: int = 10
+):
+    """
+    Treina modelos de Machine Learning para lead scoring
+    
+    Utiliza features extraídas para treinar ensemble de modelos
+    incluindo Random Forest e Gradient Boosting
+    """
+    try:
+        logger.info("Iniciando treinamento de modelos ML")
+        
+        result = await ml_worker.train_models(job_ids, min_samples)
+        
+        if result['status'] == 'completed':
+            return {
+                "message": "Modelos treinados com sucesso",
+                "models_trained": result['models_trained'],
+                "samples_used": result['samples_used'],
+                "performances": result['performances'],
+                "training_details": result['training_record']
+            }
+        elif result['status'] == 'insufficient_data':
+            return {
+                "message": result['message'],
+                "samples_found": result['samples_found'],
+                "min_samples_required": min_samples,
+                "status": "insufficient_data"
+            }
+        else:
+            return {
+                "message": f"Erro no treinamento: {result.get('error', 'Erro desconhecido')}",
+                "status": result['status'],
+                "error": result.get('error')
+            }
+    
+    except Exception as e:
+        logger.error(f"Erro no endpoint de treinamento: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro no treinamento de modelos: {str(e)}")
+
+@app.post("/predict-leads/{job_id}")
+async def predict_job_leads(job_id: str):
+    """
+    Faz predições ML de lead scoring para um job
+    
+    Utiliza modelos treinados para avaliar qualidade dos leads
+    identificados em cada página do documento
+    """
+    try:
+        logger.info(f"Iniciando predições ML para job {job_id}")
+        
+        result = await ml_worker.predict_job_scores(job_id)
+        
+        if result['status'] == 'completed':
+            return {
+                "message": f"Predições ML completadas para job {job_id}",
+                "job_id": job_id,
+                "predictions": result['predictions'],
+                "statistics": result['job_statistics'],
+                "total_pages": result['total_pages_predicted']
+            }
+        elif result['status'] == 'no_features':
+            return {
+                "message": result['message'],
+                "job_id": job_id,
+                "status": "no_features",
+                "suggestion": "Execute /extract-features/{job_id} primeiro"
+            }
+        else:
+            return {
+                "message": f"Erro nas predições: {result.get('error', 'Erro desconhecido')}",
+                "job_id": job_id,
+                "status": result['status'],
+                "error": result.get('error')
+            }
+    
+    except Exception as e:
+        logger.error(f"Erro no endpoint de predições: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro nas predições ML: {str(e)}")
+
+@app.get("/job/{job_id}/ml-analysis")
+async def get_job_ml_analysis(job_id: str):
+    """
+    Retorna análise ML completa de um job
+    
+    Inclui features extraídas, predições e estatísticas
+    """
+    try:
+        # Carregar features
+        features = await ml_worker._load_job_features(job_id)
+        
+        # Carregar predições se existirem
+        ml_dir = f"ml_analysis/{job_id}"
+        predictions_file = f"{ml_dir}/ml_predictions.json"
+        
+        predictions_data = None
+        if storage_manager.file_exists(predictions_file):
+            predictions_data = storage_manager.load_json(predictions_file)
+        
+        # Carregar resumo das features
+        summary_file = f"{ml_dir}/features_summary.json"
+        features_summary = None
+        if storage_manager.file_exists(summary_file):
+            features_summary = storage_manager.load_json(summary_file)
+        
+        return {
+            "job_id": job_id,
+            "features": [asdict(f) for f in features] if features else None,
+            "features_summary": features_summary,
+            "predictions": predictions_data,
+            "analysis_available": {
+                "features_extracted": len(features) > 0,
+                "predictions_made": predictions_data is not None,
+                "total_pages": len(features) if features else 0
+            }
+        }
+    
+    except Exception as e:
+        logger.error(f"Erro ao buscar análise ML do job {job_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro na análise ML: {str(e)}")
+
+@app.get("/ml/lead-quality-analysis")
+async def get_lead_quality_analysis(
+    threshold_high: float = 80.0,
+    threshold_medium: float = 50.0
+):
+    """
+    Análise geral da qualidade dos leads no sistema
+    
+    Retorna estatísticas agregadas de todos os leads processados
+    """
+    try:
+        result = await ml_worker.analyze_lead_quality(threshold_high, threshold_medium)
+        
+        if result['status'] == 'completed':
+            return {
+                "message": "Análise de qualidade completada",
+                "analysis": result['analysis'],
+                "generated_at": result['generated_at'],
+                "thresholds": {
+                    "high_quality": threshold_high,
+                    "medium_quality": threshold_medium
+                }
+            }
+        elif result['status'] == 'no_data':
+            return {
+                "message": result['message'],
+                "status": "no_data",
+                "suggestion": "Processe alguns documentos e execute predições primeiro"
+            }
+        else:
+            return {
+                "message": f"Erro na análise: {result.get('error', 'Erro desconhecido')}",
+                "status": result['status'],
+                "error": result.get('error')
+            }
+    
+    except Exception as e:
+        logger.error(f"Erro no endpoint de análise de qualidade: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro na análise de qualidade: {str(e)}")
+
+@app.get("/ml/model-performance")
+async def get_model_performance():
+    """
+    Retorna performance dos modelos ML treinados
+    
+    Inclui métricas de accuracy, precisão, recall e feature importance
+    """
+    try:
+        performances = {}
+        
+        # Performance do ensemble
+        if ensemble_model.is_trained:
+            performances['ensemble'] = ensemble_model.get_model_performances()
+        
+        # Performance individual dos modelos
+        models_info = {
+            'random_forest': {
+                'trained': random_forest_model.is_trained,
+                'training_history': random_forest_model.training_history
+            },
+            'gradient_boosting': {
+                'trained': gradient_boosting_model.is_trained,
+                'training_history': gradient_boosting_model.training_history
+            }
+        }
+        
+        # Estatísticas do worker
+        worker_stats = ml_worker.get_worker_stats()
+        
+        return {
+            "message": "Performance dos modelos ML",
+            "model_performances": performances,
+            "models_info": models_info,
+            "worker_statistics": worker_stats,
+            "feature_engineering_stats": feature_engineer.get_feature_stats()
+        }
+    
+    except Exception as e:
+        logger.error(f"Erro ao buscar performance dos modelos: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro na performance dos modelos: {str(e)}")
+
+@app.get("/ml/stats")
+async def get_ml_stats():
+    """
+    Estatísticas gerais do módulo de Machine Learning
+    
+    Inclui contadores de features, predições e treinamentos
+    """
+    try:
+        return {
+            "message": "Estatísticas do módulo ML",
+            "worker_stats": ml_worker.get_worker_stats(),
+            "feature_engineering_stats": feature_engineer.get_feature_stats(),
+            "models_status": {
+                "ensemble_trained": ensemble_model.is_trained,
+                "random_forest_trained": random_forest_model.is_trained,
+                "gradient_boosting_trained": gradient_boosting_model.is_trained
+            },
+            "system_info": {
+                "sklearn_available": feature_engineer.get_feature_stats().get('sklearn_available', False),
+                "total_feature_categories": len(feature_engineer.business_keywords),
+                "feature_importance_names": len(feature_engineer.get_feature_importance_names())
+            }
+        }
+    
+    except Exception as e:
+        logger.error(f"Erro ao buscar estatísticas ML: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro nas estatísticas ML: {str(e)}")
