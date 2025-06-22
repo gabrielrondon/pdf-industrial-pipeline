@@ -1,0 +1,103 @@
+{
+  "job_id": "2bd14aed-c04c-413f-a2cf-620d5818ed53",
+  "page_number": 1,
+  "original_text": "VDEFEN SORIA PUBLICA - FLS. _\n\nt + Defensor ( A) Adv. conveniado { )\n\n“at NI MIN TT ||]\nso i ser Vara a\nÉ\nsê O\n= The\n32 JUÍZO DE DIREITO DA\n= ) CARTÓRIO DO. soricio 39º OFÍCIO CÍVEL\nai 5 TÂNIA\n\n=p\n\nESCRIVÃO(Ã) DIRETOR(A)\n\nee\n\n205 445-73. sr t. 26.0 (G0/PL\n\n3 + Vara Cível q\nagi pone Civel João Mendes Júnior =\n\nGrupo: 1.Cível\nAção: 146-Procedimento Sumário (Cob. Condomínio)\n\nValor da Causa : R$17.521,59\n\nData Distribuição : 23/11/2010 Hora: 15:24\nTipo de Distribuição : Livre\n\n—— RTE: CONDOMÍNIO EDIFÍCIO METRO 1 El\nADV: CRLANDO CAVALIERI JUNIOR\nOAB: 31333/SP\n\nRDO: LUIZA EDNA FURTADO ORSINI e outro(s)\n\nNº DE ORDEM: 01.39.2010/002171\n\nPR\n\nAUTUAÇÃO\n\nde de\n\n_ (ema me — ars\nmos sas ni ea e qa\n\nEstão neste Oficio R Ea ange Loic! t\n\n_ Justia. co) _— psa\nCool ria”\n\nat yet aa = _\n\nao que segue(m) e lavro este termo.\n\nintervenção de Terosto\nSemeador\nPerca\n\nSentença, (\n\nnm\n\n= EM Sarcial : f\n= , oe a\n=. ç ue - -— map coment et mr em :\neee RS oe eer os !\n' A E ce É oras to cedo —\n\nwre",
+  "cleaned_text": "VDEFEN SORIA PUBLICA - FLS. _ t + Defensor ( A) Adv. conveniado { ) “at NI MIN TT ||] so i ser Vara a É sê O = The 32 JUÍZO DE DIREITO DA = ) CARTÓRIO DO. soricio 39º OFÍCIO CÍVEL ai 5 TÂNIA =p ESCRIVÃO(Ã) DIRETOR(A) ee 205 445-73. sr t. 26.0 (G0/PL 3 + Vara Cível q agi pone Civel João Mendes Júnior = Grupo: 1.Cível Ação: 146-Procedimento Sumário (Cob. Condomínio) Valor da Causa: R$17.521,59 Data Distribuição: 23/11/2010 Hora: 15:24 Tipo de Distribuição: Livre —— RTE: CONDOMÍNIO EDIFÍCIO METRO 1 El ADV: CRLANDO CAVALIERI JUNIOR OAB: 31333/SP RDO: LUIZA EDNA FURTADO ORSINI e outro(s) Nº DE ORDEM: 01.39.2010/002171 PR AUTUAÇÃO de de _ (ema me — ars mos sas ni ea e qa Estão neste Oficio R Ea ange Loic! t _ Justia. co) _— psa Cool ria” at yet aa = _ ao que segue(m) e lavro este termo. intervenção de Terosto Semeador Perca Sentença, ( nm = EM Sarcial: f =, oe a =. ç ue - -— map coment et mr em: eee RS oe eer os! ' A E ce É oras to cedo — wre",
+  "detected_language": "pt",
+  "language_confidence": 0.14432989690721648,
+  "entities": [
+    {
+      "text": "R$17.521,59",
+      "entity_type": "money",
+      "confidence": 0.9,
+      "start_pos": 383,
+      "end_pos": 394,
+      "context": "dimento Sumário (Cob. Condomínio) Valor da Causa: R$17.521,59 Data Distribuição: 23/11/2010 Hora: 15:24 Tipo de",
+      "metadata": {
+        "method": "regex",
+        "pattern": "R\\$\\s?[\\d.,]+(?:\\.\\d{2})?"
+      }
+    },
+    {
+      "text": "me",
+      "entity_type": "company_suffix",
+      "confidence": 0.9,
+      "start_pos": 646,
+      "end_pos": 648,
+      "context": "ORDEM: 01.39.2010/002171 PR AUTUAÇÃO de de _ (ema me — ars mos sas ni ea e qa Estão neste Oficio R Ea ",
+      "metadata": {
+        "method": "regex",
+        "pattern": "\\b(?:LTDA|ME|EPP|EIRELI|S\\.A\\.|SA|LDTA)\\b"
+      }
+    },
+    {
+      "text": "23/11/2010",
+      "entity_type": "auction_date",
+      "confidence": 0.9,
+      "start_pos": 414,
+      "end_pos": 424,
+      "context": "o) Valor da Causa: R$17.521,59 Data Distribuição: 23/11/2010 Hora: 15:24 Tipo de Distribuição: Livre —— RTE: C",
+      "metadata": {
+        "method": "regex",
+        "pattern": "\\d{1,2}\\/\\d{1,2}\\/\\d{4}"
+      }
+    }
+  ],
+  "keywords": [
+    "cível",
+    "adv",
+    "vara",
+    "condomínio",
+    "distribuição"
+  ],
+  "sentences": [
+    "VDEFEN SORIA PUBLICA - FLS",
+    "_ t + Defensor ( A) Adv",
+    "conveniado { ) “at NI MIN TT ||] so i ser Vara a É sê O = The 32 JUÍZO DE DIREITO DA = ) CARTÓRIO DO",
+    "soricio 39º OFÍCIO CÍVEL ai 5 TÂNIA =p ESCRIVÃO(Ã) DIRETOR(A) ee 205 445-73",
+    "sr t",
+    "26",
+    "0 (G0/PL 3 + Vara Cível q agi pone Civel João Mendes Júnior = Grupo: 1",
+    "Cível Ação: 146-Procedimento Sumário (Cob",
+    "Condomínio) Valor da Causa: R$17",
+    "521,59 Data Distribuição: 23/11/2010 Hora: 15:24 Tipo de Distribuição: Livre —— RTE: CONDOMÍNIO EDIFÍCIO METRO 1 El ADV: CRLANDO CAVALIERI JUNIOR OAB: 31333/SP RDO: LUIZA EDNA FURTADO ORSINI e outro(s) Nº DE ORDEM: 01",
+    "39",
+    "2010/002171 PR AUTUAÇÃO de de _ (ema me — ars mos sas ni ea e qa Estão neste Oficio R Ea ange Loic",
+    "t _ Justia",
+    "co) _— psa Cool ria” at yet aa = _ ao que segue(m) e lavro este termo",
+    "intervenção de Terosto Semeador Perca Sentença, ( nm = EM Sarcial: f =, oe a =",
+    "ç ue - -— map coment et mr em: eee RS oe eer os",
+    "' A E ce É oras to cedo — wre"
+  ],
+  "word_count": 194,
+  "char_count": 950,
+  "lead_indicators": {
+    "has_judicial_auction": false,
+    "has_legal_notifications": false,
+    "has_property_valuation": true,
+    "has_property_status": true,
+    "has_legal_compliance": false,
+    "has_financial_data": false,
+    "legal_restrictions_level": "low",
+    "investment_viability": "low",
+    "lead_score": 45.0,
+    "confidence": 0.5,
+    "risk_level": "high",
+    "matched_keywords": [
+      "livre"
+    ],
+    "confidence_factors": [
+      "Dados financeiros: 0 + 1 valores",
+      "Imóvel livre de ocupação",
+      "Entidades judiciais: 1 encontradas"
+    ],
+    "risk_factors": []
+  },
+  "processing_metadata": {
+    "processing_time": 0.000837,
+    "entity_extraction_method": "regex",
+    "text_quality_score": 0.6585735214324471,
+    "language_detection_method": "heuristic"
+  },
+  "processed_at": "2025-06-23T00:35:02.405533"
+}

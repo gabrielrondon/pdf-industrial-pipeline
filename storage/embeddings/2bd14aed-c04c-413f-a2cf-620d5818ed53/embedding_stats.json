@@ -1,0 +1,27 @@
+{
+  "job_id": "2bd14aed-c04c-413f-a2cf-620d5818ed53",
+  "embeddings_generated": 1,
+  "errors": [],
+  "processed_at": "2025-06-23T00:35:04.959206",
+  "model_info": {
+    "model_name": "neuralmind/bert-base-portuguese-cased",
+    "model_available": true,
+    "sentence_transformers_available": true,
+    "sklearn_available": true,
+    "cache_size": 3,
+    "use_gpu": false,
+    "vector_dimension": 768,
+    "model_type": "SentenceTransformer"
+  },
+  "vector_db_stats": {
+    "total_documents": 2,
+    "vector_dimension": 768,
+    "index_type": "flat",
+    "faiss_available": true,
+    "index_built": true,
+    "documents_with_lead_scores": 0,
+    "average_lead_score": 0,
+    "max_lead_score": 0,
+    "jobs_count": 2
+  }
+}

@@ -204,6 +204,21 @@ class QueueManager:
             logger.error(f"Erro ao marcar job como falhado {job_id}: {e}")
             return False
     
+    def job_exists(self, job_id: str) -> bool:
+        """
+        Verifica se um job existe (checando se há arquivos no storage)
+        """
+        try:
+            from utils.storage_manager import storage_manager
+            
+            # Verificar se existe manifest do job
+            manifest_path = f"jobs/{job_id}/metadata/manifest.json"
+            return storage_manager.file_exists(manifest_path)
+        
+        except Exception as e:
+            logger.error(f"Erro ao verificar existência do job {job_id}: {e}")
+            return False
+    
     def clear_all_queues(self) -> bool:
         """
         Limpa todas as filas (usado para testes)

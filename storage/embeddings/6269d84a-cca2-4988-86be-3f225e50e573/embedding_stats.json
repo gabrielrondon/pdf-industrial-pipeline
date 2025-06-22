@@ -1,8 +1,8 @@
 {
-  "job_id": "stage4-test-job",
+  "job_id": "6269d84a-cca2-4988-86be-3f225e50e573",
   "embeddings_generated": 1,
   "errors": [],
-  "processed_at": "2025-06-16T21:30:17.649724",
+  "processed_at": "2025-06-23T00:34:05.340225",
   "model_info": {
     "model_name": "neuralmind/bert-base-portuguese-cased",
     "model_available": true,

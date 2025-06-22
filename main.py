@@ -23,6 +23,7 @@ from workers.split_worker import split_pdf_task, pdf_split_worker
 from workers.ocr_worker import ocr_worker
 from workers.text_worker import text_worker
 from workers.embedding_worker import embedding_worker
+from workers.queue_manager import queue_manager
 from utils.file_utils import validate_pdf_file, clean_filename, format_file_size
 from utils.storage_manager import storage_manager
 from ocr.tesseract_engine import tesseract_engine
@@ -173,16 +174,61 @@ async def process_text_analysis(job_id: str):
     Processa análise de texto para um job específico (Etapa 3)
     """
     try:
-        # Simular resultado OCR para teste
-        test_ocr_result = {
+        # Verificar se o job existe
+        if not queue_manager.job_exists(job_id):
+            raise HTTPException(status_code=404, detail="Job não encontrado")
+        
+        # Obter manifest do job para saber quantas páginas processar
+        manifest_path = f"jobs/{job_id}/metadata/manifest.json"
+        if not storage_manager.file_exists(manifest_path):
+            raise HTTPException(status_code=404, detail="Manifest do job não encontrado")
+        
+        manifest = storage_manager.load_json(manifest_path)
+        pages = manifest.get('output_info', {}).get('pages', [])
+        
+        if not pages:
+            raise HTTPException(status_code=400, detail="Nenhuma página encontrada no job")
+        
+        # Processar apenas a primeira página por enquanto
+        # TODO: Implementar processamento de múltiplas páginas
+        first_page = pages[0]
+        page_path = first_page.get('file_path')
+        
+        if not page_path:
+            raise HTTPException(status_code=400, detail="Caminho da página não encontrado")
+        
+        # Tentar extrair texto diretamente do PDF (se for texto nativo)
+        try:
+            # Usar utilitário de extração de texto
+            from utils.file_utils import extract_text_from_pdf
+            full_page_path = storage_manager.get_full_path(page_path)
+            extracted_text = extract_text_from_pdf(full_page_path)
+            
+            if not extracted_text or len(extracted_text.strip()) < 10:
+                # Se não conseguiu extrair texto suficiente, usar OCR
+                ocr_result = ocr_worker.process_ocr_job(job_id, first_page)
+                extracted_text = ocr_result.get('text_extracted', '')
+                confidence = ocr_result.get('confidence_avg', 0)
+            else:
+                confidence = 95.0  # Texto nativo tem alta confiança
+                
+        except Exception as e:
+            logger.warning(f"Erro na extração de texto nativo, usando OCR: {e}")
+            # Fallback para OCR
+            ocr_result = ocr_worker.process_ocr_job(job_id, first_page)
+            extracted_text = ocr_result.get('text_extracted', '')
+            confidence = ocr_result.get('confidence_avg', 0)
+        
+        # Criar resultado estruturado para o text worker
+        ocr_result = {
             'job_id': job_id,
-            'page_number': 1,
-            'text_extracted': 'Esta é uma empresa de tecnologia chamada TechSolutions Brasil Ltda. CNPJ: 12.345.678/0001-90. Contato: João Silva, telefone (11) 99999-8888, email: joao@techsolutions.com.br. Projeto de desenvolvimento de sistema de gestão empresarial no valor de R$ 250.000,00. Prazo urgente de 6 meses.',
-            'confidence_avg': 85.0
+            'page_number': first_page.get('page_number', 1),
+            'text_extracted': extracted_text,
+            'confidence_avg': confidence
         }
         
         # Processar com o text worker
-        result = text_worker.process_text_job(job_id, test_ocr_result)
+        result = text_worker.process_text_job(job_id, ocr_result)
         
         return {
             "job_id": job_id,

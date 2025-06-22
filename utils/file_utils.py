@@ -4,6 +4,14 @@ import mimetypes
 from typing import Optional, Dict
 from pathlib import Path
 
+# PDF text extraction
+try:
+    import PyPDF2
+    import pdfplumber
+    PDF_LIBS_AVAILABLE = True
+except ImportError:
+    PDF_LIBS_AVAILABLE = False
+
 def calculate_file_hash(file_path: str, algorithm: str = "sha256") -> str:
     """
     Calcula hash de um arquivo
@@ -196,3 +204,47 @@ def is_safe_path(path: str, base_path: str) -> bool:
     
     except Exception:
         return False
+
+def extract_text_from_pdf(pdf_path: str) -> str:
+    """
+    Extrai texto de um PDF usando bibliotecas Python
+    
+    Args:
+        pdf_path: Caminho para o arquivo PDF
+    
+    Returns:
+        Texto extraído do PDF
+    """
+    if not PDF_LIBS_AVAILABLE:
+        raise ImportError("Bibliotecas PDF não disponíveis (PyPDF2, pdfplumber)")
+    
+    if not os.path.exists(pdf_path):
+        raise FileNotFoundError(f"Arquivo PDF não encontrado: {pdf_path}")
+    
+    extracted_text = ""
+    
+    try:
+        # Primeiro tentar com pdfplumber (melhor para texto)
+        with pdfplumber.open(pdf_path) as pdf:
+            for page in pdf.pages:
+                page_text = page.extract_text()
+                if page_text:
+                    extracted_text += page_text + "\n"
+    
+    except Exception as e:
+        print(f"Erro com pdfplumber, tentando PyPDF2: {e}")
+        
+        try:
+            # Fallback para PyPDF2
+            with open(pdf_path, 'rb') as file:
+                reader = PyPDF2.PdfReader(file)
+                for page in reader.pages:
+                    page_text = page.extract_text()
+                    if page_text:
+                        extracted_text += page_text + "\n"
+        
+        except Exception as e2:
+            print(f"Erro com PyPDF2: {e2}")
+            raise RuntimeError(f"Não foi possível extrair texto do PDF: {e2}")
+    
+    return extracted_text.strip()
