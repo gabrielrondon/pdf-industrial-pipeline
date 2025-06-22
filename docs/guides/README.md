@@ -9,6 +9,10 @@
 - **[FAQ](faq.md)** - Frequently asked questions
 - **[Troubleshooting](troubleshooting.md)** - Common issues and solutions
 
+### 🤖 **Machine Learning**
+- **[Model Training Tutorial](model-training-tutorial.md)** - Complete step-by-step guide for training ML models with PlantUML workflows and Postman collection setup
+- **[Business Configuration Guide](business-configuration.md)** - Configure the system for different business types and use cases
+
 ### 👨‍💻 **For Developers**
 - **[Developer Guide](developer-guide.md)** - Development environment setup
 - **[API Integration](api-integration.md)** - How to integrate with the API
