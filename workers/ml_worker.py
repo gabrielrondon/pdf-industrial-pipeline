@@ -461,11 +461,20 @@ class MLWorker:
                 available_jobs = [job_id for job_id in job_ids 
                                 if storage_manager.directory_exists(f"{ml_base_dir}/{job_id}")]
             else:
-                # Buscar todos os jobs
+                # Buscar todos os jobs processados
                 try:
-                    # Simular listagem de diretórios
-                    available_jobs = ['stage4-test-job']  # Adicionar lógica real depois
-                except:
+                    # Listar todos os diretórios em ml_analysis
+                    import os
+                    ml_analysis_path = os.path.join("storage", "ml_analysis")
+                    if os.path.exists(ml_analysis_path):
+                        available_jobs = [
+                            job_dir for job_dir in os.listdir(ml_analysis_path)
+                            if os.path.isdir(os.path.join(ml_analysis_path, job_dir))
+                            and job_dir != '__pycache__'  # Ignorar cache do Python
+                        ]
+                        logger.info(f"Jobs encontrados para treinamento: {available_jobs}")
+                except Exception as e:
+                    logger.error(f"Erro ao listar jobs: {e}")
                     pass
             
             # Carregar features de cada job
