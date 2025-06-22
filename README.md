@@ -1,6 +1,6 @@
-# 🔧 PDF Industrial Pipeline
+# ⚖️ Leilão Judicial Analysis Pipeline
 
-*Advanced PDF processing pipeline with ML-powered lead scoring and semantic search capabilities*
+*Sistema especializado em análise de editais de leilão judicial brasileiro para identificação de oportunidades de investimento imobiliário*
 
 [![Python](https://img.shields.io/badge/Python-3.11%2B-blue.svg)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104%2B-green.svg)](https://fastapi.tiangolo.com)
@@ -25,18 +25,19 @@ python3 -m uvicorn main:app --reload --port 8000
 
 ## 📋 Overview
 
-This is a comprehensive PDF processing pipeline that combines OCR, text analysis, machine learning, and semantic search to extract valuable insights from industrial documents. The system is designed for high-performance processing of large PDF documents with automated lead scoring and intelligent content analysis.
+Este é um sistema abrangente de processamento de documentos PDF que combina OCR, análise de texto, machine learning e busca semântica para extrair insights valiosos de editais de leilão judicial e documentos governamentais brasileiros. O sistema é projetado para processamento de alto desempenho de documentos PDF grandes com scoring automatizado de viabilidade de investimento e análise inteligente de conteúdo jurídico.
 
-### ✨ Key Features
+### ✨ Principais Funcionalidades
 
-- **📄 PDF Processing**: Advanced PDF splitting and page extraction
-- **🔍 OCR Integration**: Tesseract-powered text extraction from images
-- **🧠 ML Pipeline**: Feature engineering and lead scoring models
-- **🔗 Semantic Search**: BERT-based embeddings with FAISS indexing
-- **⚡ High Performance**: Redis caching, parallel processing, monitoring
-- **🌐 REST API**: FastAPI with comprehensive documentation
-- **🐳 Docker Ready**: Production deployment with Docker Compose
-- **📊 Frontend**: React-based dashboard for visualization
+- **📄 Processamento de PDF**: Divisão avançada de PDF e extração de páginas
+- **🔍 Integração OCR**: Extração de texto alimentada por Tesseract otimizada para português
+- **⚖️ Pipeline Jurídico**: Engenharia de características e modelos de scoring de oportunidades de leilão
+- **🔗 Busca Semântica**: Embeddings BERT com indexação FAISS para documentos legais
+- **🏠 Análise Imobiliária**: Identificação de oportunidades de investimento e avaliação de riscos
+- **⚡ Alto Desempenho**: Cache Redis, processamento paralelo, monitoramento
+- **🌐 REST API**: FastAPI com documentação abrangente
+- **🐳 Docker Ready**: Implantação de produção com Docker Compose
+- **📊 Frontend**: Dashboard baseado em React para visualização
 
 ## 📚 Documentation
 
@@ -129,4 +130,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Built with ❤️ for efficient industrial document processing** 
+**Construído com ❤️ para análise eficiente de leilões judiciais brasileiros** 

@@ -61,18 +61,23 @@ class FeatureSet:
     deadline_mentioned: bool = False
     urgency_keywords_count: int = 0
     
-    # Features de tecnologia
-    technology_score: float = 0.0
-    tech_keywords_count: int = 0
-    digital_transformation_indicators: int = 0
+    # Features específicas de leilão judicial
+    judicial_auction_score: float = 0.0
+    legal_notifications_count: int = 0
+    property_valuation_indicators: int = 0
+    property_status_score: float = 0.0
+    legal_compliance_score: float = 0.0
+    legal_restrictions_count: int = 0
     
-    # Features de decisão
-    decision_maker_indicators: int = 0
-    authority_keywords_count: int = 0
+    # Features de risco de investimento
+    investment_viability_score: float = 0.0
+    risk_level_score: float = 0.0
+    legal_authority_mentions: int = 0
     
-    # Features de competitividade
-    competitor_mentions: int = 0
-    market_opportunity_score: float = 0.0
+    # Features de oportunidade imobiliária
+    property_discount_indicators: int = 0
+    market_value_mentions: int = 0
+    auction_urgency_score: float = 0.0
     
     # Features de embedding
     embedding_dimension: int = 0
@@ -103,36 +108,56 @@ class FeatureEngineer:
         logger.info("FeatureEngineer inicializado")
     
     def _load_business_keywords(self) -> Dict[str, List[str]]:
-        """Carrega keywords categorizadas para feature engineering"""
+        """Carrega keywords categorizadas para feature engineering de leilões judiciais"""
         return {
-            'financial': [
-                'investimento', 'orçamento', 'custo', 'valor', 'preço', 'receita',
-                'lucro', 'margem', 'roi', 'retorno', 'economia', 'saving',
-                'milhão', 'milhões', 'real', 'reais', 'dólar', 'euro'
+            'judicial_auction': [
+                'leilão judicial', 'hasta pública', 'arrematação', 'execução fiscal',
+                'penhora', 'alienação judicial', 'hasta', 'leilão', 'arrematante',
+                'adjudicação', 'execução', 'expropriação'
             ],
-            'urgency': [
-                'urgente', 'imediato', 'agora', 'hoje', 'amanhã', 'asap',
-                'prazo', 'deadline', 'vencimento', 'pressa', 'rápido',
-                'emergência', 'critical', 'prioridade'
+            'legal_notifications': [
+                'edital', 'intimação', 'citação', 'diário oficial', 'publicação',
+                'notificação', 'cientificação', 'comunicação', 'aviso',
+                'art. 889', 'CPC', 'código de processo civil'
             ],
-            'technology': [
-                'sistema', 'software', 'tecnologia', 'digital', 'automação',
-                'ia', 'artificial', 'machine learning', 'cloud', 'saas',
-                'api', 'integração', 'plataforma', 'app', 'mobile'
+            'property_valuation': [
+                'avaliação', 'laudo', 'perícia', 'valor de mercado', 'valor venal',
+                'valor da avaliação', 'preço', 'lance mínimo', 'primeira praça',
+                'segunda praça', 'valor inicial'
             ],
-            'authority': [
-                'diretor', 'ceo', 'cto', 'gerente', 'coordenador',
-                'presidente', 'supervisor', 'responsável', 'líder',
-                'decisão', 'aprovação', 'autoridade'
+            'property_status': [
+                'imóvel desocupado', 'livre de ocupação', 'desimpedido',
+                'sem ocupantes', 'vago', 'livre', 'desembaraçado',
+                'inquilino', 'locatário', 'posseiro', 'ocupação irregular'
             ],
-            'opportunity': [
-                'projeto', 'oportunidade', 'negócio', 'parceria',
-                'contrato', 'proposta', 'licitação', 'expansão',
-                'crescimento', 'mercado', 'cliente'
+            'legal_compliance': [
+                'regular', 'conforme', 'legal', 'válido', 'procedimento correto',
+                'dentro do prazo', 'publicado', 'intimado', 'notificado',
+                'cumprimento', 'observância'
             ],
-            'competitors': [
-                'concorrente', 'competitor', 'rival', 'alternativa',
-                'comparação', 'benchmark', 'versus', 'vs'
+            'financial_data': [
+                'débito', 'dívida', 'IPTU', 'condomínio', 'taxa', 'imposto',
+                'financiamento', 'hipoteca', 'ônus', 'gravame', 'encargo',
+                'quitação', 'pagamento'
+            ],
+            'legal_restrictions': [
+                'indisponibilidade', 'penhora', 'arresto', 'sequestro',
+                'bloqueio', 'restrição', 'impedimento', 'gravame',
+                'ônus real', 'usufruto', 'servidão'
+            ],
+            'investment_opportunity': [
+                'oportunidade', 'investimento', 'negócio', 'aquisição',
+                'compra', 'desconto', 'abaixo do mercado', 'barganha',
+                'rentabilidade', 'valorização'
+            ],
+            'urgency_indicators': [
+                'prazo', 'vencimento', 'data limite', 'até', 'antes de',
+                'urgente', 'imediato', 'breve', 'em breve'
+            ],
+            'decision_authorities': [
+                'juiz', 'magistrado', 'leiloeiro', 'oficial de justiça',
+                'escrivão', 'cartório', 'tribunal', 'vara', 'foro',
+                'comarca', 'instância'
             ]
         }
     
@@ -187,14 +212,17 @@ class FeatureEngineer:
             # Features de urgência
             features = self._extract_urgency_features(features, text)
             
-            # Features de tecnologia
-            features = self._extract_technology_features(features, text)
+            # Features específicas de leilão judicial
+            features = self._extract_judicial_auction_features(features, text)
             
-            # Features de decisão/autoridade
-            features = self._extract_authority_features(features, text)
+            # Features de conformidade legal
+            features = self._extract_legal_compliance_features(features, text)
             
-            # Features de competitividade
-            features = self._extract_competition_features(features, text)
+            # Features de autoridades legais
+            features = self._extract_legal_authority_features(features, text)
+            
+            # Features de oportunidade imobiliária
+            features = self._extract_property_opportunity_features(features, text)
             
             # Features de embedding
             if embedding_data:
@@ -246,7 +274,7 @@ class FeatureEngineer:
         money_entities = [e for e in entities if e.get('entity_type') == 'money']
         
         features.has_financial_values = len(money_entities) > 0
-        features.financial_keywords_count = self._count_keywords(text, self.business_keywords['financial'])
+        features.financial_keywords_count = self._count_keywords(text, self.business_keywords['financial_data'])
         
         if money_entities:
             # Extrair valores numéricos
@@ -273,7 +301,7 @@ class FeatureEngineer:
     
     def _extract_urgency_features(self, features: FeatureSet, text: str) -> FeatureSet:
         """Extrai features de urgência"""
-        urgency_keywords = self.business_keywords['urgency']
+        urgency_keywords = self.business_keywords['urgency_indicators']
         features.urgency_keywords_count = self._count_keywords(text, urgency_keywords)
         
         # Detectar menções de deadline
@@ -293,59 +321,28 @@ class FeatureEngineer:
         
         return features
     
-    def _extract_technology_features(self, features: FeatureSet, text: str) -> FeatureSet:
-        """Extrai features de tecnologia"""
-        tech_keywords = self.business_keywords['technology']
-        features.tech_keywords_count = self._count_keywords(text, tech_keywords)
+    def _extract_legal_authority_features(self, features: FeatureSet, text: str) -> FeatureSet:
+        """Extrai features de autoridades legais"""
+        authority_keywords = self.business_keywords['decision_authorities']
+        features.legal_authority_mentions = self._count_keywords(text, authority_keywords)
         
-        # Indicadores de transformação digital
-        digital_patterns = [
-            'transformação digital', 'digitalização', 'automação',
-            'inteligência artificial', 'machine learning', 'ia',
-            'cloud computing', 'nuvem', 'saas', 'api'
+        # Indicadores de procedimentos legais
+        legal_procedure_patterns = [
+            'procedimento legal', 'rito processual', 'devido processo',
+            'competência', 'jurisdição', 'instância', 'recurso'
         ]
         
-        features.digital_transformation_indicators = sum(
-            1 for pattern in digital_patterns 
+        legal_procedure_count = sum(
+            1 for pattern in legal_procedure_patterns 
             if pattern in text.lower()
         )
         
-        # Score de tecnologia
-        features.technology_score = min(100, (features.tech_keywords_count * 15) + 
-                                      (features.digital_transformation_indicators * 25))
+        # Score de conformidade legal baseado em autoridades mencionadas
+        features.legal_compliance_score += min(25, features.legal_authority_mentions * 5)
         
         return features
     
-    def _extract_authority_features(self, features: FeatureSet, text: str) -> FeatureSet:
-        """Extrai features de autoridade/decisão"""
-        authority_keywords = self.business_keywords['authority']
-        features.authority_keywords_count = self._count_keywords(text, authority_keywords)
-        
-        # Indicadores de tomador de decisão
-        decision_patterns = [
-            'aprovação', 'decisão', 'autorização', 'orçamento aprovado',
-            'verba disponível', 'recursos alocados'
-        ]
-        
-        features.decision_maker_indicators = sum(
-            1 for pattern in decision_patterns 
-            if pattern in text.lower()
-        )
-        
-        return features
-    
-    def _extract_competition_features(self, features: FeatureSet, text: str) -> FeatureSet:
-        """Extrai features de competitividade"""
-        competitor_keywords = self.business_keywords['competitors']
-        features.competitor_mentions = self._count_keywords(text, competitor_keywords)
-        
-        # Score de oportunidade de mercado
-        opportunity_keywords = self.business_keywords['opportunity']
-        opportunity_count = self._count_keywords(text, opportunity_keywords)
-        
-        features.market_opportunity_score = min(100, opportunity_count * 20)
-        
-        return features
+
     
     def _extract_embedding_features(self, features: FeatureSet, embedding_data: Dict[str, Any]) -> FeatureSet:
         """Extrai features dos embeddings"""
@@ -462,9 +459,11 @@ class FeatureEngineer:
             'cnpj_count', 'cpf_count', 'phone_count', 'email_count', 'money_count',
             'company_count', 'max_financial_value', 'total_financial_value',
             'financial_keywords_count', 'urgency_score', 'urgency_keywords_count',
-            'technology_score', 'tech_keywords_count', 'digital_transformation_indicators',
-            'decision_maker_indicators', 'authority_keywords_count', 'competitor_mentions',
-            'market_opportunity_score', 'embedding_dimension', 'embedding_norm',
+            'judicial_auction_score', 'legal_notifications_count', 'property_valuation_indicators',
+            'property_status_score', 'legal_compliance_score', 'legal_restrictions_count',
+            'investment_viability_score', 'risk_level_score', 'legal_authority_mentions',
+            'property_discount_indicators', 'market_value_mentions', 'auction_urgency_score',
+            'embedding_dimension', 'embedding_norm',
             'embedding_entropy', 'text_density', 'financial_density',
             'contact_completeness', 'original_lead_score', 'processing_time'
         ]
@@ -490,9 +489,10 @@ class FeatureEngineer:
             'money_count', 'company_count', 'has_financial_values',
             'max_financial_value', 'total_financial_value', 'financial_keywords_count',
             'urgency_score', 'deadline_mentioned', 'urgency_keywords_count',
-            'technology_score', 'tech_keywords_count', 'digital_transformation_indicators',
-            'decision_maker_indicators', 'authority_keywords_count',
-            'competitor_mentions', 'market_opportunity_score',
+            'judicial_auction_score', 'legal_notifications_count', 'property_valuation_indicators',
+            'property_status_score', 'legal_compliance_score', 'legal_restrictions_count',
+            'investment_viability_score', 'risk_level_score', 'legal_authority_mentions',
+            'property_discount_indicators', 'market_value_mentions', 'auction_urgency_score',
             'embedding_dimension', 'embedding_norm', 'embedding_entropy',
             'text_density', 'financial_density', 'contact_completeness'
         ]
@@ -506,6 +506,88 @@ class FeatureEngineer:
             'total_keywords': sum(len(words) for words in self.business_keywords.values()),
             'sklearn_available': SKLEARN_AVAILABLE
         }
+
+    def _extract_judicial_auction_features(self, features: FeatureSet, text: str) -> FeatureSet:
+        """Extrai features específicas de leilão judicial"""
+        # Contagem de indicadores de leilão judicial
+        judicial_keywords = self.business_keywords['judicial_auction']
+        judicial_count = self._count_keywords(text, judicial_keywords)
+        features.judicial_auction_score = min(100, judicial_count * 25)
+        
+        # Notificações legais
+        notification_keywords = self.business_keywords['legal_notifications']
+        features.legal_notifications_count = self._count_keywords(text, notification_keywords)
+        
+        # Indicadores de avaliação de propriedade
+        valuation_keywords = self.business_keywords['property_valuation']
+        features.property_valuation_indicators = self._count_keywords(text, valuation_keywords)
+        
+        # Score de status da propriedade
+        property_status_keywords = self.business_keywords['property_status']
+        property_status_count = self._count_keywords(text, property_status_keywords)
+        
+        # Verificar se é status positivo (livre) ou negativo (ocupado)
+        positive_status = ['desocupado', 'livre', 'vago', 'desembaraçado', 'sem ocupantes']
+        negative_status = ['inquilino', 'locatário', 'posseiro', 'ocupação irregular']
+        
+        positive_count = self._count_keywords(text, positive_status)
+        negative_count = self._count_keywords(text, negative_status)
+        
+        # Score positivo se mais indicadores livres, negativo se ocupado
+        if positive_count > negative_count:
+            features.property_status_score = min(100, positive_count * 30)
+        else:
+            features.property_status_score = max(-50, -negative_count * 20)
+        
+        # Restrições legais (quanto mais, pior)
+        restriction_keywords = self.business_keywords['legal_restrictions']
+        features.legal_restrictions_count = self._count_keywords(text, restriction_keywords)
+        
+        return features
+    
+    def _extract_legal_compliance_features(self, features: FeatureSet, text: str) -> FeatureSet:
+        """Extrai features de conformidade legal"""
+        compliance_keywords = self.business_keywords['legal_compliance']
+        compliance_count = self._count_keywords(text, compliance_keywords)
+        features.legal_compliance_score = min(100, compliance_count * 20)
+        
+        # Menções de autoridades legais
+        authority_keywords = self.business_keywords['decision_authorities']
+        features.legal_authority_mentions = self._count_keywords(text, authority_keywords)
+        
+        # Calcular score de risco baseado em restrições vs conformidade
+        risk_score = features.legal_restrictions_count * 10  # Penalidade por restrições
+        compliance_bonus = compliance_count * 5  # Bônus por conformidade
+        features.risk_level_score = max(0, min(100, risk_score - compliance_bonus))
+        
+        return features
+    
+    def _extract_property_opportunity_features(self, features: FeatureSet, text: str) -> FeatureSet:
+        """Extrai features de oportunidade imobiliária"""
+        opportunity_keywords = self.business_keywords['investment_opportunity']
+        opportunity_count = self._count_keywords(text, opportunity_keywords)
+        features.investment_viability_score = min(100, opportunity_count * 15)
+        
+        # Indicadores de desconto/preço baixo
+        discount_patterns = [
+            'abaixo do mercado', 'desconto', 'barganha', 'oportunidade',
+            '50%', 'metade', 'menor preço', 'lance mínimo'
+        ]
+        features.property_discount_indicators = self._count_keywords(text, discount_patterns)
+        
+        # Menções de valor de mercado
+        market_value_patterns = [
+            'valor de mercado', 'avaliação', 'preço de mercado',
+            'valor venal', 'valor da avaliação'
+        ]
+        features.market_value_mentions = self._count_keywords(text, market_value_patterns)
+        
+        # Score de urgência do leilão
+        urgency_keywords = self.business_keywords['urgency_indicators']
+        urgency_count = self._count_keywords(text, urgency_keywords)
+        features.auction_urgency_score = min(100, urgency_count * 20)
+        
+        return features
 
 # Instância global do feature engineer
 feature_engineer = FeatureEngineer() 

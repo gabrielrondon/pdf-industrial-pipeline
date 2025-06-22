@@ -549,7 +549,7 @@ class MLWorker:
             'average_lead_score': sum(f.original_lead_score for f in features_list) / len(features_list),
             'financial_features_present': sum(1 for f in features_list if f.has_financial_values),
             'urgency_features_present': sum(1 for f in features_list if f.urgency_score > 0),
-            'technology_features_present': sum(1 for f in features_list if f.technology_score > 0),
+            'judicial_auction_features_present': sum(1 for f in features_list if f.judicial_auction_score > 0),
             'total_processing_time': sum(f.processing_time for f in features_list)
         }
     
@@ -580,7 +580,7 @@ class MLWorker:
             'entity_count': features.entity_count,
             'financial_value': features.max_financial_value,
             'urgency_score': features.urgency_score,
-            'technology_score': features.technology_score,
+            'judicial_auction_score': features.judicial_auction_score,
             'contact_completeness': features.contact_completeness
         }
     

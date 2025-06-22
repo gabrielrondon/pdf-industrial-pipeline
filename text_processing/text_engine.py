@@ -96,7 +96,7 @@ class TextProcessingResult:
 class TextEngine:
     """Engine principal de processamento de texto"""
     
-    # Padrões regex para extração de entidades brasileiras
+    # Padrões regex para extração de entidades brasileiras de leilões judiciais
     PATTERNS = {
         'cnpj': r'\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2}',
         'cpf': r'\d{3}\.?\d{3}\.?\d{3}-?\d{2}',
@@ -107,29 +107,68 @@ class TextEngine:
         'percentage': r'\d+(?:,\d+)?%',
         'website': r'https?://[^\s]+|www\.[^\s]+',
         'company_suffix': r'\b(?:LTDA|ME|EPP|EIRELI|S\.A\.|SA|LDTA)\b',
+        
+        # Padrões específicos para leilões judiciais
+        'process_number': r'\d{7}-?\d{2}\.\d{4}\.\d\.\d{2}\.\d{4}',  # Número de processo judicial
+        'property_registration': r'(?:matrícula|registro)\s*n?º?\s*\d+',  # Matrícula do imóvel
+        'auction_date': r'\d{1,2}\/\d{1,2}\/\d{4}',  # Datas de leilão
+        'auction_value': r'(?:lance|avaliação|valor)\s*(?:mínimo|inicial)?\s*:?\s*R\$\s?[\d.,]+',
+        'property_area': r'\d+(?:,\d+)?\s*m²',  # Área do imóvel
+        'iptu_value': r'IPTU\s*:?\s*R\$\s?[\d.,]+',  # Valor do IPTU
+        'debt_value': r'(?:débito|dívida)\s*:?\s*R\$\s?[\d.,]+',  # Valores de débito
+        'court_name': r'\d+ª?\s*Vara\s*(?:Cível|Criminal|Execução)?',  # Nome da vara
     }
     
-    # Palavras-chave para detecção de oportunidades
+    # Palavras-chave específicas para leilões judiciais brasileiros
     LEAD_KEYWORDS = {
-        'opportunity': [
-            'oportunidade', 'negócio', 'projeto', 'contrato', 'licitação',
-            'edital', 'concorrência', 'proposta', 'orçamento', 'investimento'
+        'judicial_auction': [
+            'leilão judicial', 'hasta pública', 'arrematação', 'execução fiscal',
+            'penhora', 'alienação judicial', 'hasta', 'leilão', 'arrematante',
+            'adjudicação', 'execução', 'expropriação'
         ],
-        'decision_makers': [
-            'diretor', 'gerente', 'coordenador', 'supervisor', 'responsável',
-            'presidente', 'vice-presidente', 'ceo', 'cto', 'cfo'
+        'legal_notifications': [
+            'edital', 'intimação', 'citação', 'diário oficial', 'publicação',
+            'notificação', 'cientificação', 'comunicação', 'aviso',
+            'art. 889', 'CPC', 'código de processo civil'
         ],
-        'company_indicators': [
-            'empresa', 'corporação', 'organização', 'instituição', 'fundação',
-            'faturamento', 'receita', 'lucro', 'funcionários', 'colaboradores'
+        'property_valuation': [
+            'avaliação', 'laudo', 'perícia', 'valor de mercado', 'valor venal',
+            'valor da avaliação', 'preço', 'lance mínimo', 'primeira praça',
+            'segunda praça', 'valor inicial'
         ],
-        'urgency': [
-            'urgente', 'imediato', 'prazo', 'deadline', 'asap', 'breve',
-            'rápido', 'emergência', 'prioridade'
+        'property_status': [
+            'imóvel desocupado', 'livre de ocupação', 'desimpedido',
+            'sem ocupantes', 'vago', 'livre', 'desembaraçado',
+            'inquilino', 'locatário', 'posseiro', 'ocupação irregular'
         ],
-        'technology': [
-            'sistema', 'software', 'tecnologia', 'digital', 'automação',
-            'integração', 'api', 'banco de dados', 'nuvem', 'cloud'
+        'legal_compliance': [
+            'regular', 'conforme', 'legal', 'válido', 'procedimento correto',
+            'dentro do prazo', 'publicado', 'intimado', 'notificado',
+            'cumprimento', 'observância'
+        ],
+        'financial_data': [
+            'débito', 'dívida', 'IPTU', 'condomínio', 'taxa', 'imposto',
+            'financiamento', 'hipoteca', 'ônus', 'gravame', 'encargo',
+            'quitação', 'pagamento'
+        ],
+        'legal_restrictions': [
+            'indisponibilidade', 'penhora', 'arresto', 'sequestro',
+            'bloqueio', 'restrição', 'impedimento', 'gravame',
+            'ônus real', 'usufruto', 'servidão'
+        ],
+        'investment_opportunity': [
+            'oportunidade', 'investimento', 'negócio', 'aquisição',
+            'compra', 'desconto', 'abaixo do mercado', 'barganha',
+            'rentabilidade', 'valorização'
+        ],
+        'urgency_indicators': [
+            'prazo', 'vencimento', 'data limite', 'até', 'antes de',
+            'urgente', 'imediato', 'breve', 'em breve'
+        ],
+        'decision_authorities': [
+            'juiz', 'magistrado', 'leiloeiro', 'oficial de justiça',
+            'escrivão', 'cartório', 'tribunal', 'vara', 'foro',
+            'comarca', 'instância'
         ]
     }
     
@@ -318,68 +357,153 @@ class TextEngine:
             return []
     
     def analyze_lead_potential(self, text: str, entities: List[EntityMatch], keywords: List[str]) -> Dict[str, Any]:
-        """Analisa o potencial de lead do texto"""
+        """Analisa o potencial de investimento em leilão judicial"""
         lead_indicators = {
-            'has_contact_info': False,
-            'has_company_info': False,
-            'has_opportunity_keywords': False,
-            'has_financial_info': False,
-            'urgency_level': 'low',
-            'decision_maker_present': False,
-            'technology_related': False,
+            'has_judicial_auction': False,
+            'has_legal_notifications': False,
+            'has_property_valuation': False,
+            'has_property_status': False,
+            'has_legal_compliance': False,
+            'has_financial_data': False,
+            'legal_restrictions_level': 'unknown',
+            'investment_viability': 'low',
             'lead_score': 0.0,
-            'confidence': 0.0
+            'confidence': 0.0,
+            'risk_level': 'high'
         }
         
         text_lower = text.lower()
         score = 0.0
         confidence_factors = []
+        risk_factors = []
         
-        # Verificar informações de contato
-        contact_entities = [e for e in entities if e.entity_type in ['email', 'phone', 'cnpj', 'cpf']]
-        if contact_entities:
-            lead_indicators['has_contact_info'] = True
+        # 1. Confirmação de leilão judicial (+30 pontos)
+        judicial_matches = []
+        for word in self.LEAD_KEYWORDS['judicial_auction']:
+            if word in text_lower:
+                judicial_matches.append(word)
+        
+        if judicial_matches:
+            lead_indicators['has_judicial_auction'] = True
+            score += 30
+            confidence_factors.append(f"Leilão judicial confirmado: {len(judicial_matches)} indicadores")
+        
+        # 2. Publicações e notificações legais (+25 pontos)
+        legal_notification_matches = []
+        for word in self.LEAD_KEYWORDS['legal_notifications']:
+            if word in text_lower:
+                legal_notification_matches.append(word)
+        
+        if legal_notification_matches:
+            lead_indicators['has_legal_notifications'] = True
             score += 25
-            confidence_factors.append(f"{len(contact_entities)} contatos encontrados")
+            confidence_factors.append(f"Notificações legais: {len(legal_notification_matches)} encontradas")
         
-        # Verificar informações de empresa
-        company_entities = [e for e in entities if e.entity_type in ['cnpj', 'company_suffix']]
-        if company_entities:
-            lead_indicators['has_company_info'] = True
+        # 3. Dados financeiros e avaliações (+20 pontos)
+        valuation_matches = []
+        for word in self.LEAD_KEYWORDS['property_valuation']:
+            if word in text_lower:
+                valuation_matches.append(word)
+        
+        financial_entities = [e for e in entities if e.entity_type in ['money', 'auction_value', 'iptu_value', 'debt_value']]
+        if valuation_matches or financial_entities:
+            lead_indicators['has_property_valuation'] = True
             score += 20
-            confidence_factors.append("Informações de empresa presentes")
+            confidence_factors.append(f"Dados financeiros: {len(valuation_matches)} + {len(financial_entities)} valores")
         
-        # Verificar palavras-chave de oportunidade
-        opportunity_matches = []
-        for category, words in self.LEAD_KEYWORDS.items():
-            matches = [word for word in words if word in text_lower]
-            if matches:
-                opportunity_matches.extend(matches)
-                if category == 'opportunity':
-                    lead_indicators['has_opportunity_keywords'] = True
-                    score += 30
-                elif category == 'decision_makers':
-                    lead_indicators['decision_maker_present'] = True
-                    score += 15
-                elif category == 'urgency':
-                    lead_indicators['urgency_level'] = 'high'
-                    score += 10
-                elif category == 'technology':
-                    lead_indicators['technology_related'] = True
-                    score += 10
+        # 4. Status de ocupação/posse (+15 pontos)
+        property_status_matches = []
+        for word in self.LEAD_KEYWORDS['property_status']:
+            if word in text_lower:
+                property_status_matches.append(word)
         
-        # Verificar informações financeiras
-        financial_entities = [e for e in entities if e.entity_type in ['money', 'percentage']]
-        if financial_entities:
-            lead_indicators['has_financial_info'] = True
-            score += 20
-            confidence_factors.append(f"{len(financial_entities)} valores financeiros")
+        if property_status_matches:
+            lead_indicators['has_property_status'] = True
+            # Verificar se é positivo (desocupado) ou negativo (ocupado)
+            positive_status = ['desocupado', 'livre', 'vago', 'desembaraçado', 'sem ocupantes']
+            negative_status = ['inquilino', 'locatário', 'posseiro', 'ocupação irregular']
+            
+            positive_count = sum(1 for word in positive_status if word in text_lower)
+            negative_count = sum(1 for word in negative_status if word in text_lower)
+            
+            if positive_count > negative_count:
+                score += 15
+                confidence_factors.append("Imóvel livre de ocupação")
+            else:
+                score += 5
+                risk_factors.append("Possível ocupação irregular")
         
-        # Calcular score final
-        lead_indicators['lead_score'] = min(100.0, score)
-        lead_indicators['confidence'] = min(1.0, len(confidence_factors) / 5.0)
-        lead_indicators['matched_keywords'] = opportunity_matches
+        # 5. Conformidade legal (+10 pontos)
+        compliance_matches = []
+        for word in self.LEAD_KEYWORDS['legal_compliance']:
+            if word in text_lower:
+                compliance_matches.append(word)
+        
+        if compliance_matches:
+            lead_indicators['has_legal_compliance'] = True
+            score += 10
+            confidence_factors.append(f"Conformidade legal: {len(compliance_matches)} indicadores")
+        
+        # 6. Verificar restrições legais (reduz pontuação)
+        restriction_matches = []
+        for word in self.LEAD_KEYWORDS['legal_restrictions']:
+            if word in text_lower:
+                restriction_matches.append(word)
+        
+        if restriction_matches:
+            restriction_penalty = min(15, len(restriction_matches) * 3)
+            score -= restriction_penalty
+            risk_factors.append(f"Restrições legais: {len(restriction_matches)} encontradas")
+            lead_indicators['legal_restrictions_level'] = 'high' if len(restriction_matches) > 2 else 'medium'
+        else:
+            lead_indicators['legal_restrictions_level'] = 'low'
+        
+        # 7. Oportunidade de investimento (bônus)
+        investment_matches = []
+        for word in self.LEAD_KEYWORDS['investment_opportunity']:
+            if word in text_lower:
+                investment_matches.append(word)
+        
+        if investment_matches:
+            score += 5
+            confidence_factors.append(f"Oportunidade de investimento: {len(investment_matches)} indicadores")
+        
+        # 8. Urgência (pode ser positiva ou negativa)
+        urgency_matches = []
+        for word in self.LEAD_KEYWORDS['urgency_indicators']:
+            if word in text_lower:
+                urgency_matches.append(word)
+        
+        if urgency_matches:
+            score += 5
+            confidence_factors.append(f"Indicadores de prazo: {len(urgency_matches)}")
+        
+        # 9. Verificar entidades específicas de leilão
+        judicial_entities = [e for e in entities if e.entity_type in ['process_number', 'property_registration', 'auction_date', 'court_name']]
+        if judicial_entities:
+            score += 10
+            confidence_factors.append(f"Entidades judiciais: {len(judicial_entities)} encontradas")
+        
+        # Calcular score final e métricas
+        lead_indicators['lead_score'] = max(0.0, min(100.0, score))
+        lead_indicators['confidence'] = min(1.0, len(confidence_factors) / 6.0)
+        
+        # Determinar viabilidade de investimento
+        if score >= 70:
+            lead_indicators['investment_viability'] = 'high'
+            lead_indicators['risk_level'] = 'low'
+        elif score >= 50:
+            lead_indicators['investment_viability'] = 'medium'
+            lead_indicators['risk_level'] = 'medium'
+        else:
+            lead_indicators['investment_viability'] = 'low'
+            lead_indicators['risk_level'] = 'high'
+        
+        # Adicionar fatores de análise
+        all_matches = judicial_matches + legal_notification_matches + valuation_matches + property_status_matches + compliance_matches
+        lead_indicators['matched_keywords'] = all_matches
         lead_indicators['confidence_factors'] = confidence_factors
+        lead_indicators['risk_factors'] = risk_factors
         
         return lead_indicators
     
