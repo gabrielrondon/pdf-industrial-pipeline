@@ -372,19 +372,44 @@ pm.test("Lead prediction successful", function () {
 - **Method**: `POST`
 - **URL**: `{{base_url}}/search/semantic`
 
-**Headers:** `Content-Type: application/json`
+**Headers:** None required  
+**Body:** None (select "none")
 
-**Body - Raw JSON:**
-```json
-{
-  "query": "technology companies with high revenue",
-  "k": 10,
-  "threshold": 0.7,
-  "job_id": "{{job_id}}"
-}
+#### 🔧 Adding Query Parameters:
+
+**Method 1 - URL Bar:**
+```
+{{base_url}}/search/semantic?query=technology companies with high revenue&k=10&threshold=0.7&job_id={{job_id}}
 ```
 
-#### 📝 Body Parameter Guide:
+**Method 2 - Params Tab (Recommended):**
+1. Click **"Params"** button next to URL
+2. Add parameters:
+
+| Key | Value | Description |
+|-----|-------|-------------|
+| `query` | `technology companies with high revenue` | Natural language search text |
+| `k` | `10` | Number of results (1-50) |
+| `threshold` | `0.7` | Similarity score (0.0-1.0, higher = more strict) |
+| `job_id` | `{{job_id}}` | Search in specific job only (optional) |
+
+**Visual Guide:**
+```
+URL: {{base_url}}/search/semantic
+Params Tab:
+┌───────────┬─────────────────────────────────────┬─────────────────────┐
+│ Key       │ Value                               │ Description         │
+├───────────┼─────────────────────────────────────┼─────────────────────┤
+│ query     │ technology companies with high...   │ Search text         │
+│ k         │ 10                                  │ Max results         │
+│ threshold │ 0.7                                 │ Similarity score    │
+│ job_id    │ {{job_id}}                          │ Filter by job       │
+└───────────┴─────────────────────────────────────┴─────────────────────┘
+
+Final URL: {{base_url}}/search/semantic?query=technology%20companies...
+```
+
+#### 📝 Parameter Guide:
 - **query**: Natural language search (e.g., "urgent construction projects")
 - **k**: Number of results (1-50)
 - **threshold**: Similarity score (0.0-1.0, higher = more strict)
@@ -396,16 +421,22 @@ pm.test("Semantic search successful", function () {
     pm.response.to.have.status(200);
     const response = pm.response.json();
     
-    console.log("🔍 SEARCH RESULTS:");
-    console.log("  Results found:", response.results ? response.results.length : 0);
+    console.log("🔍 SEMANTIC SEARCH RESULTS:");
+    console.log("  Query:", response.query_text);
+    console.log("  Total Results:", response.total_results);
+    console.log("  Model Used:", response.model_used);
+    console.log("  Threshold Used:", response.threshold_used);
     
     if (response.results && response.results.length > 0) {
-        console.log("  Top score:", response.results[0].score);
+        console.log("  Top Result Similarity:", response.results[0].similarity);
+        console.log("  Top Result Text:", response.results[0].text_preview);
         
         // Show top 3 results
         response.results.slice(0, 3).forEach((result, i) => {
-            console.log(`  Result ${i+1}: Score ${result.score}`);
+            console.log(`  Result ${i+1}: Similarity ${result.similarity.toFixed(3)} - Job ${result.job_id} Page ${result.page_number}`);
         });
+    } else {
+        console.log("  No results found - try lowering threshold or different query");
     }
 });
 ```
@@ -592,7 +623,15 @@ if (pm.response.code === 200) {
 python3 -m uvicorn main:app --reload --port 8000 --host 0.0.0.0
 ```
 
-#### **Issue 4: Path Variable Not Resolving**
+#### **Issue 4: 422 Error on Semantic Search**
+**Cause:** Using JSON body instead of query parameters  
+**Solution:**
+- ✅ Use **Params tab** not Body tab
+- ✅ Set Body to **"none"**
+- ✅ Add query, k, threshold, job_id as parameters
+- ❌ Don't use JSON body format
+
+#### **Issue 5: Path Variable Not Resolving**
 **Cause:** Wrong variable name or environment not selected  
 **Solution:**
 1. Check environment is selected (top-right dropdown)
