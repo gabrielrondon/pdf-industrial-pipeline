@@ -596,15 +596,24 @@ class EnsembleLeadScorer:
     """Ensemble de modelos para lead scoring"""
     
     def __init__(self):
-        self.models = {
-            'random_forest': RandomForestLeadScorer(),
-            'gradient_boosting': GradientBoostingLeadScorer()
-        }
+        # Use global instances instead of creating new ones
+        self.models = {}
         self.weights = {'random_forest': 0.6, 'gradient_boosting': 0.4}
         self.is_trained = False
     
+    def _initialize_models(self):
+        """Initialize models using global instances"""
+        global random_forest_model, gradient_boosting_model
+        self.models = {
+            'random_forest': random_forest_model,
+            'gradient_boosting': gradient_boosting_model
+        }
+    
     def train(self, features_list: List[FeatureSet], target_scores: List[float]) -> Dict[str, ModelPerformance]:
         """Treina todos os modelos do ensemble"""
+        # Initialize models with global instances
+        self._initialize_models()
+        
         performances = {}
         
         for model_name, model in self.models.items():
@@ -621,6 +630,10 @@ class EnsembleLeadScorer:
         """Faz predição usando ensemble de modelos"""
         start_time = datetime.now()
         
+        # Initialize models with global instances if not already done
+        if not self.models:
+            self._initialize_models()
+        
         if not self.is_trained:
             logger.warning("Ensemble não está treinado")
             return self._create_dummy_prediction()
@@ -636,6 +649,7 @@ class EnsembleLeadScorer:
                 total_weight += self.weights[model_name]
         
         if not predictions:
+            logger.warning(f"Nenhum modelo individual está treinado: RF={self.models['random_forest'].is_trained}, GB={self.models['gradient_boosting'].is_trained}")
             return self._create_dummy_prediction()
         
         # Combinar predições
