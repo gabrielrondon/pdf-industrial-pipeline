@@ -242,12 +242,33 @@ class StorageManager:
         """Salva dados JSON no storage"""
         if isinstance(self.backend, LocalStorage):
             import json
+            import math
             full_path = self.backend.base_path / file_path
             full_path.parent.mkdir(parents=True, exist_ok=True)
             
+            # Sanitize data to avoid JSON serialization errors
+            sanitized_data = self._sanitize_for_json(data)
+            
             with open(full_path, 'w', encoding='utf-8') as f:
-                json.dump(data, f, ensure_ascii=False, indent=2)
+                json.dump(sanitized_data, f, ensure_ascii=False, indent=2)
             logger.debug(f"JSON salvo: {full_path}")
+    
+    def _sanitize_for_json(self, obj):
+        """Sanitiza dados para evitar erros de serialização JSON"""
+        import math
+        
+        if isinstance(obj, dict):
+            return {key: self._sanitize_for_json(value) for key, value in obj.items()}
+        elif isinstance(obj, list):
+            return [self._sanitize_for_json(item) for item in obj]
+        elif isinstance(obj, float):
+            if math.isinf(obj):
+                return 999.0 if obj > 0 else -999.0  # Replace infinity with large finite number
+            elif math.isnan(obj):
+                return 0.0  # Replace NaN with 0
+            return obj
+        else:
+            return obj
     
     def save_text(self, file_path: str, text: str):
         """Salva texto no storage"""

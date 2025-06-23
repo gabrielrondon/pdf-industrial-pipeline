@@ -1,0 +1,50 @@
+{
+  "training_sessions": [
+    {
+      "timestamp": "2025-06-23T22:26:28.331874",
+      "samples_used": 2,
+      "job_ids": "all",
+      "performances": {
+        "random_forest": {
+          "model_name": "random_forest_classifier",
+          "accuracy": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1_score": 0.0,
+          "rmse": 0.0,
+          "r2_score": 0.0,
+          "cross_val_score": 0.0,
+          "feature_importance": {},
+          "training_time": 0.0,
+          "samples_trained": 0,
+          "last_trained": "2025-06-23T22:26:28.328633"
+        },
+        "gradient_boosting": {
+          "model_name": "gradient_boosting_regressor",
+          "accuracy": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1_score": 0.0,
+          "rmse": 999.0,
+          "r2_score": 0.0,
+          "cross_val_score": 0.0,
+          "feature_importance": {},
+          "training_time": 0.0,
+          "samples_trained": 0,
+          "last_trained": "2025-06-23T22:26:28.331814"
+        }
+      },
+      "score_distribution": {
+        "count": 2,
+        "min": 45.0,
+        "max": 65.0,
+        "average": 55.0,
+        "high_scores": 0,
+        "medium_scores": 1,
+        "low_scores": 1
+      }
+    }
+  ],
+  "total_trainings": 1,
+  "last_updated": "2025-06-23T22:26:28.332023"
+}

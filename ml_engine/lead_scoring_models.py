@@ -555,7 +555,7 @@ class GradientBoostingLeadScorer(LeadScoringModel):
             precision=0.0,
             recall=0.0,
             f1_score=0.0,
-            rmse=float('inf'),
+            rmse=999.0,  # Use large finite number instead of infinity
             r2_score=0.0,
             cross_val_score=0.0,
             feature_importance={},
