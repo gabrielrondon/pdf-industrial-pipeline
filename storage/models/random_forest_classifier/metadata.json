@@ -1,5 +1,5 @@
 {
-  "model_name": "gradient_boosting_regressor",
+  "model_name": "random_forest_classifier",
   "is_trained": true,
   "feature_columns": [
     "text_length",
@@ -41,19 +41,17 @@
   ],
   "training_history": [
     {
-      "timestamp": "2025-06-23T22:36:51.386731",
+      "timestamp": "2025-06-23T22:36:51.306306",
       "samples": 4,
-      "rmse": 27.871460846818678,
-      "r2_score": 0.0,
-      "cv_score": -0.006172839506172867
+      "accuracy": 0.0,
+      "cv_score": 0.0
     },
     {
-      "timestamp": "2025-06-23T22:37:28.348428",
+      "timestamp": "2025-06-23T22:37:28.291741",
       "samples": 4,
-      "rmse": 27.871460846818678,
-      "r2_score": 0.0,
-      "cv_score": -0.006172839506172867
+      "accuracy": 0.0,
+      "cv_score": 0.0
     }
   ],
-  "saved_at": "2025-06-23T22:37:28.352532"
+  "saved_at": "2025-06-23T22:37:28.303566"
 }

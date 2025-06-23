@@ -756,15 +756,15 @@ async def get_model_performance():
         if ensemble_model.is_trained:
             performances['ensemble'] = ensemble_model.get_model_performances()
         
-        # Performance individual dos modelos
+        # Performance individual dos modelos (sanitizar histórico)
         models_info = {
             'random_forest': {
                 'trained': random_forest_model.is_trained,
-                'training_history': random_forest_model.training_history
+                'training_history': storage_manager._sanitize_for_json(random_forest_model.training_history)
             },
             'gradient_boosting': {
                 'trained': gradient_boosting_model.is_trained,
-                'training_history': gradient_boosting_model.training_history
+                'training_history': storage_manager._sanitize_for_json(gradient_boosting_model.training_history)
             }
         }
         

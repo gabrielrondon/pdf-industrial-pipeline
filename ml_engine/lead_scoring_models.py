@@ -709,16 +709,22 @@ class EnsembleLeadScorer:
         for model_name, model in self.models.items():
             if model.training_history:
                 last_training = model.training_history[-1]
+                # Sanitizar valores para evitar NaN/inf
+                accuracy = self._sanitize_float(last_training.get('accuracy', 0.0))
+                rmse = self._sanitize_float(last_training.get('rmse', 0.0))
+                r2_score = self._sanitize_float(last_training.get('r2_score', 0.0))
+                cv_score = self._sanitize_float(last_training.get('cv_score', 0.0))
+                
                 # Criar ModelPerformance baseado no histórico
                 performances[model_name] = ModelPerformance(
                     model_name=model_name,
-                    accuracy=last_training.get('accuracy', 0.0),
+                    accuracy=accuracy,
                     precision=0.0,
                     recall=0.0,
                     f1_score=0.0,
-                    rmse=last_training.get('rmse', 0.0),
-                    r2_score=last_training.get('r2_score', 0.0),
-                    cross_val_score=last_training.get('cv_score', 0.0),
+                    rmse=rmse,
+                    r2_score=r2_score,
+                    cross_val_score=cv_score,
                     feature_importance={},
                     training_time=0.0,
                     samples_trained=last_training.get('samples', 0),
@@ -726,6 +732,13 @@ class EnsembleLeadScorer:
                 )
         
         return performances
+    
+    def _sanitize_float(self, value: float) -> float:
+        """Sanitiza valores float para evitar NaN/inf"""
+        import math
+        if math.isnan(value) or math.isinf(value):
+            return 0.0
+        return float(value)
 
 # Instâncias globais dos modelos
 random_forest_model = RandomForestLeadScorer()
