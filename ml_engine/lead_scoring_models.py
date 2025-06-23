@@ -197,7 +197,7 @@ class RandomForestLeadScorer(LeadScoringModel):
             # Converter features para DataFrame
             features_df = feature_engineer.features_to_dataframe(features_list)
             
-            if features_df is None or len(features_df) < 5:
+            if features_df is None or len(features_df) < 2:
                 logger.error("Dados insuficientes para treinamento")
                 return self._create_dummy_performance()
             
@@ -207,10 +207,17 @@ class RandomForestLeadScorer(LeadScoringModel):
             # Converter scores para classes (high, medium, low)
             y = self._scores_to_classes(target_scores)
             
-            # Dividir dados
-            X_train, X_test, y_train, y_test = train_test_split(
-                X, y, test_size=0.2, random_state=42, stratify=y
-            )
+            # Verificar se há classes suficientes para stratify
+            unique_classes = list(set(y))
+            if len(unique_classes) < 2 or min([y.count(cls) for cls in unique_classes]) < 2:
+                # Não usar stratify se não há classes suficientes
+                X_train, X_test, y_train, y_test = train_test_split(
+                    X, y, test_size=0.2, random_state=42
+                )
+            else:
+                X_train, X_test, y_train, y_test = train_test_split(
+                    X, y, test_size=0.2, random_state=42, stratify=y
+                )
             
             # Escalar features
             self.scaler = StandardScaler()
@@ -225,8 +232,12 @@ class RandomForestLeadScorer(LeadScoringModel):
             # Avaliar performance
             y_pred = self.model.predict(X_test_scaled)
             
-            # Cross-validation
-            cv_scores = cross_val_score(self.model, X_train_scaled, y_train, cv=3)
+            # Cross-validation (ajustar CV baseado no tamanho dos dados)
+            cv_folds = min(3, len(X_train) // 2) if len(X_train) >= 4 else 2
+            if cv_folds >= 2:
+                cv_scores = cross_val_score(self.model, X_train_scaled, y_train, cv=cv_folds)
+            else:
+                cv_scores = [self.model.score(X_train_scaled, y_train)]
             
             # Feature importance
             feature_importance = dict(zip(
@@ -395,7 +406,7 @@ class GradientBoostingLeadScorer(LeadScoringModel):
             # Converter features para DataFrame
             features_df = feature_engineer.features_to_dataframe(features_list)
             
-            if features_df is None or len(features_df) < 5:
+            if features_df is None or len(features_df) < 2:
                 logger.error("Dados insuficientes para treinamento")
                 return self._create_dummy_performance()
             
@@ -425,8 +436,12 @@ class GradientBoostingLeadScorer(LeadScoringModel):
             rmse = mean_squared_error(y_test, y_pred, squared=False)
             r2 = r2_score(y_test, y_pred)
             
-            # Cross-validation
-            cv_scores = cross_val_score(self.model, X_train_scaled, y_train, cv=3)
+            # Cross-validation (ajustar CV baseado no tamanho dos dados)
+            cv_folds = min(3, len(X_train) // 2) if len(X_train) >= 4 else 2
+            if cv_folds >= 2:
+                cv_scores = cross_val_score(self.model, X_train_scaled, y_train, cv=cv_folds)
+            else:
+                cv_scores = [self.model.score(X_train_scaled, y_train)]
             
             # Feature importance
             feature_importance = dict(zip(

@@ -1,0 +1,47 @@
+{
+  "job_id": "ecbb1f00-6e34-4721-9cc0-8719d6c5ac15",
+  "predictions": [
+    {
+      "page_number": 1,
+      "job_id": "ecbb1f00-6e34-4721-9cc0-8719d6c5ac15",
+      "ml_prediction": {
+        "lead_score": 50.0,
+        "confidence": 0.5,
+        "classification": "medium",
+        "probability_distribution": {
+          "low": 0.3,
+          "medium": 0.4,
+          "high": 0.3
+        },
+        "feature_importance": {},
+        "model_name": "ensemble",
+        "prediction_time": 0.0,
+        "metadata": {
+          "error": "Ensemble não disponível"
+        }
+      },
+      "original_score": 45.0,
+      "feature_summary": {
+        "text_length": 950,
+        "entity_count": 3,
+        "financial_value": 17521.59,
+        "urgency_score": 0,
+        "judicial_auction_score": 0,
+        "contact_completeness": 0.0
+      }
+    }
+  ],
+  "statistics": {
+    "total_pages": 1,
+    "average_ml_score": 50.0,
+    "max_ml_score": 50.0,
+    "min_ml_score": 50.0,
+    "average_confidence": 0.5,
+    "high_quality_leads": 0,
+    "medium_quality_leads": 1,
+    "low_quality_leads": 0,
+    "high_confidence_predictions": 0
+  },
+  "predicted_at": "2025-06-23T22:32:18.596472",
+  "model_used": "ensemble"
+}

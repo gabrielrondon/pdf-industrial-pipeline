@@ -1,0 +1,52 @@
+{
+  "model_name": "gradient_boosting_regressor",
+  "is_trained": true,
+  "feature_columns": [
+    "text_length",
+    "word_count",
+    "entity_count",
+    "language_confidence",
+    "readability_score",
+    "cnpj_count",
+    "phone_count",
+    "email_count",
+    "money_count",
+    "company_count",
+    "has_financial_values",
+    "max_financial_value",
+    "total_financial_value",
+    "financial_keywords_count",
+    "urgency_score",
+    "deadline_mentioned",
+    "urgency_keywords_count",
+    "judicial_auction_score",
+    "legal_notifications_count",
+    "property_valuation_indicators",
+    "property_status_score",
+    "legal_compliance_score",
+    "legal_restrictions_count",
+    "investment_viability_score",
+    "risk_level_score",
+    "legal_authority_mentions",
+    "property_discount_indicators",
+    "market_value_mentions",
+    "auction_urgency_score",
+    "embedding_dimension",
+    "embedding_norm",
+    "embedding_entropy",
+    "text_density",
+    "financial_density",
+    "contact_completeness",
+    "lang_pt"
+  ],
+  "training_history": [
+    {
+      "timestamp": "2025-06-23T22:33:28.196616",
+      "samples": 4,
+      "rmse": 27.871460846818678,
+      "r2_score": 0.0,
+      "cv_score": NaN
+    }
+  ],
+  "saved_at": "2025-06-23T22:33:28.200254"
+}

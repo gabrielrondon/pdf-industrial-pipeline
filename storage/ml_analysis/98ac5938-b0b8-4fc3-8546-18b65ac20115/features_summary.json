@@ -1,0 +1,17 @@
+{
+  "job_id": "98ac5938-b0b8-4fc3-8546-18b65ac20115",
+  "total_pages": 1,
+  "features_extracted_at": "2025-06-23T22:32:57.341615",
+  "average_lead_score": 65.0,
+  "high_quality_pages": 0,
+  "feature_statistics": {
+    "total_features_extracted": 1,
+    "average_text_length": 1598.0,
+    "average_entity_count": 14.0,
+    "average_lead_score": 65.0,
+    "financial_features_present": 0,
+    "urgency_features_present": 0,
+    "judicial_auction_features_present": 1,
+    "total_processing_time": 0.002119
+  }
+}

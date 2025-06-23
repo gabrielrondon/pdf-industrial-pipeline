@@ -1,0 +1,35 @@
+{
+  "document_id": "99a25289-ea98-48a3-847c-cf23f42c3ed7",
+  "job_id": "e83c2545-4f75-4c11-8b39-0efc5d55b2e3",
+  "page_number": 1,
+  "text": "ADA WV a to oe Fa ISO JUÍZO DE DIREITO DA Foro Regional IV - Lapa LODE 2? Vara Civel no e NO OO | | ESSO 0023295-55.2003.8.26.0004 Classe: Execução Hipotecária do Sistema Financeiro da Habitação E: Assunto principal: Liquidação / Cumprimento / Execução * Competência: Cível ‘| Valor da ação: R$ 12.223,47 ' Volume: 1/1 e Reqte: Banco Itaú S/A ' Advogado: ELVIO HISPAGNOL (OAB: 34804/SP) e outro Reqda: Angela Maria Camargo Rosa e outro u TerintCer: FERNANDO PESSANHA SANTOS e outro * Advogado: Fernando Rocha Fukabori (OAB: 231591/S * Distribuição: Livre - 28/07/2003 16:30:00 * 2003/003286 Titular Cível A 995-78 2º Vara Cível 0111-202100008 MN 0 0 0007 08 é a BRO atm GW ) OL GORE qt Es PRO ONE 3 RIO OA ce OPC a AUTUAÇÃO autuo neste Ofício.. que segue(m) e lavro este termo. Eu, REG. SOB nº LIVRO nº",
+  "vector_dimension": 768,
+  "model_name": "neuralmind/bert-base-portuguese-cased",
+  "created_at": "2025-06-23T22:29:59.426808",
+  "metadata": {
+    "job_id": "e83c2545-4f75-4c11-8b39-0efc5d55b2e3",
+    "page_number": 1,
+    "word_count": 145,
+    "entities_found": 5,
+    "keywords": [
+      "cível",
+      "outro",
+      "vara",
+      "execução",
+      "advogado",
+      "oab",
+      "fernando"
+    ],
+    "language": "unknown",
+    "language_confidence": 0,
+    "processing_time": 0.484908,
+    "text_length": 802
+  },
+  "vector_preview": [
+    -0.048270098865032196,
+    -0.1603890061378479,
+    0.5022831559181213,
+    0.12932151556015015,
+    0.3149922490119934
+  ]
+}

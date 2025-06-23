@@ -1,0 +1,274 @@
+{
+  "job_id": "f25b483d-7e1a-4ef0-b0c2-f805a41dde7c",
+  "page_number": 1,
+  "original_text": "fis. 1\n\nAndré Mendonça Palmuti\n\n-advogado-\n\nwww.palmuti.com.br\n\nEXCELENTISSIMO SENHOR DOUTOR JUIZ DE DIREITO DA MM. 25º VARA CIVEL\nDO FORO CENTRAL DA COMARCA DE SÃO PAULO.\n\nN\nN\n\nP\nCc\n\nO Nº 1086678-41.2013.8.26.0100\nUMPRIMENTO DE SENTENÇA\n\nCONDOMÍNIO EDIFÍCIO LA ROYALE, devidamente qualificado\nutos, por seus Advogados infra-assinados, vem mui respeitosamente à presença\nExcelência, diante do trânsito em julgado, requerer o início da fase de\nRIMENTO DE SENTENÇA, com fundamento no artigo 523 do NCPC, devendo\nda a Requerida através de seu Advogado via D.O.E, para que efetue o\nto da quantia de R$ 200.184,18, conforme planilha atualizada anexa, sob pena\nao de multa, conforme dispõe o 81º, do referido artigo do NCPC, visando dar\n\namento ao feito.\n\nem que,\na deferimento\n\n9, 26 de novembro de 2018.\nSsinatura digital) (assinatura digital)\n\nENDONÇA PALMUTI NATASHA NEVES LOPES CASSIANO\nE OAB/SP 346.210\n\nRIO DE JANEIRO-RJ SALVADOR - BA\n\nAv. Irai, 79 cj 155/156 Torre A Av. das Américas, 3500 cj 319 Toronto 2000 Rua Chile, 23/25 cj 707\n\nMoema — São Paulo +SP Barra da Tijuca — Rio de Janeiro — RJ Centro — Salvador — BA\nCEP: 04082-000 CEP: 22640-102 CEP: 40020-000\n\nTel. (0XX11) 5543-5500 Tel. (0XX21) 3282-5242 Tel. (0XX71) 3266-5455\n\nEste documento é cópia do original, assinado digitalmente por NATASHA NEVES LOPES CASSIANO e Tribunal de Justica do Estado de Sao Paulo, protocolado em 26/11/2018 às 17:31 , sob o número WJMJ18415913745\n\nPara conferir o original, acesse o site https://esaj tisp.jus.br/pastadigital/pg/abrirConferenciaDocumento.do, informe o processo 0088894-16.2018.8.26.0100 e código 4BbzNnU1.",
+  "cleaned_text": "fis. 1 André Mendonça Palmuti -advogado- www.palmuti.com.br EXCELENTISSIMO SENHOR DOUTOR JUIZ DE DIREITO DA MM. 25º VARA CIVEL DO FORO CENTRAL DA COMARCA DE SÃO PAULO. N N P Cc O Nº 1086678-41.2013.8.26.0100 UMPRIMENTO DE SENTENÇA CONDOMÍNIO EDIFÍCIO LA ROYALE, devidamente qualificado utos, por seus Advogados infra-assinados, vem mui respeitosamente à presença Excelência, diante do trânsito em julgado, requerer o início da fase de RIMENTO DE SENTENÇA, com fundamento no artigo 523 do NCPC, devendo da a Requerida através de seu Advogado via D.O.E, para que efetue o to da quantia de R$ 200.184,18, conforme planilha atualizada anexa, sob pena ao de multa, conforme dispõe o 81º, do referido artigo do NCPC, visando dar amento ao feito. em que, a deferimento 9, 26 de novembro de 2018. Ssinatura digital) (assinatura digital) ENDONÇA PALMUTI NATASHA NEVES LOPES CASSIANO E OAB/SP 346.210 RIO DE JANEIRO-RJ SALVADOR - BA Av. Irai, 79 cj 155/156 Torre A Av. das Américas, 3500 cj 319 Toronto 2000 Rua Chile, 23/25 cj 707 Moema — São Paulo +SP Barra da Tijuca — Rio de Janeiro — RJ Centro — Salvador — BA CEP: 04082-000 CEP: 22640-102 CEP: 40020-000 Tel. (0XX11) 5543-5500 Tel. (0XX21) 3282-5242 Tel. (0XX71) 3266-5455 Este documento é cópia do original, assinado digitalmente por NATASHA NEVES LOPES CASSIANO e Tribunal de Justica do Estado de Sao Paulo, protocolado em 26/11/2018 às 17:31, sob o número WJMJ18415913745 Para conferir o original, acesse o site https://esaj tisp.jus.br/pastadigital/pg/abrirConferenciaDocumento.do, informe o processo 0088894-16.2018.8.26.0100 e código 4BbzNnU1.",
+  "detected_language": "pt",
+  "language_confidence": 0.3157894736842105,
+  "entities": [
+    {
+      "text": "18415913745",
+      "entity_type": "cpf",
+      "confidence": 0.9,
+      "start_pos": 1409,
+      "end_pos": 1420,
+      "context": "tocolado em 26/11/2018 às 17:31, sob o número WJMJ18415913745 Para conferir o original, acesse o site https://e",
+      "metadata": {
+        "method": "regex",
+        "pattern": "\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}"
+      }
+    },
+    {
+      "text": "5543-5500",
+      "entity_type": "phone",
+      "confidence": 0.9,
+      "start_pos": 1163,
+      "end_pos": 1172,
+      "context": "82-000 CEP: 22640-102 CEP: 40020-000 Tel. (0XX11) 5543-5500 Tel. (0XX21) 3282-5242 Tel. (0XX71) 3266-5455 Est",
+      "metadata": {
+        "method": "regex",
+        "pattern": "(?:\\+55\\s?)?(?:\\(\\d{2}\\)\\s?)?(?:9\\s?)?\\d{4}[-\\s]?\\d{4}"
+      }
+    },
+    {
+      "text": "3282-5242",
+      "entity_type": "phone",
+      "confidence": 0.9,
+      "start_pos": 1186,
+      "end_pos": 1195,
+      "context": "EP: 40020-000 Tel. (0XX11) 5543-5500 Tel. (0XX21) 3282-5242 Tel. (0XX71) 3266-5455 Este documento é cópia do ",
+      "metadata": {
+        "method": "regex",
+        "pattern": "(?:\\+55\\s?)?(?:\\(\\d{2}\\)\\s?)?(?:9\\s?)?\\d{4}[-\\s]?\\d{4}"
+      }
+    },
+    {
+      "text": "3266-5455",
+      "entity_type": "phone",
+      "confidence": 0.9,
+      "start_pos": 1209,
+      "end_pos": 1218,
+      "context": "11) 5543-5500 Tel. (0XX21) 3282-5242 Tel. (0XX71) 3266-5455 Este documento é cópia do original, assinado digi",
+      "metadata": {
+        "method": "regex",
+        "pattern": "(?:\\+55\\s?)?(?:\\(\\d{2}\\)\\s?)?(?:9\\s?)?\\d{4}[-\\s]?\\d{4}"
+      }
+    },
+    {
+      "text": "18415913",
+      "entity_type": "phone",
+      "confidence": 0.9,
+      "start_pos": 1409,
+      "end_pos": 1417,
+      "context": "tocolado em 26/11/2018 às 17:31, sob o número WJMJ18415913745 Para conferir o original, acesse o site https:",
+      "metadata": {
+        "method": "regex",
+        "pattern": "(?:\\+55\\s?)?(?:\\(\\d{2}\\)\\s?)?(?:9\\s?)?\\d{4}[-\\s]?\\d{4}"
+      }
+    },
+    {
+      "text": "04082-000",
+      "entity_type": "cep",
+      "confidence": 0.9,
+      "start_pos": 1110,
+      "end_pos": 1119,
+      "context": "— Rio de Janeiro — RJ Centro — Salvador — BA CEP: 04082-000 CEP: 22640-102 CEP: 40020-000 Tel. (0XX11) 5543-5",
+      "metadata": {
+        "method": "regex",
+        "pattern": "\\d{5}-?\\d{3}"
+      }
+    },
+    {
+      "text": "22640-102",
+      "entity_type": "cep",
+      "confidence": 0.9,
+      "start_pos": 1125,
+      "end_pos": 1134,
+      "context": "o — RJ Centro — Salvador — BA CEP: 04082-000 CEP: 22640-102 CEP: 40020-000 Tel. (0XX11) 5543-5500 Tel. (0XX21",
+      "metadata": {
+        "method": "regex",
+        "pattern": "\\d{5}-?\\d{3}"
+      }
+    },
+    {
+      "text": "40020-000",
+      "entity_type": "cep",
+      "confidence": 0.9,
+      "start_pos": 1140,
+      "end_pos": 1149,
+      "context": " Salvador — BA CEP: 04082-000 CEP: 22640-102 CEP: 40020-000 Tel. (0XX11) 5543-5500 Tel. (0XX21) 3282-5242 Tel",
+      "metadata": {
+        "method": "regex",
+        "pattern": "\\d{5}-?\\d{3}"
+      }
+    },
+    {
+      "text": "18415913",
+      "entity_type": "cep",
+      "confidence": 0.9,
+      "start_pos": 1409,
+      "end_pos": 1417,
+      "context": "tocolado em 26/11/2018 às 17:31, sob o número WJMJ18415913745 Para conferir o original, acesse o site https:",
+      "metadata": {
+        "method": "regex",
+        "pattern": "\\d{5}-?\\d{3}"
+      }
+    },
+    {
+      "text": "R$ 200.184,18,",
+      "entity_type": "money",
+      "confidence": 0.9,
+      "start_pos": 587,
+      "end_pos": 601,
+      "context": "ado via D.O.E, para que efetue o to da quantia de R$ 200.184,18, conforme planilha atualizada anexa, sob pena ao d",
+      "metadata": {
+        "method": "regex",
+        "pattern": "R\\$\\s?[\\d.,]+(?:\\.\\d{2})?"
+      }
+    },
+    {
+      "text": "www.palmuti.com.br",
+      "entity_type": "website",
+      "confidence": 0.9,
+      "start_pos": 41,
+      "end_pos": 59,
+      "context": "fis. 1 André Mendonça Palmuti -advogado- www.palmuti.com.br EXCELENTISSIMO SENHOR DOUTOR JUIZ DE DIREITO DA M",
+      "metadata": {
+        "method": "regex",
+        "pattern": "https?://[^\\s]+|www\\.[^\\s]+"
+      }
+    },
+    {
+      "text": "https://esaj",
+      "entity_type": "website",
+      "confidence": 0.9,
+      "start_pos": 1461,
+      "end_pos": 1473,
+      "context": "415913745 Para conferir o original, acesse o site https://esaj tisp.jus.br/pastadigital/pg/abrirConferenciaDocum",
+      "metadata": {
+        "method": "regex",
+        "pattern": "https?://[^\\s]+|www\\.[^\\s]+"
+      }
+    },
+    {
+      "text": "1086678-41.2013.8.26.0100",
+      "entity_type": "process_number",
+      "confidence": 0.9,
+      "start_pos": 182,
+      "end_pos": 207,
+      "context": "RO CENTRAL DA COMARCA DE SÃO PAULO. N N P Cc O Nº 1086678-41.2013.8.26.0100 UMPRIMENTO DE SENTENÇA CONDOMÍNIO EDIFÍCIO LA ROY",
+      "metadata": {
+        "method": "regex",
+        "pattern": "\\d{7}-?\\d{2}\\.\\d{4}\\.\\d\\.\\d{2}\\.\\d{4}"
+      }
+    },
+    {
+      "text": "0088894-16.2018.8.26.0100",
+      "entity_type": "process_number",
+      "confidence": 0.9,
+      "start_pos": 1551,
+      "end_pos": 1576,
+      "context": "/abrirConferenciaDocumento.do, informe o processo 0088894-16.2018.8.26.0100 e código 4BbzNnU1.",
+      "metadata": {
+        "method": "regex",
+        "pattern": "\\d{7}-?\\d{2}\\.\\d{4}\\.\\d\\.\\d{2}\\.\\d{4}"
+      }
+    },
+    {
+      "text": "26/11/2018",
+      "entity_type": "auction_date",
+      "confidence": 0.9,
+      "start_pos": 1371,
+      "end_pos": 1381,
+      "context": "de Justica do Estado de Sao Paulo, protocolado em 26/11/2018 às 17:31, sob o número WJMJ18415913745 Para confe",
+      "metadata": {
+        "method": "regex",
+        "pattern": "\\d{1,2}\\/\\d{1,2}\\/\\d{4}"
+      }
+    }
+  ],
+  "keywords": [
+    "palmuti",
+    "paulo",
+    "cep",
+    "tel",
+    "advogado",
+    "são",
+    "sentença",
+    "artigo",
+    "ncpc",
+    "conforme",
+    "sob",
+    "digital",
+    "natasha",
+    "neves",
+    "lopes",
+    "cassiano",
+    "rio",
+    "janeiro",
+    "salvador",
+    "original"
+  ],
+  "sentences": [
+    "fis",
+    "1 André Mendonça Palmuti -advogado- www",
+    "palmuti",
+    "com",
+    "br EXCELENTISSIMO SENHOR DOUTOR JUIZ DE DIREITO DA MM",
+    "25º VARA CIVEL DO FORO CENTRAL DA COMARCA DE SÃO PAULO",
+    "N N P Cc O Nº 1086678-41",
+    "2013",
+    "8",
+    "26",
+    "0100 UMPRIMENTO DE SENTENÇA CONDOMÍNIO EDIFÍCIO LA ROYALE, devidamente qualificado utos, por seus Advogados infra-assinados, vem mui respeitosamente à presença Excelência, diante do trânsito em julgado, requerer o início da fase de RIMENTO DE SENTENÇA, com fundamento no artigo 523 do NCPC, devendo da a Requerida através de seu Advogado via D",
+    "O",
+    "E, para que efetue o to da quantia de R$ 200",
+    "184,18, conforme planilha atualizada anexa, sob pena ao de multa, conforme dispõe o 81º, do referido artigo do NCPC, visando dar amento ao feito",
+    "em que, a deferimento 9, 26 de novembro de 2018",
+    "Ssinatura digital) (assinatura digital) ENDONÇA PALMUTI NATASHA NEVES LOPES CASSIANO E OAB/SP 346",
+    "210 RIO DE JANEIRO-RJ SALVADOR - BA Av",
+    "Irai, 79 cj 155/156 Torre A Av",
+    "das Américas, 3500 cj 319 Toronto 2000 Rua Chile, 23/25 cj 707 Moema — São Paulo +SP Barra da Tijuca — Rio de Janeiro — RJ Centro — Salvador — BA CEP: 04082-000 CEP: 22640-102 CEP: 40020-000 Tel",
+    "(0XX11) 5543-5500 Tel",
+    "(0XX21) 3282-5242 Tel",
+    "(0XX71) 3266-5455 Este documento é cópia do original, assinado digitalmente por NATASHA NEVES LOPES CASSIANO e Tribunal de Justica do Estado de Sao Paulo, protocolado em 26/11/2018 às 17:31, sob o número WJMJ18415913745 Para conferir o original, acesse o site https://esaj tisp",
+    "jus",
+    "br/pastadigital/pg/abrirConferenciaDocumento",
+    "do, informe o processo 0088894-16",
+    "2018",
+    "8",
+    "26",
+    "0100 e código 4BbzNnU1"
+  ],
+  "word_count": 247,
+  "char_count": 1595,
+  "lead_indicators": {
+    "has_judicial_auction": false,
+    "has_legal_notifications": false,
+    "has_property_valuation": true,
+    "has_property_status": false,
+    "has_legal_compliance": true,
+    "has_financial_data": false,
+    "legal_restrictions_level": "low",
+    "investment_viability": "low",
+    "lead_score": 40.0,
+    "confidence": 0.5,
+    "risk_level": "high",
+    "matched_keywords": [
+      "conforme"
+    ],
+    "confidence_factors": [
+      "Dados financeiros: 0 + 1 valores",
+      "Conformidade legal: 1 indicadores",
+      "Entidades judiciais: 3 encontradas"
+    ],
+    "risk_factors": []
+  },
+  "processing_metadata": {
+    "processing_time": 0.001266,
+    "entity_extraction_method": "regex",
+    "text_quality_score": 0.5522107293795133,
+    "language_detection_method": "heuristic"
+  },
+  "processed_at": "2025-06-23T22:30:58.590747"
+}

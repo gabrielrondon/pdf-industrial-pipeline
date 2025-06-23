@@ -1,0 +1,2547 @@
+{
+  "job_id": "98ac5938-b0b8-4fc3-8546-18b65ac20115",
+  "processing_info": {
+    "processed_at": "2025-06-23T22:32:36.649175",
+    "processor": "qpdf",
+    "status": "completed"
+  },
+  "original_file": {
+    "filename": "98ac5938-b0b8-4fc3-8546-18b65ac20115.pdf",
+    "file_path": "uploads/98ac5938-b0b8-4fc3-8546-18b65ac20115.pdf",
+    "file_size": 36373316,
+    "created_at": "2025-06-23T22:32:35.137235"
+  },
+  "output_info": {
+    "output_directory": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115",
+    "total_pages": 358,
+    "pages": [
+      {
+        "page_number": 1,
+        "filename": "page-001.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-001.pdf",
+        "file_size": 87976,
+        "created_at": "2025-06-23T22:32:35.279824"
+      },
+      {
+        "page_number": 2,
+        "filename": "page-002.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-002.pdf",
+        "file_size": 65583,
+        "created_at": "2025-06-23T22:32:35.281113"
+      },
+      {
+        "page_number": 3,
+        "filename": "page-003.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-003.pdf",
+        "file_size": 72641,
+        "created_at": "2025-06-23T22:32:35.282460"
+      },
+      {
+        "page_number": 4,
+        "filename": "page-004.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-004.pdf",
+        "file_size": 68110,
+        "created_at": "2025-06-23T22:32:35.283733"
+      },
+      {
+        "page_number": 5,
+        "filename": "page-005.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-005.pdf",
+        "file_size": 243334,
+        "created_at": "2025-06-23T22:32:35.284559"
+      },
+      {
+        "page_number": 6,
+        "filename": "page-006.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-006.pdf",
+        "file_size": 223557,
+        "created_at": "2025-06-23T22:32:35.285129"
+      },
+      {
+        "page_number": 7,
+        "filename": "page-007.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-007.pdf",
+        "file_size": 244211,
+        "created_at": "2025-06-23T22:32:35.285639"
+      },
+      {
+        "page_number": 8,
+        "filename": "page-008.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-008.pdf",
+        "file_size": 274596,
+        "created_at": "2025-06-23T22:32:35.286276"
+      },
+      {
+        "page_number": 9,
+        "filename": "page-009.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-009.pdf",
+        "file_size": 251947,
+        "created_at": "2025-06-23T22:32:35.286781"
+      },
+      {
+        "page_number": 10,
+        "filename": "page-010.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-010.pdf",
+        "file_size": 188458,
+        "created_at": "2025-06-23T22:32:35.287251"
+      },
+      {
+        "page_number": 11,
+        "filename": "page-011.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-011.pdf",
+        "file_size": 185798,
+        "created_at": "2025-06-23T22:32:35.287728"
+      },
+      {
+        "page_number": 12,
+        "filename": "page-012.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-012.pdf",
+        "file_size": 232588,
+        "created_at": "2025-06-23T22:32:35.288217"
+      },
+      {
+        "page_number": 13,
+        "filename": "page-013.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-013.pdf",
+        "file_size": 236460,
+        "created_at": "2025-06-23T22:32:35.288701"
+      },
+      {
+        "page_number": 14,
+        "filename": "page-014.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-014.pdf",
+        "file_size": 234164,
+        "created_at": "2025-06-23T22:32:35.289711"
+      },
+      {
+        "page_number": 15,
+        "filename": "page-015.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-015.pdf",
+        "file_size": 244052,
+        "created_at": "2025-06-23T22:32:35.290330"
+      },
+      {
+        "page_number": 16,
+        "filename": "page-016.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-016.pdf",
+        "file_size": 231347,
+        "created_at": "2025-06-23T22:32:35.290974"
+      },
+      {
+        "page_number": 17,
+        "filename": "page-017.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-017.pdf",
+        "file_size": 294544,
+        "created_at": "2025-06-23T22:32:35.291860"
+      },
+      {
+        "page_number": 18,
+        "filename": "page-018.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-018.pdf",
+        "file_size": 373618,
+        "created_at": "2025-06-23T22:32:35.292614"
+      },
+      {
+        "page_number": 19,
+        "filename": "page-019.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-019.pdf",
+        "file_size": 338109,
+        "created_at": "2025-06-23T22:32:35.293154"
+      },
+      {
+        "page_number": 20,
+        "filename": "page-020.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-020.pdf",
+        "file_size": 350254,
+        "created_at": "2025-06-23T22:32:35.293704"
+      },
+      {
+        "page_number": 21,
+        "filename": "page-021.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-021.pdf",
+        "file_size": 361984,
+        "created_at": "2025-06-23T22:32:35.294258"
+      },
+      {
+        "page_number": 22,
+        "filename": "page-022.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-022.pdf",
+        "file_size": 365708,
+        "created_at": "2025-06-23T22:32:35.294871"
+      },
+      {
+        "page_number": 23,
+        "filename": "page-023.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-023.pdf",
+        "file_size": 346846,
+        "created_at": "2025-06-23T22:32:35.295421"
+      },
+      {
+        "page_number": 24,
+        "filename": "page-024.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-024.pdf",
+        "file_size": 350355,
+        "created_at": "2025-06-23T22:32:35.295960"
+      },
+      {
+        "page_number": 25,
+        "filename": "page-025.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-025.pdf",
+        "file_size": 376323,
+        "created_at": "2025-06-23T22:32:35.296501"
+      },
+      {
+        "page_number": 26,
+        "filename": "page-026.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-026.pdf",
+        "file_size": 302634,
+        "created_at": "2025-06-23T22:32:35.297021"
+      },
+      {
+        "page_number": 27,
+        "filename": "page-027.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-027.pdf",
+        "file_size": 331597,
+        "created_at": "2025-06-23T22:32:35.297550"
+      },
+      {
+        "page_number": 28,
+        "filename": "page-028.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-028.pdf",
+        "file_size": 462097,
+        "created_at": "2025-06-23T22:32:35.298110"
+      },
+      {
+        "page_number": 29,
+        "filename": "page-029.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-029.pdf",
+        "file_size": 472771,
+        "created_at": "2025-06-23T22:32:35.298680"
+      },
+      {
+        "page_number": 30,
+        "filename": "page-030.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-030.pdf",
+        "file_size": 439753,
+        "created_at": "2025-06-23T22:32:35.299318"
+      },
+      {
+        "page_number": 31,
+        "filename": "page-031.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-031.pdf",
+        "file_size": 290046,
+        "created_at": "2025-06-23T22:32:35.299920"
+      },
+      {
+        "page_number": 32,
+        "filename": "page-032.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-032.pdf",
+        "file_size": 247504,
+        "created_at": "2025-06-23T22:32:35.300436"
+      },
+      {
+        "page_number": 33,
+        "filename": "page-033.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-033.pdf",
+        "file_size": 87886,
+        "created_at": "2025-06-23T22:32:35.302382"
+      },
+      {
+        "page_number": 34,
+        "filename": "page-034.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-034.pdf",
+        "file_size": 81585,
+        "created_at": "2025-06-23T22:32:35.303705"
+      },
+      {
+        "page_number": 35,
+        "filename": "page-035.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-035.pdf",
+        "file_size": 1091111,
+        "created_at": "2025-06-23T22:32:35.305238"
+      },
+      {
+        "page_number": 36,
+        "filename": "page-036.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-036.pdf",
+        "file_size": 594566,
+        "created_at": "2025-06-23T22:32:35.306975"
+      },
+      {
+        "page_number": 37,
+        "filename": "page-037.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-037.pdf",
+        "file_size": 28558,
+        "created_at": "2025-06-23T22:32:35.308764"
+      },
+      {
+        "page_number": 38,
+        "filename": "page-038.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-038.pdf",
+        "file_size": 364916,
+        "created_at": "2025-06-23T22:32:35.309683"
+      },
+      {
+        "page_number": 39,
+        "filename": "page-039.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-039.pdf",
+        "file_size": 325576,
+        "created_at": "2025-06-23T22:32:35.310558"
+      },
+      {
+        "page_number": 40,
+        "filename": "page-040.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-040.pdf",
+        "file_size": 325969,
+        "created_at": "2025-06-23T22:32:35.311346"
+      },
+      {
+        "page_number": 41,
+        "filename": "page-041.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-041.pdf",
+        "file_size": 74212,
+        "created_at": "2025-06-23T22:32:35.313048"
+      },
+      {
+        "page_number": 42,
+        "filename": "page-042.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-042.pdf",
+        "file_size": 266853,
+        "created_at": "2025-06-23T22:32:35.313750"
+      },
+      {
+        "page_number": 43,
+        "filename": "page-043.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-043.pdf",
+        "file_size": 256970,
+        "created_at": "2025-06-23T22:32:35.314288"
+      },
+      {
+        "page_number": 44,
+        "filename": "page-044.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-044.pdf",
+        "file_size": 344520,
+        "created_at": "2025-06-23T22:32:35.314970"
+      },
+      {
+        "page_number": 45,
+        "filename": "page-045.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-045.pdf",
+        "file_size": 23827,
+        "created_at": "2025-06-23T22:32:35.317799"
+      },
+      {
+        "page_number": 46,
+        "filename": "page-046.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-046.pdf",
+        "file_size": 34367,
+        "created_at": "2025-06-23T22:32:35.321043"
+      },
+      {
+        "page_number": 47,
+        "filename": "page-047.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-047.pdf",
+        "file_size": 21824,
+        "created_at": "2025-06-23T22:32:35.323515"
+      },
+      {
+        "page_number": 48,
+        "filename": "page-048.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-048.pdf",
+        "file_size": 20883,
+        "created_at": "2025-06-23T22:32:35.325159"
+      },
+      {
+        "page_number": 49,
+        "filename": "page-049.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-049.pdf",
+        "file_size": 36452,
+        "created_at": "2025-06-23T22:32:35.332558"
+      },
+      {
+        "page_number": 50,
+        "filename": "page-050.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-050.pdf",
+        "file_size": 34948,
+        "created_at": "2025-06-23T22:32:35.340031"
+      },
+      {
+        "page_number": 51,
+        "filename": "page-051.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-051.pdf",
+        "file_size": 287094,
+        "created_at": "2025-06-23T22:32:35.341715"
+      },
+      {
+        "page_number": 52,
+        "filename": "page-052.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-052.pdf",
+        "file_size": 34544,
+        "created_at": "2025-06-23T22:32:35.348824"
+      },
+      {
+        "page_number": 53,
+        "filename": "page-053.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-053.pdf",
+        "file_size": 35290,
+        "created_at": "2025-06-23T22:32:35.356066"
+      },
+      {
+        "page_number": 54,
+        "filename": "page-054.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-054.pdf",
+        "file_size": 15686,
+        "created_at": "2025-06-23T22:32:35.357348"
+      },
+      {
+        "page_number": 55,
+        "filename": "page-055.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-055.pdf",
+        "file_size": 56683,
+        "created_at": "2025-06-23T22:32:35.359395"
+      },
+      {
+        "page_number": 56,
+        "filename": "page-056.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-056.pdf",
+        "file_size": 62686,
+        "created_at": "2025-06-23T22:32:35.361261"
+      },
+      {
+        "page_number": 57,
+        "filename": "page-057.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-057.pdf",
+        "file_size": 55328,
+        "created_at": "2025-06-23T22:32:35.362402"
+      },
+      {
+        "page_number": 58,
+        "filename": "page-058.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-058.pdf",
+        "file_size": 66708,
+        "created_at": "2025-06-23T22:32:35.363679"
+      },
+      {
+        "page_number": 59,
+        "filename": "page-059.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-059.pdf",
+        "file_size": 19237,
+        "created_at": "2025-06-23T22:32:35.364783"
+      },
+      {
+        "page_number": 60,
+        "filename": "page-060.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-060.pdf",
+        "file_size": 35022,
+        "created_at": "2025-06-23T22:32:35.371993"
+      },
+      {
+        "page_number": 61,
+        "filename": "page-061.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-061.pdf",
+        "file_size": 52227,
+        "created_at": "2025-06-23T22:32:35.373326"
+      },
+      {
+        "page_number": 62,
+        "filename": "page-062.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-062.pdf",
+        "file_size": 52534,
+        "created_at": "2025-06-23T22:32:35.374553"
+      },
+      {
+        "page_number": 63,
+        "filename": "page-063.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-063.pdf",
+        "file_size": 15428,
+        "created_at": "2025-06-23T22:32:35.375711"
+      },
+      {
+        "page_number": 64,
+        "filename": "page-064.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-064.pdf",
+        "file_size": 52513,
+        "created_at": "2025-06-23T22:32:35.381901"
+      },
+      {
+        "page_number": 65,
+        "filename": "page-065.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-065.pdf",
+        "file_size": 15642,
+        "created_at": "2025-06-23T22:32:35.383034"
+      },
+      {
+        "page_number": 66,
+        "filename": "page-066.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-066.pdf",
+        "file_size": 15792,
+        "created_at": "2025-06-23T22:32:35.384150"
+      },
+      {
+        "page_number": 67,
+        "filename": "page-067.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-067.pdf",
+        "file_size": 78338,
+        "created_at": "2025-06-23T22:32:35.386147"
+      },
+      {
+        "page_number": 68,
+        "filename": "page-068.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-068.pdf",
+        "file_size": 82592,
+        "created_at": "2025-06-23T22:32:35.387987"
+      },
+      {
+        "page_number": 69,
+        "filename": "page-069.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-069.pdf",
+        "file_size": 51592,
+        "created_at": "2025-06-23T22:32:35.388899"
+      },
+      {
+        "page_number": 70,
+        "filename": "page-070.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-070.pdf",
+        "file_size": 102197,
+        "created_at": "2025-06-23T22:32:35.390342"
+      },
+      {
+        "page_number": 71,
+        "filename": "page-071.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-071.pdf",
+        "file_size": 17179,
+        "created_at": "2025-06-23T22:32:35.391243"
+      },
+      {
+        "page_number": 72,
+        "filename": "page-072.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-072.pdf",
+        "file_size": 39862,
+        "created_at": "2025-06-23T22:32:35.399383"
+      },
+      {
+        "page_number": 73,
+        "filename": "page-073.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-073.pdf",
+        "file_size": 36140,
+        "created_at": "2025-06-23T22:32:35.406890"
+      },
+      {
+        "page_number": 74,
+        "filename": "page-074.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-074.pdf",
+        "file_size": 84250,
+        "created_at": "2025-06-23T22:32:35.408757"
+      },
+      {
+        "page_number": 75,
+        "filename": "page-075.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-075.pdf",
+        "file_size": 21071,
+        "created_at": "2025-06-23T22:32:35.410623"
+      },
+      {
+        "page_number": 76,
+        "filename": "page-076.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-076.pdf",
+        "file_size": 21968,
+        "created_at": "2025-06-23T22:32:35.412564"
+      },
+      {
+        "page_number": 77,
+        "filename": "page-077.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-077.pdf",
+        "file_size": 16343,
+        "created_at": "2025-06-23T22:32:35.413776"
+      },
+      {
+        "page_number": 78,
+        "filename": "page-078.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-078.pdf",
+        "file_size": 51539,
+        "created_at": "2025-06-23T22:32:35.419716"
+      },
+      {
+        "page_number": 79,
+        "filename": "page-079.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-079.pdf",
+        "file_size": 16320,
+        "created_at": "2025-06-23T22:32:35.420853"
+      },
+      {
+        "page_number": 80,
+        "filename": "page-080.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-080.pdf",
+        "file_size": 77835,
+        "created_at": "2025-06-23T22:32:35.422871"
+      },
+      {
+        "page_number": 81,
+        "filename": "page-081.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-081.pdf",
+        "file_size": 59431,
+        "created_at": "2025-06-23T22:32:35.424669"
+      },
+      {
+        "page_number": 82,
+        "filename": "page-082.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-082.pdf",
+        "file_size": 54558,
+        "created_at": "2025-06-23T22:32:35.425991"
+      },
+      {
+        "page_number": 83,
+        "filename": "page-083.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-083.pdf",
+        "file_size": 154247,
+        "created_at": "2025-06-23T22:32:35.428102"
+      },
+      {
+        "page_number": 84,
+        "filename": "page-084.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-084.pdf",
+        "file_size": 135898,
+        "created_at": "2025-06-23T22:32:35.429535"
+      },
+      {
+        "page_number": 85,
+        "filename": "page-085.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-085.pdf",
+        "file_size": 137411,
+        "created_at": "2025-06-23T22:32:35.431106"
+      },
+      {
+        "page_number": 86,
+        "filename": "page-086.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-086.pdf",
+        "file_size": 141077,
+        "created_at": "2025-06-23T22:32:35.433388"
+      },
+      {
+        "page_number": 87,
+        "filename": "page-087.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-087.pdf",
+        "file_size": 34861,
+        "created_at": "2025-06-23T22:32:35.440615"
+      },
+      {
+        "page_number": 88,
+        "filename": "page-088.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-088.pdf",
+        "file_size": 15806,
+        "created_at": "2025-06-23T22:32:35.441787"
+      },
+      {
+        "page_number": 89,
+        "filename": "page-089.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-089.pdf",
+        "file_size": 89979,
+        "created_at": "2025-06-23T22:32:35.443575"
+      },
+      {
+        "page_number": 90,
+        "filename": "page-090.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-090.pdf",
+        "file_size": 35341,
+        "created_at": "2025-06-23T22:32:35.450862"
+      },
+      {
+        "page_number": 91,
+        "filename": "page-091.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-091.pdf",
+        "file_size": 16025,
+        "created_at": "2025-06-23T22:32:35.452039"
+      },
+      {
+        "page_number": 92,
+        "filename": "page-092.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-092.pdf",
+        "file_size": 72025,
+        "created_at": "2025-06-23T22:32:35.453968"
+      },
+      {
+        "page_number": 93,
+        "filename": "page-093.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-093.pdf",
+        "file_size": 68377,
+        "created_at": "2025-06-23T22:32:35.455432"
+      },
+      {
+        "page_number": 94,
+        "filename": "page-094.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-094.pdf",
+        "file_size": 407309,
+        "created_at": "2025-06-23T22:32:35.465623"
+      },
+      {
+        "page_number": 95,
+        "filename": "page-095.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-095.pdf",
+        "file_size": 34648,
+        "created_at": "2025-06-23T22:32:35.473631"
+      },
+      {
+        "page_number": 96,
+        "filename": "page-096.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-096.pdf",
+        "file_size": 36632,
+        "created_at": "2025-06-23T22:32:35.481181"
+      },
+      {
+        "page_number": 97,
+        "filename": "page-097.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-097.pdf",
+        "file_size": 28300,
+        "created_at": "2025-06-23T22:32:35.482461"
+      },
+      {
+        "page_number": 98,
+        "filename": "page-098.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-098.pdf",
+        "file_size": 34477,
+        "created_at": "2025-06-23T22:32:35.489534"
+      },
+      {
+        "page_number": 99,
+        "filename": "page-099.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-099.pdf",
+        "file_size": 35404,
+        "created_at": "2025-06-23T22:32:35.497928"
+      },
+      {
+        "page_number": 100,
+        "filename": "page-100.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-100.pdf",
+        "file_size": 25737,
+        "created_at": "2025-06-23T22:32:35.499294"
+      },
+      {
+        "page_number": 101,
+        "filename": "page-101.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-101.pdf",
+        "file_size": 26022,
+        "created_at": "2025-06-23T22:32:35.500496"
+      },
+      {
+        "page_number": 102,
+        "filename": "page-102.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-102.pdf",
+        "file_size": 67772,
+        "created_at": "2025-06-23T22:32:35.502188"
+      },
+      {
+        "page_number": 103,
+        "filename": "page-103.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-103.pdf",
+        "file_size": 35133,
+        "created_at": "2025-06-23T22:32:35.509542"
+      },
+      {
+        "page_number": 104,
+        "filename": "page-104.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-104.pdf",
+        "file_size": 25768,
+        "created_at": "2025-06-23T22:32:35.510960"
+      },
+      {
+        "page_number": 105,
+        "filename": "page-105.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-105.pdf",
+        "file_size": 26066,
+        "created_at": "2025-06-23T22:32:35.512193"
+      },
+      {
+        "page_number": 106,
+        "filename": "page-106.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-106.pdf",
+        "file_size": 240409,
+        "created_at": "2025-06-23T22:32:35.513576"
+      },
+      {
+        "page_number": 107,
+        "filename": "page-107.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-107.pdf",
+        "file_size": 34365,
+        "created_at": "2025-06-23T22:32:35.520531"
+      },
+      {
+        "page_number": 108,
+        "filename": "page-108.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-108.pdf",
+        "file_size": 103212,
+        "created_at": "2025-06-23T22:32:35.521856"
+      },
+      {
+        "page_number": 109,
+        "filename": "page-109.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-109.pdf",
+        "file_size": 110263,
+        "created_at": "2025-06-23T22:32:35.522787"
+      },
+      {
+        "page_number": 110,
+        "filename": "page-110.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-110.pdf",
+        "file_size": 94239,
+        "created_at": "2025-06-23T22:32:35.523567"
+      },
+      {
+        "page_number": 111,
+        "filename": "page-111.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-111.pdf",
+        "file_size": 119112,
+        "created_at": "2025-06-23T22:32:35.524234"
+      },
+      {
+        "page_number": 112,
+        "filename": "page-112.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-112.pdf",
+        "file_size": 129782,
+        "created_at": "2025-06-23T22:32:35.524786"
+      },
+      {
+        "page_number": 113,
+        "filename": "page-113.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-113.pdf",
+        "file_size": 121584,
+        "created_at": "2025-06-23T22:32:35.525356"
+      },
+      {
+        "page_number": 114,
+        "filename": "page-114.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-114.pdf",
+        "file_size": 103311,
+        "created_at": "2025-06-23T22:32:35.525905"
+      },
+      {
+        "page_number": 115,
+        "filename": "page-115.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-115.pdf",
+        "file_size": 97030,
+        "created_at": "2025-06-23T22:32:35.526610"
+      },
+      {
+        "page_number": 116,
+        "filename": "page-116.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-116.pdf",
+        "file_size": 34895,
+        "created_at": "2025-06-23T22:32:35.533981"
+      },
+      {
+        "page_number": 117,
+        "filename": "page-117.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-117.pdf",
+        "file_size": 25748,
+        "created_at": "2025-06-23T22:32:35.535468"
+      },
+      {
+        "page_number": 118,
+        "filename": "page-118.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-118.pdf",
+        "file_size": 26042,
+        "created_at": "2025-06-23T22:32:35.536677"
+      },
+      {
+        "page_number": 119,
+        "filename": "page-119.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-119.pdf",
+        "file_size": 76360,
+        "created_at": "2025-06-23T22:32:35.538609"
+      },
+      {
+        "page_number": 120,
+        "filename": "page-120.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-120.pdf",
+        "file_size": 111283,
+        "created_at": "2025-06-23T22:32:35.539767"
+      },
+      {
+        "page_number": 121,
+        "filename": "page-121.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-121.pdf",
+        "file_size": 78924,
+        "created_at": "2025-06-23T22:32:35.541313"
+      },
+      {
+        "page_number": 122,
+        "filename": "page-122.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-122.pdf",
+        "file_size": 60135,
+        "created_at": "2025-06-23T22:32:35.551595"
+      },
+      {
+        "page_number": 123,
+        "filename": "page-123.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-123.pdf",
+        "file_size": 36429,
+        "created_at": "2025-06-23T22:32:35.652684"
+      },
+      {
+        "page_number": 124,
+        "filename": "page-124.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-124.pdf",
+        "file_size": 150714,
+        "created_at": "2025-06-23T22:32:35.656287"
+      },
+      {
+        "page_number": 125,
+        "filename": "page-125.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-125.pdf",
+        "file_size": 34366,
+        "created_at": "2025-06-23T22:32:35.674831"
+      },
+      {
+        "page_number": 126,
+        "filename": "page-126.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-126.pdf",
+        "file_size": 25758,
+        "created_at": "2025-06-23T22:32:35.679575"
+      },
+      {
+        "page_number": 127,
+        "filename": "page-127.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-127.pdf",
+        "file_size": 26050,
+        "created_at": "2025-06-23T22:32:35.683815"
+      },
+      {
+        "page_number": 128,
+        "filename": "page-128.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-128.pdf",
+        "file_size": 104146,
+        "created_at": "2025-06-23T22:32:35.687541"
+      },
+      {
+        "page_number": 129,
+        "filename": "page-129.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-129.pdf",
+        "file_size": 93431,
+        "created_at": "2025-06-23T22:32:35.688665"
+      },
+      {
+        "page_number": 130,
+        "filename": "page-130.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-130.pdf",
+        "file_size": 77808,
+        "created_at": "2025-06-23T22:32:35.689965"
+      },
+      {
+        "page_number": 131,
+        "filename": "page-131.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-131.pdf",
+        "file_size": 37466,
+        "created_at": "2025-06-23T22:32:35.698167"
+      },
+      {
+        "page_number": 132,
+        "filename": "page-132.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-132.pdf",
+        "file_size": 26333,
+        "created_at": "2025-06-23T22:32:35.699633"
+      },
+      {
+        "page_number": 133,
+        "filename": "page-133.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-133.pdf",
+        "file_size": 26610,
+        "created_at": "2025-06-23T22:32:35.700853"
+      },
+      {
+        "page_number": 134,
+        "filename": "page-134.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-134.pdf",
+        "file_size": 70787,
+        "created_at": "2025-06-23T22:32:35.702837"
+      },
+      {
+        "page_number": 135,
+        "filename": "page-135.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-135.pdf",
+        "file_size": 50615,
+        "created_at": "2025-06-23T22:32:35.704038"
+      },
+      {
+        "page_number": 136,
+        "filename": "page-136.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-136.pdf",
+        "file_size": 60263,
+        "created_at": "2025-06-23T22:32:35.705330"
+      },
+      {
+        "page_number": 137,
+        "filename": "page-137.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-137.pdf",
+        "file_size": 46540,
+        "created_at": "2025-06-23T22:32:35.707020"
+      },
+      {
+        "page_number": 138,
+        "filename": "page-138.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-138.pdf",
+        "file_size": 35430,
+        "created_at": "2025-06-23T22:32:35.715003"
+      },
+      {
+        "page_number": 139,
+        "filename": "page-139.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-139.pdf",
+        "file_size": 25729,
+        "created_at": "2025-06-23T22:32:35.716809"
+      },
+      {
+        "page_number": 140,
+        "filename": "page-140.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-140.pdf",
+        "file_size": 26025,
+        "created_at": "2025-06-23T22:32:35.718152"
+      },
+      {
+        "page_number": 141,
+        "filename": "page-141.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-141.pdf",
+        "file_size": 67704,
+        "created_at": "2025-06-23T22:32:35.719880"
+      },
+      {
+        "page_number": 142,
+        "filename": "page-142.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-142.pdf",
+        "file_size": 151302,
+        "created_at": "2025-06-23T22:32:35.721405"
+      },
+      {
+        "page_number": 143,
+        "filename": "page-143.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-143.pdf",
+        "file_size": 337402,
+        "created_at": "2025-06-23T22:32:35.722086"
+      },
+      {
+        "page_number": 144,
+        "filename": "page-144.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-144.pdf",
+        "file_size": 35929,
+        "created_at": "2025-06-23T22:32:35.729780"
+      },
+      {
+        "page_number": 145,
+        "filename": "page-145.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-145.pdf",
+        "file_size": 25950,
+        "created_at": "2025-06-23T22:32:35.731136"
+      },
+      {
+        "page_number": 146,
+        "filename": "page-146.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-146.pdf",
+        "file_size": 26233,
+        "created_at": "2025-06-23T22:32:35.732344"
+      },
+      {
+        "page_number": 147,
+        "filename": "page-147.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-147.pdf",
+        "file_size": 34373,
+        "created_at": "2025-06-23T22:32:35.740467"
+      },
+      {
+        "page_number": 148,
+        "filename": "page-148.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-148.pdf",
+        "file_size": 67426,
+        "created_at": "2025-06-23T22:32:35.744625"
+      },
+      {
+        "page_number": 149,
+        "filename": "page-149.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-149.pdf",
+        "file_size": 434744,
+        "created_at": "2025-06-23T22:32:35.745582"
+      },
+      {
+        "page_number": 150,
+        "filename": "page-150.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-150.pdf",
+        "file_size": 316562,
+        "created_at": "2025-06-23T22:32:35.746193"
+      },
+      {
+        "page_number": 151,
+        "filename": "page-151.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-151.pdf",
+        "file_size": 35263,
+        "created_at": "2025-06-23T22:32:35.753426"
+      },
+      {
+        "page_number": 152,
+        "filename": "page-152.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-152.pdf",
+        "file_size": 25621,
+        "created_at": "2025-06-23T22:32:35.754701"
+      },
+      {
+        "page_number": 153,
+        "filename": "page-153.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-153.pdf",
+        "file_size": 25925,
+        "created_at": "2025-06-23T22:32:35.756095"
+      },
+      {
+        "page_number": 154,
+        "filename": "page-154.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-154.pdf",
+        "file_size": 89845,
+        "created_at": "2025-06-23T22:32:35.758511"
+      },
+      {
+        "page_number": 155,
+        "filename": "page-155.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-155.pdf",
+        "file_size": 102335,
+        "created_at": "2025-06-23T22:32:35.760841"
+      },
+      {
+        "page_number": 156,
+        "filename": "page-156.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-156.pdf",
+        "file_size": 91937,
+        "created_at": "2025-06-23T22:32:35.762357"
+      },
+      {
+        "page_number": 157,
+        "filename": "page-157.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-157.pdf",
+        "file_size": 37088,
+        "created_at": "2025-06-23T22:32:35.770016"
+      },
+      {
+        "page_number": 158,
+        "filename": "page-158.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-158.pdf",
+        "file_size": 25795,
+        "created_at": "2025-06-23T22:32:35.771312"
+      },
+      {
+        "page_number": 159,
+        "filename": "page-159.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-159.pdf",
+        "file_size": 26080,
+        "created_at": "2025-06-23T22:32:35.772714"
+      },
+      {
+        "page_number": 160,
+        "filename": "page-160.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-160.pdf",
+        "file_size": 196493,
+        "created_at": "2025-06-23T22:32:35.774122"
+      },
+      {
+        "page_number": 161,
+        "filename": "page-161.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-161.pdf",
+        "file_size": 34376,
+        "created_at": "2025-06-23T22:32:35.781273"
+      },
+      {
+        "page_number": 162,
+        "filename": "page-162.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-162.pdf",
+        "file_size": 113843,
+        "created_at": "2025-06-23T22:32:35.783261"
+      },
+      {
+        "page_number": 163,
+        "filename": "page-163.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-163.pdf",
+        "file_size": 92628,
+        "created_at": "2025-06-23T22:32:35.784098"
+      },
+      {
+        "page_number": 164,
+        "filename": "page-164.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-164.pdf",
+        "file_size": 131126,
+        "created_at": "2025-06-23T22:32:35.785544"
+      },
+      {
+        "page_number": 165,
+        "filename": "page-165.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-165.pdf",
+        "file_size": 36720,
+        "created_at": "2025-06-23T22:32:35.793270"
+      },
+      {
+        "page_number": 166,
+        "filename": "page-166.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-166.pdf",
+        "file_size": 26339,
+        "created_at": "2025-06-23T22:32:35.794689"
+      },
+      {
+        "page_number": 167,
+        "filename": "page-167.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-167.pdf",
+        "file_size": 26621,
+        "created_at": "2025-06-23T22:32:35.795932"
+      },
+      {
+        "page_number": 168,
+        "filename": "page-168.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-168.pdf",
+        "file_size": 98897,
+        "created_at": "2025-06-23T22:32:35.797308"
+      },
+      {
+        "page_number": 169,
+        "filename": "page-169.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-169.pdf",
+        "file_size": 88394,
+        "created_at": "2025-06-23T22:32:35.798085"
+      },
+      {
+        "page_number": 170,
+        "filename": "page-170.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-170.pdf",
+        "file_size": 34815,
+        "created_at": "2025-06-23T22:32:35.805122"
+      },
+      {
+        "page_number": 171,
+        "filename": "page-171.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-171.pdf",
+        "file_size": 36945,
+        "created_at": "2025-06-23T22:32:35.812958"
+      },
+      {
+        "page_number": 172,
+        "filename": "page-172.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-172.pdf",
+        "file_size": 26191,
+        "created_at": "2025-06-23T22:32:35.814401"
+      },
+      {
+        "page_number": 173,
+        "filename": "page-173.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-173.pdf",
+        "file_size": 26456,
+        "created_at": "2025-06-23T22:32:35.815638"
+      },
+      {
+        "page_number": 174,
+        "filename": "page-174.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-174.pdf",
+        "file_size": 91200,
+        "created_at": "2025-06-23T22:32:35.817245"
+      },
+      {
+        "page_number": 175,
+        "filename": "page-175.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-175.pdf",
+        "file_size": 67351,
+        "created_at": "2025-06-23T22:32:35.818497"
+      },
+      {
+        "page_number": 176,
+        "filename": "page-176.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-176.pdf",
+        "file_size": 18013,
+        "created_at": "2025-06-23T22:32:35.819175"
+      },
+      {
+        "page_number": 177,
+        "filename": "page-177.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-177.pdf",
+        "file_size": 143296,
+        "created_at": "2025-06-23T22:32:35.821695"
+      },
+      {
+        "page_number": 178,
+        "filename": "page-178.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-178.pdf",
+        "file_size": 94611,
+        "created_at": "2025-06-23T22:32:35.823128"
+      },
+      {
+        "page_number": 179,
+        "filename": "page-179.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-179.pdf",
+        "file_size": 363657,
+        "created_at": "2025-06-23T22:32:35.827614"
+      },
+      {
+        "page_number": 180,
+        "filename": "page-180.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-180.pdf",
+        "file_size": 35826,
+        "created_at": "2025-06-23T22:32:35.835286"
+      },
+      {
+        "page_number": 181,
+        "filename": "page-181.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-181.pdf",
+        "file_size": 26722,
+        "created_at": "2025-06-23T22:32:35.836704"
+      },
+      {
+        "page_number": 182,
+        "filename": "page-182.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-182.pdf",
+        "file_size": 34343,
+        "created_at": "2025-06-23T22:32:35.844101"
+      },
+      {
+        "page_number": 183,
+        "filename": "page-183.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-183.pdf",
+        "file_size": 26994,
+        "created_at": "2025-06-23T22:32:35.845549"
+      },
+      {
+        "page_number": 184,
+        "filename": "page-184.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-184.pdf",
+        "file_size": 35127,
+        "created_at": "2025-06-23T22:32:35.852714"
+      },
+      {
+        "page_number": 185,
+        "filename": "page-185.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-185.pdf",
+        "file_size": 26209,
+        "created_at": "2025-06-23T22:32:35.854035"
+      },
+      {
+        "page_number": 186,
+        "filename": "page-186.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-186.pdf",
+        "file_size": 26633,
+        "created_at": "2025-06-23T22:32:35.855256"
+      },
+      {
+        "page_number": 187,
+        "filename": "page-187.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-187.pdf",
+        "file_size": 89891,
+        "created_at": "2025-06-23T22:32:35.857109"
+      },
+      {
+        "page_number": 188,
+        "filename": "page-188.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-188.pdf",
+        "file_size": 346194,
+        "created_at": "2025-06-23T22:32:35.858537"
+      },
+      {
+        "page_number": 189,
+        "filename": "page-189.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-189.pdf",
+        "file_size": 19440,
+        "created_at": "2025-06-23T22:32:35.859391"
+      },
+      {
+        "page_number": 190,
+        "filename": "page-190.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-190.pdf",
+        "file_size": 2366,
+        "created_at": "2025-06-23T22:32:35.859980"
+      },
+      {
+        "page_number": 191,
+        "filename": "page-191.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-191.pdf",
+        "file_size": 108455,
+        "created_at": "2025-06-23T22:32:35.861434"
+      },
+      {
+        "page_number": 192,
+        "filename": "page-192.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-192.pdf",
+        "file_size": 35322,
+        "created_at": "2025-06-23T22:32:35.868573"
+      },
+      {
+        "page_number": 193,
+        "filename": "page-193.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-193.pdf",
+        "file_size": 26157,
+        "created_at": "2025-06-23T22:32:35.869861"
+      },
+      {
+        "page_number": 194,
+        "filename": "page-194.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-194.pdf",
+        "file_size": 26428,
+        "created_at": "2025-06-23T22:32:35.871159"
+      },
+      {
+        "page_number": 195,
+        "filename": "page-195.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-195.pdf",
+        "file_size": 34471,
+        "created_at": "2025-06-23T22:32:35.878506"
+      },
+      {
+        "page_number": 196,
+        "filename": "page-196.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-196.pdf",
+        "file_size": 43577,
+        "created_at": "2025-06-23T22:32:35.886940"
+      },
+      {
+        "page_number": 197,
+        "filename": "page-197.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-197.pdf",
+        "file_size": 26591,
+        "created_at": "2025-06-23T22:32:35.894156"
+      },
+      {
+        "page_number": 198,
+        "filename": "page-198.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-198.pdf",
+        "file_size": 35778,
+        "created_at": "2025-06-23T22:32:35.901591"
+      },
+      {
+        "page_number": 199,
+        "filename": "page-199.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-199.pdf",
+        "file_size": 28501,
+        "created_at": "2025-06-23T22:32:35.902803"
+      },
+      {
+        "page_number": 200,
+        "filename": "page-200.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-200.pdf",
+        "file_size": 937051,
+        "created_at": "2025-06-23T22:32:35.904199"
+      },
+      {
+        "page_number": 201,
+        "filename": "page-201.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-201.pdf",
+        "file_size": 35383,
+        "created_at": "2025-06-23T22:32:35.912133"
+      },
+      {
+        "page_number": 202,
+        "filename": "page-202.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-202.pdf",
+        "file_size": 34699,
+        "created_at": "2025-06-23T22:32:35.919405"
+      },
+      {
+        "page_number": 203,
+        "filename": "page-203.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-203.pdf",
+        "file_size": 25604,
+        "created_at": "2025-06-23T22:32:35.920690"
+      },
+      {
+        "page_number": 204,
+        "filename": "page-204.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-204.pdf",
+        "file_size": 25902,
+        "created_at": "2025-06-23T22:32:35.921902"
+      },
+      {
+        "page_number": 205,
+        "filename": "page-205.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-205.pdf",
+        "file_size": 203498,
+        "created_at": "2025-06-23T22:32:35.923461"
+      },
+      {
+        "page_number": 206,
+        "filename": "page-206.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-206.pdf",
+        "file_size": 35183,
+        "created_at": "2025-06-23T22:32:35.931032"
+      },
+      {
+        "page_number": 207,
+        "filename": "page-207.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-207.pdf",
+        "file_size": 25606,
+        "created_at": "2025-06-23T22:32:35.932408"
+      },
+      {
+        "page_number": 208,
+        "filename": "page-208.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-208.pdf",
+        "file_size": 26029,
+        "created_at": "2025-06-23T22:32:35.933595"
+      },
+      {
+        "page_number": 209,
+        "filename": "page-209.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-209.pdf",
+        "file_size": 90039,
+        "created_at": "2025-06-23T22:32:35.935092"
+      },
+      {
+        "page_number": 210,
+        "filename": "page-210.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-210.pdf",
+        "file_size": 35216,
+        "created_at": "2025-06-23T22:32:35.942615"
+      },
+      {
+        "page_number": 211,
+        "filename": "page-211.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-211.pdf",
+        "file_size": 25768,
+        "created_at": "2025-06-23T22:32:35.944057"
+      },
+      {
+        "page_number": 212,
+        "filename": "page-212.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-212.pdf",
+        "file_size": 193674,
+        "created_at": "2025-06-23T22:32:35.945271"
+      },
+      {
+        "page_number": 213,
+        "filename": "page-213.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-213.pdf",
+        "file_size": 34492,
+        "created_at": "2025-06-23T22:32:35.952299"
+      },
+      {
+        "page_number": 214,
+        "filename": "page-214.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-214.pdf",
+        "file_size": 26050,
+        "created_at": "2025-06-23T22:32:35.953558"
+      },
+      {
+        "page_number": 215,
+        "filename": "page-215.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-215.pdf",
+        "file_size": 34465,
+        "created_at": "2025-06-23T22:32:35.961020"
+      },
+      {
+        "page_number": 216,
+        "filename": "page-216.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-216.pdf",
+        "file_size": 36490,
+        "created_at": "2025-06-23T22:32:35.968524"
+      },
+      {
+        "page_number": 217,
+        "filename": "page-217.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-217.pdf",
+        "file_size": 25825,
+        "created_at": "2025-06-23T22:32:35.969835"
+      },
+      {
+        "page_number": 218,
+        "filename": "page-218.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-218.pdf",
+        "file_size": 106921,
+        "created_at": "2025-06-23T22:32:35.970948"
+      },
+      {
+        "page_number": 219,
+        "filename": "page-219.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-219.pdf",
+        "file_size": 34493,
+        "created_at": "2025-06-23T22:32:35.978544"
+      },
+      {
+        "page_number": 220,
+        "filename": "page-220.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-220.pdf",
+        "file_size": 26101,
+        "created_at": "2025-06-23T22:32:35.979945"
+      },
+      {
+        "page_number": 221,
+        "filename": "page-221.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-221.pdf",
+        "file_size": 111075,
+        "created_at": "2025-06-23T22:32:35.981261"
+      },
+      {
+        "page_number": 222,
+        "filename": "page-222.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-222.pdf",
+        "file_size": 117083,
+        "created_at": "2025-06-23T22:32:35.982450"
+      },
+      {
+        "page_number": 223,
+        "filename": "page-223.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-223.pdf",
+        "file_size": 199731,
+        "created_at": "2025-06-23T22:32:35.984272"
+      },
+      {
+        "page_number": 224,
+        "filename": "page-224.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-224.pdf",
+        "file_size": 252252,
+        "created_at": "2025-06-23T22:32:35.985412"
+      },
+      {
+        "page_number": 225,
+        "filename": "page-225.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-225.pdf",
+        "file_size": 209365,
+        "created_at": "2025-06-23T22:32:35.986381"
+      },
+      {
+        "page_number": 226,
+        "filename": "page-226.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-226.pdf",
+        "file_size": 203662,
+        "created_at": "2025-06-23T22:32:35.987557"
+      },
+      {
+        "page_number": 227,
+        "filename": "page-227.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-227.pdf",
+        "file_size": 259181,
+        "created_at": "2025-06-23T22:32:35.988885"
+      },
+      {
+        "page_number": 228,
+        "filename": "page-228.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-228.pdf",
+        "file_size": 268489,
+        "created_at": "2025-06-23T22:32:35.990276"
+      },
+      {
+        "page_number": 229,
+        "filename": "page-229.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-229.pdf",
+        "file_size": 111705,
+        "created_at": "2025-06-23T22:32:35.991493"
+      },
+      {
+        "page_number": 230,
+        "filename": "page-230.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-230.pdf",
+        "file_size": 243875,
+        "created_at": "2025-06-23T22:32:35.992672"
+      },
+      {
+        "page_number": 231,
+        "filename": "page-231.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-231.pdf",
+        "file_size": 214669,
+        "created_at": "2025-06-23T22:32:35.993988"
+      },
+      {
+        "page_number": 232,
+        "filename": "page-232.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-232.pdf",
+        "file_size": 253715,
+        "created_at": "2025-06-23T22:32:35.995073"
+      },
+      {
+        "page_number": 233,
+        "filename": "page-233.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-233.pdf",
+        "file_size": 236381,
+        "created_at": "2025-06-23T22:32:35.996099"
+      },
+      {
+        "page_number": 234,
+        "filename": "page-234.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-234.pdf",
+        "file_size": 255971,
+        "created_at": "2025-06-23T22:32:35.997109"
+      },
+      {
+        "page_number": 235,
+        "filename": "page-235.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-235.pdf",
+        "file_size": 178947,
+        "created_at": "2025-06-23T22:32:35.998100"
+      },
+      {
+        "page_number": 236,
+        "filename": "page-236.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-236.pdf",
+        "file_size": 173607,
+        "created_at": "2025-06-23T22:32:35.999084"
+      },
+      {
+        "page_number": 237,
+        "filename": "page-237.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-237.pdf",
+        "file_size": 209572,
+        "created_at": "2025-06-23T22:32:36.000087"
+      },
+      {
+        "page_number": 238,
+        "filename": "page-238.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-238.pdf",
+        "file_size": 208273,
+        "created_at": "2025-06-23T22:32:36.001088"
+      },
+      {
+        "page_number": 239,
+        "filename": "page-239.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-239.pdf",
+        "file_size": 213082,
+        "created_at": "2025-06-23T22:32:36.002100"
+      },
+      {
+        "page_number": 240,
+        "filename": "page-240.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-240.pdf",
+        "file_size": 172084,
+        "created_at": "2025-06-23T22:32:36.003476"
+      },
+      {
+        "page_number": 241,
+        "filename": "page-241.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-241.pdf",
+        "file_size": 205020,
+        "created_at": "2025-06-23T22:32:36.004488"
+      },
+      {
+        "page_number": 242,
+        "filename": "page-242.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-242.pdf",
+        "file_size": 185507,
+        "created_at": "2025-06-23T22:32:36.005511"
+      },
+      {
+        "page_number": 243,
+        "filename": "page-243.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-243.pdf",
+        "file_size": 157822,
+        "created_at": "2025-06-23T22:32:36.006567"
+      },
+      {
+        "page_number": 244,
+        "filename": "page-244.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-244.pdf",
+        "file_size": 180881,
+        "created_at": "2025-06-23T22:32:36.007657"
+      },
+      {
+        "page_number": 245,
+        "filename": "page-245.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-245.pdf",
+        "file_size": 196854,
+        "created_at": "2025-06-23T22:32:36.008907"
+      },
+      {
+        "page_number": 246,
+        "filename": "page-246.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-246.pdf",
+        "file_size": 166031,
+        "created_at": "2025-06-23T22:32:36.009932"
+      },
+      {
+        "page_number": 247,
+        "filename": "page-247.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-247.pdf",
+        "file_size": 273722,
+        "created_at": "2025-06-23T22:32:36.010961"
+      },
+      {
+        "page_number": 248,
+        "filename": "page-248.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-248.pdf",
+        "file_size": 142367,
+        "created_at": "2025-06-23T22:32:36.011957"
+      },
+      {
+        "page_number": 249,
+        "filename": "page-249.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-249.pdf",
+        "file_size": 158357,
+        "created_at": "2025-06-23T22:32:36.012940"
+      },
+      {
+        "page_number": 250,
+        "filename": "page-250.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-250.pdf",
+        "file_size": 176782,
+        "created_at": "2025-06-23T22:32:36.013953"
+      },
+      {
+        "page_number": 251,
+        "filename": "page-251.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-251.pdf",
+        "file_size": 185435,
+        "created_at": "2025-06-23T22:32:36.014940"
+      },
+      {
+        "page_number": 252,
+        "filename": "page-252.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-252.pdf",
+        "file_size": 165873,
+        "created_at": "2025-06-23T22:32:36.015922"
+      },
+      {
+        "page_number": 253,
+        "filename": "page-253.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-253.pdf",
+        "file_size": 111605,
+        "created_at": "2025-06-23T22:32:36.016856"
+      },
+      {
+        "page_number": 254,
+        "filename": "page-254.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-254.pdf",
+        "file_size": 116177,
+        "created_at": "2025-06-23T22:32:36.017995"
+      },
+      {
+        "page_number": 255,
+        "filename": "page-255.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-255.pdf",
+        "file_size": 126025,
+        "created_at": "2025-06-23T22:32:36.019594"
+      },
+      {
+        "page_number": 256,
+        "filename": "page-256.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-256.pdf",
+        "file_size": 218697,
+        "created_at": "2025-06-23T22:32:36.020919"
+      },
+      {
+        "page_number": 257,
+        "filename": "page-257.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-257.pdf",
+        "file_size": 126395,
+        "created_at": "2025-06-23T22:32:36.022386"
+      },
+      {
+        "page_number": 258,
+        "filename": "page-258.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-258.pdf",
+        "file_size": 110750,
+        "created_at": "2025-06-23T22:32:36.023482"
+      },
+      {
+        "page_number": 259,
+        "filename": "page-259.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-259.pdf",
+        "file_size": 292560,
+        "created_at": "2025-06-23T22:32:36.025644"
+      },
+      {
+        "page_number": 260,
+        "filename": "page-260.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-260.pdf",
+        "file_size": 226055,
+        "created_at": "2025-06-23T22:32:36.027640"
+      },
+      {
+        "page_number": 261,
+        "filename": "page-261.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-261.pdf",
+        "file_size": 237258,
+        "created_at": "2025-06-23T22:32:36.029207"
+      },
+      {
+        "page_number": 262,
+        "filename": "page-262.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-262.pdf",
+        "file_size": 295848,
+        "created_at": "2025-06-23T22:32:36.030935"
+      },
+      {
+        "page_number": 263,
+        "filename": "page-263.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-263.pdf",
+        "file_size": 241511,
+        "created_at": "2025-06-23T22:32:36.032331"
+      },
+      {
+        "page_number": 264,
+        "filename": "page-264.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-264.pdf",
+        "file_size": 265168,
+        "created_at": "2025-06-23T22:32:36.034500"
+      },
+      {
+        "page_number": 265,
+        "filename": "page-265.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-265.pdf",
+        "file_size": 269259,
+        "created_at": "2025-06-23T22:32:36.036226"
+      },
+      {
+        "page_number": 266,
+        "filename": "page-266.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-266.pdf",
+        "file_size": 185796,
+        "created_at": "2025-06-23T22:32:36.037746"
+      },
+      {
+        "page_number": 267,
+        "filename": "page-267.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-267.pdf",
+        "file_size": 246698,
+        "created_at": "2025-06-23T22:32:36.039348"
+      },
+      {
+        "page_number": 268,
+        "filename": "page-268.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-268.pdf",
+        "file_size": 265093,
+        "created_at": "2025-06-23T22:32:36.041502"
+      },
+      {
+        "page_number": 269,
+        "filename": "page-269.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-269.pdf",
+        "file_size": 284355,
+        "created_at": "2025-06-23T22:32:36.043709"
+      },
+      {
+        "page_number": 270,
+        "filename": "page-270.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-270.pdf",
+        "file_size": 232616,
+        "created_at": "2025-06-23T22:32:36.045488"
+      },
+      {
+        "page_number": 271,
+        "filename": "page-271.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-271.pdf",
+        "file_size": 115294,
+        "created_at": "2025-06-23T22:32:36.046527"
+      },
+      {
+        "page_number": 272,
+        "filename": "page-272.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-272.pdf",
+        "file_size": 135544,
+        "created_at": "2025-06-23T22:32:36.048141"
+      },
+      {
+        "page_number": 273,
+        "filename": "page-273.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-273.pdf",
+        "file_size": 227133,
+        "created_at": "2025-06-23T22:32:36.049176"
+      },
+      {
+        "page_number": 274,
+        "filename": "page-274.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-274.pdf",
+        "file_size": 147590,
+        "created_at": "2025-06-23T22:32:36.050045"
+      },
+      {
+        "page_number": 275,
+        "filename": "page-275.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-275.pdf",
+        "file_size": 254433,
+        "created_at": "2025-06-23T22:32:36.050758"
+      },
+      {
+        "page_number": 276,
+        "filename": "page-276.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-276.pdf",
+        "file_size": 105217,
+        "created_at": "2025-06-23T22:32:36.051992"
+      },
+      {
+        "page_number": 277,
+        "filename": "page-277.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-277.pdf",
+        "file_size": 119555,
+        "created_at": "2025-06-23T22:32:36.053346"
+      },
+      {
+        "page_number": 278,
+        "filename": "page-278.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-278.pdf",
+        "file_size": 35459,
+        "created_at": "2025-06-23T22:32:36.061014"
+      },
+      {
+        "page_number": 279,
+        "filename": "page-279.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-279.pdf",
+        "file_size": 26364,
+        "created_at": "2025-06-23T22:32:36.062545"
+      },
+      {
+        "page_number": 280,
+        "filename": "page-280.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-280.pdf",
+        "file_size": 34832,
+        "created_at": "2025-06-23T22:32:36.069871"
+      },
+      {
+        "page_number": 281,
+        "filename": "page-281.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-281.pdf",
+        "file_size": 26641,
+        "created_at": "2025-06-23T22:32:36.071273"
+      },
+      {
+        "page_number": 282,
+        "filename": "page-282.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-282.pdf",
+        "file_size": 46995,
+        "created_at": "2025-06-23T22:32:36.072635"
+      },
+      {
+        "page_number": 283,
+        "filename": "page-283.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-283.pdf",
+        "file_size": 89896,
+        "created_at": "2025-06-23T22:32:36.074250"
+      },
+      {
+        "page_number": 284,
+        "filename": "page-284.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-284.pdf",
+        "file_size": 35299,
+        "created_at": "2025-06-23T22:32:36.081957"
+      },
+      {
+        "page_number": 285,
+        "filename": "page-285.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-285.pdf",
+        "file_size": 26222,
+        "created_at": "2025-06-23T22:32:36.083463"
+      },
+      {
+        "page_number": 286,
+        "filename": "page-286.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-286.pdf",
+        "file_size": 26658,
+        "created_at": "2025-06-23T22:32:36.084723"
+      },
+      {
+        "page_number": 287,
+        "filename": "page-287.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-287.pdf",
+        "file_size": 91483,
+        "created_at": "2025-06-23T22:32:36.086296"
+      },
+      {
+        "page_number": 288,
+        "filename": "page-288.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-288.pdf",
+        "file_size": 70647,
+        "created_at": "2025-06-23T22:32:36.087685"
+      },
+      {
+        "page_number": 289,
+        "filename": "page-289.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-289.pdf",
+        "file_size": 38455,
+        "created_at": "2025-06-23T22:32:36.088618"
+      },
+      {
+        "page_number": 290,
+        "filename": "page-290.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-290.pdf",
+        "file_size": 34982,
+        "created_at": "2025-06-23T22:32:36.096247"
+      },
+      {
+        "page_number": 291,
+        "filename": "page-291.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-291.pdf",
+        "file_size": 25813,
+        "created_at": "2025-06-23T22:32:36.097650"
+      },
+      {
+        "page_number": 292,
+        "filename": "page-292.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-292.pdf",
+        "file_size": 26099,
+        "created_at": "2025-06-23T22:32:36.098886"
+      },
+      {
+        "page_number": 293,
+        "filename": "page-293.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-293.pdf",
+        "file_size": 35415,
+        "created_at": "2025-06-23T22:32:36.106212"
+      },
+      {
+        "page_number": 294,
+        "filename": "page-294.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-294.pdf",
+        "file_size": 46691,
+        "created_at": "2025-06-23T22:32:36.114183"
+      },
+      {
+        "page_number": 295,
+        "filename": "page-295.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-295.pdf",
+        "file_size": 31033,
+        "created_at": "2025-06-23T22:32:36.115451"
+      },
+      {
+        "page_number": 296,
+        "filename": "page-296.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-296.pdf",
+        "file_size": 76582,
+        "created_at": "2025-06-23T22:32:36.117646"
+      },
+      {
+        "page_number": 297,
+        "filename": "page-297.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-297.pdf",
+        "file_size": 78137,
+        "created_at": "2025-06-23T22:32:36.119483"
+      },
+      {
+        "page_number": 298,
+        "filename": "page-298.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-298.pdf",
+        "file_size": 101879,
+        "created_at": "2025-06-23T22:32:36.121974"
+      },
+      {
+        "page_number": 299,
+        "filename": "page-299.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-299.pdf",
+        "file_size": 102142,
+        "created_at": "2025-06-23T22:32:36.123665"
+      },
+      {
+        "page_number": 300,
+        "filename": "page-300.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-300.pdf",
+        "file_size": 102274,
+        "created_at": "2025-06-23T22:32:36.125275"
+      },
+      {
+        "page_number": 301,
+        "filename": "page-301.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-301.pdf",
+        "file_size": 100016,
+        "created_at": "2025-06-23T22:32:36.127303"
+      },
+      {
+        "page_number": 302,
+        "filename": "page-302.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-302.pdf",
+        "file_size": 720121,
+        "created_at": "2025-06-23T22:32:36.137140"
+      },
+      {
+        "page_number": 303,
+        "filename": "page-303.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-303.pdf",
+        "file_size": 81946,
+        "created_at": "2025-06-23T22:32:36.140586"
+      },
+      {
+        "page_number": 304,
+        "filename": "page-304.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-304.pdf",
+        "file_size": 524182,
+        "created_at": "2025-06-23T22:32:36.142354"
+      },
+      {
+        "page_number": 305,
+        "filename": "page-305.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-305.pdf",
+        "file_size": 78088,
+        "created_at": "2025-06-23T22:32:36.144250"
+      },
+      {
+        "page_number": 306,
+        "filename": "page-306.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-306.pdf",
+        "file_size": 36151,
+        "created_at": "2025-06-23T22:32:36.152115"
+      },
+      {
+        "page_number": 307,
+        "filename": "page-307.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-307.pdf",
+        "file_size": 26753,
+        "created_at": "2025-06-23T22:32:36.153592"
+      },
+      {
+        "page_number": 308,
+        "filename": "page-308.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-308.pdf",
+        "file_size": 27027,
+        "created_at": "2025-06-23T22:32:36.154995"
+      },
+      {
+        "page_number": 309,
+        "filename": "page-309.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-309.pdf",
+        "file_size": 82987,
+        "created_at": "2025-06-23T22:32:36.157213"
+      },
+      {
+        "page_number": 310,
+        "filename": "page-310.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-310.pdf",
+        "file_size": 524181,
+        "created_at": "2025-06-23T22:32:36.158051"
+      },
+      {
+        "page_number": 311,
+        "filename": "page-311.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-311.pdf",
+        "file_size": 89847,
+        "created_at": "2025-06-23T22:32:36.160274"
+      },
+      {
+        "page_number": 312,
+        "filename": "page-312.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-312.pdf",
+        "file_size": 27920,
+        "created_at": "2025-06-23T22:32:36.161967"
+      },
+      {
+        "page_number": 313,
+        "filename": "page-313.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-313.pdf",
+        "file_size": 35484,
+        "created_at": "2025-06-23T22:32:36.169751"
+      },
+      {
+        "page_number": 314,
+        "filename": "page-314.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-314.pdf",
+        "file_size": 26222,
+        "created_at": "2025-06-23T22:32:36.171439"
+      },
+      {
+        "page_number": 315,
+        "filename": "page-315.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-315.pdf",
+        "file_size": 26490,
+        "created_at": "2025-06-23T22:32:36.172731"
+      },
+      {
+        "page_number": 316,
+        "filename": "page-316.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-316.pdf",
+        "file_size": 34555,
+        "created_at": "2025-06-23T22:32:36.180695"
+      },
+      {
+        "page_number": 317,
+        "filename": "page-317.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-317.pdf",
+        "file_size": 34468,
+        "created_at": "2025-06-23T22:32:36.189796"
+      },
+      {
+        "page_number": 318,
+        "filename": "page-318.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-318.pdf",
+        "file_size": 35445,
+        "created_at": "2025-06-23T22:32:36.199167"
+      },
+      {
+        "page_number": 319,
+        "filename": "page-319.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-319.pdf",
+        "file_size": 25845,
+        "created_at": "2025-06-23T22:32:36.200872"
+      },
+      {
+        "page_number": 320,
+        "filename": "page-320.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-320.pdf",
+        "file_size": 26127,
+        "created_at": "2025-06-23T22:32:36.202210"
+      },
+      {
+        "page_number": 321,
+        "filename": "page-321.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-321.pdf",
+        "file_size": 81854,
+        "created_at": "2025-06-23T22:32:36.204613"
+      },
+      {
+        "page_number": 322,
+        "filename": "page-322.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-322.pdf",
+        "file_size": 76325,
+        "created_at": "2025-06-23T22:32:36.210418"
+      },
+      {
+        "page_number": 323,
+        "filename": "page-323.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-323.pdf",
+        "file_size": 92206,
+        "created_at": "2025-06-23T22:32:36.213551"
+      },
+      {
+        "page_number": 324,
+        "filename": "page-324.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-324.pdf",
+        "file_size": 35996,
+        "created_at": "2025-06-23T22:32:36.221648"
+      },
+      {
+        "page_number": 325,
+        "filename": "page-325.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-325.pdf",
+        "file_size": 26406,
+        "created_at": "2025-06-23T22:32:36.223248"
+      },
+      {
+        "page_number": 326,
+        "filename": "page-326.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-326.pdf",
+        "file_size": 26675,
+        "created_at": "2025-06-23T22:32:36.224674"
+      },
+      {
+        "page_number": 327,
+        "filename": "page-327.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-327.pdf",
+        "file_size": 90072,
+        "created_at": "2025-06-23T22:32:36.228554"
+      },
+      {
+        "page_number": 328,
+        "filename": "page-328.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-328.pdf",
+        "file_size": 133815,
+        "created_at": "2025-06-23T22:32:36.233543"
+      },
+      {
+        "page_number": 329,
+        "filename": "page-329.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-329.pdf",
+        "file_size": 139895,
+        "created_at": "2025-06-23T22:32:36.236078"
+      },
+      {
+        "page_number": 330,
+        "filename": "page-330.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-330.pdf",
+        "file_size": 131763,
+        "created_at": "2025-06-23T22:32:36.238312"
+      },
+      {
+        "page_number": 331,
+        "filename": "page-331.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-331.pdf",
+        "file_size": 118408,
+        "created_at": "2025-06-23T22:32:36.240427"
+      },
+      {
+        "page_number": 332,
+        "filename": "page-332.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-332.pdf",
+        "file_size": 86868,
+        "created_at": "2025-06-23T22:32:36.245900"
+      },
+      {
+        "page_number": 333,
+        "filename": "page-333.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-333.pdf",
+        "file_size": 61896,
+        "created_at": "2025-06-23T22:32:36.251880"
+      },
+      {
+        "page_number": 334,
+        "filename": "page-334.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-334.pdf",
+        "file_size": 52586,
+        "created_at": "2025-06-23T22:32:36.253054"
+      },
+      {
+        "page_number": 335,
+        "filename": "page-335.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-335.pdf",
+        "file_size": 207171,
+        "created_at": "2025-06-23T22:32:36.254115"
+      },
+      {
+        "page_number": 336,
+        "filename": "page-336.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-336.pdf",
+        "file_size": 198215,
+        "created_at": "2025-06-23T22:32:36.255348"
+      },
+      {
+        "page_number": 337,
+        "filename": "page-337.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-337.pdf",
+        "file_size": 195217,
+        "created_at": "2025-06-23T22:32:36.256532"
+      },
+      {
+        "page_number": 338,
+        "filename": "page-338.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-338.pdf",
+        "file_size": 148381,
+        "created_at": "2025-06-23T22:32:36.257673"
+      },
+      {
+        "page_number": 339,
+        "filename": "page-339.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-339.pdf",
+        "file_size": 35463,
+        "created_at": "2025-06-23T22:32:36.265757"
+      },
+      {
+        "page_number": 340,
+        "filename": "page-340.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-340.pdf",
+        "file_size": 25808,
+        "created_at": "2025-06-23T22:32:36.267374"
+      },
+      {
+        "page_number": 341,
+        "filename": "page-341.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-341.pdf",
+        "file_size": 35233,
+        "created_at": "2025-06-23T22:32:36.275447"
+      },
+      {
+        "page_number": 342,
+        "filename": "page-342.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-342.pdf",
+        "file_size": 26220,
+        "created_at": "2025-06-23T22:32:36.277047"
+      },
+      {
+        "page_number": 343,
+        "filename": "page-343.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-343.pdf",
+        "file_size": 26210,
+        "created_at": "2025-06-23T22:32:36.278338"
+      },
+      {
+        "page_number": 344,
+        "filename": "page-344.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-344.pdf",
+        "file_size": 26619,
+        "created_at": "2025-06-23T22:32:36.279621"
+      },
+      {
+        "page_number": 345,
+        "filename": "page-345.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-345.pdf",
+        "file_size": 89847,
+        "created_at": "2025-06-23T22:32:36.422450"
+      },
+      {
+        "page_number": 346,
+        "filename": "page-346.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-346.pdf",
+        "file_size": 34595,
+        "created_at": "2025-06-23T22:32:36.451428"
+      },
+      {
+        "page_number": 347,
+        "filename": "page-347.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-347.pdf",
+        "file_size": 25637,
+        "created_at": "2025-06-23T22:32:36.453474"
+      },
+      {
+        "page_number": 348,
+        "filename": "page-348.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-348.pdf",
+        "file_size": 25931,
+        "created_at": "2025-06-23T22:32:36.461371"
+      },
+      {
+        "page_number": 349,
+        "filename": "page-349.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-349.pdf",
+        "file_size": 130660,
+        "created_at": "2025-06-23T22:32:36.467375"
+      },
+      {
+        "page_number": 350,
+        "filename": "page-350.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-350.pdf",
+        "file_size": 123534,
+        "created_at": "2025-06-23T22:32:36.476664"
+      },
+      {
+        "page_number": 351,
+        "filename": "page-351.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-351.pdf",
+        "file_size": 67799,
+        "created_at": "2025-06-23T22:32:36.481387"
+      },
+      {
+        "page_number": 352,
+        "filename": "page-352.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-352.pdf",
+        "file_size": 107610,
+        "created_at": "2025-06-23T22:32:36.487446"
+      },
+      {
+        "page_number": 353,
+        "filename": "page-353.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-353.pdf",
+        "file_size": 67723,
+        "created_at": "2025-06-23T22:32:36.491209"
+      },
+      {
+        "page_number": 354,
+        "filename": "page-354.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-354.pdf",
+        "file_size": 106319,
+        "created_at": "2025-06-23T22:32:36.493008"
+      },
+      {
+        "page_number": 355,
+        "filename": "page-355.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-355.pdf",
+        "file_size": 185349,
+        "created_at": "2025-06-23T22:32:36.504906"
+      },
+      {
+        "page_number": 356,
+        "filename": "page-356.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-356.pdf",
+        "file_size": 269180,
+        "created_at": "2025-06-23T22:32:36.507329"
+      },
+      {
+        "page_number": 357,
+        "filename": "page-357.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-357.pdf",
+        "file_size": 116746,
+        "created_at": "2025-06-23T22:32:36.508110"
+      },
+      {
+        "page_number": 358,
+        "filename": "page-358.pdf",
+        "file_path": "temp_splits/98ac5938-b0b8-4fc3-8546-18b65ac20115/page-358.pdf",
+        "file_size": 108722,
+        "created_at": "2025-06-23T22:32:36.508764"
+      }
+    ]
+  },
+  "next_steps": {
+    "ocr_required": false,
+    "ready_for_processing": true,
+    "queue_status": "completed"
+  },
+  "pipeline_status": {
+    "stage": "split_complete",
+    "next_stage": "analysis",
+    "estimated_completion": "immediate"
+  },
+  "queue_info": {
+    "ocr": 3,
+    "analysis": 0,
+    "failed": 0,
+    "completed": 13,
+    "redis_available": true
+  },
+  "storage_info": {
+    "backend": "LocalStorage",
+    "files_uploaded": true
+  }
+}

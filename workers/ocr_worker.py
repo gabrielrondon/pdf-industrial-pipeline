@@ -268,8 +268,7 @@ class OCRWorker:
                 text_result = storage_manager.upload_job_file(
                     job_id=job_id,
                     local_path=temp_text_path,
-                    file_type='ocr',
-                    filename=text_filename
+                    file_type='ocr'
                 )
                 storage_paths['text_file'] = text_result
                 
@@ -295,8 +294,7 @@ class OCRWorker:
             metadata_result = storage_manager.upload_job_file(
                 job_id=job_id,
                 local_path=temp_metadata_path,
-                file_type='ocr',
-                filename=metadata_filename
+                file_type='ocr'
             )
             storage_paths['metadata_file'] = metadata_result
             
