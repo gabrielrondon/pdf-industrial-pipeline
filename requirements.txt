@@ -1,41 +1,120 @@
-# PDF Processing
-PyPDF2==3.0.1
+# Core Framework
+fastapi==0.104.1
+uvicorn[standard]==0.30.1
+python-multipart==0.0.9
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# PDF Processing - Enhanced
+PyMuPDF==1.23.26  # More robust than PyPDF2
 pdf2image==1.17.0
 Pillow==10.4.0
+camelot-py[cv]==0.11.0  # Advanced table extraction
+tabula-py==2.9.0  # Alternative table extraction
 
-# OCR
+# OCR - Enhanced
 pytesseract==0.3.10
+opencv-python-headless==4.9.0.80
+easyocr==1.7.0  # Alternative OCR engine
 
-# Web Framework
-fastapi==0.104.1
-uvicorn==0.30.1
+# Database & Storage
+sqlalchemy==2.0.23
+alembic==1.13.1
+asyncpg==0.29.0
+psycopg2-binary==2.9.9
+aioboto3==12.3.0  # For S3/MinIO
+minio==7.2.0  # MinIO client
+
+# Authentication & Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
 python-multipart==0.0.9
+cryptography==41.0.8
 
-# Queue System
+# Task Queue & Caching
+celery==5.3.4
 redis==5.0.7
+aioredis==2.0.1
+kombu==5.3.4  # Celery message transport
 
-# Text Processing & NLP - Etapa 3
+# Text Processing & NLP
 nltk==3.8.1
 langdetect==1.0.9
 spacy==3.7.2
 textblob==0.17.1
 regex==2023.12.25
+transformers==4.37.2
+tokenizers==0.15.0
 
-# Embeddings & Vector Database - Etapa 4
+# Embeddings & Vector Database
 sentence-transformers==3.0.1
 faiss-cpu==1.8.0
 numpy==1.26.4
+scipy==1.11.4
 
-# Machine Learning - Etapa 5
+# Machine Learning - Production Ready
 scikit-learn==1.5.0
 pandas==2.2.2
 joblib==1.4.2
 xgboost==2.0.3
 lightgbm==4.3.0
 optuna==3.6.1
+mlflow==2.9.2  # Model versioning
+onnx==1.15.0  # Model optimization
+onnxruntime==1.16.3
 
-# Performance & Scaling - Etapa 6
-psutil==5.9.8
-aioredis==2.0.1
-asyncpg==0.29.0
+# Monitoring & Observability
 prometheus-client==0.20.0
+opentelemetry-api==1.21.0
+opentelemetry-sdk==1.21.0
+opentelemetry-exporter-jaeger==1.21.0
+opentelemetry-instrumentation-fastapi==0.42b0
+opentelemetry-instrumentation-sqlalchemy==0.42b0
+opentelemetry-instrumentation-redis==0.42b0
+sentry-sdk[fastapi]==1.39.2
+
+# Logging & Structured Logging
+python-json-logger==2.0.7
+structlog==23.2.0
+
+# Performance & Scaling
+psutil==5.9.8
+aiofiles==23.2.1
+anyio==4.2.0
+httpx==0.26.0  # HTTP client for external services
+
+# Configuration & Environment
+python-dotenv==1.0.0
+click==8.1.7  # CLI commands
+typer==0.9.0  # Better CLI framework
+
+# Testing & Quality
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+pytest-mock==3.12.0
+httpx==0.26.0  # For testing FastAPI
+factory-boy==3.3.0  # Test data factories
+
+# Code Quality
+black==23.12.1
+isort==5.13.2
+flake8==7.0.0
+mypy==1.8.0
+pre-commit==3.6.0
+
+# Additional Utilities
+python-dateutil==2.8.2
+pytz==2023.3
+requests==2.31.0
+jinja2==3.1.2
+email-validator==2.1.0
+phonenumbers==8.13.27
+
+# Production WSGI Server
+gunicorn==21.2.0
+
+# Optional: GPU Support (uncomment if needed)
+# faiss-gpu==1.8.0
+# torch==2.1.2
+# torchvision==0.16.2

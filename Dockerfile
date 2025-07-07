@@ -51,10 +51,11 @@ RUN pip install --upgrade pip setuptools wheel && \
     pip install -r requirements.txt
 
 # Download NLTK data (handle SSL issues)
-RUN python -c "import ssl; ssl._create_default_https_context = ssl._create_unverified_context; import nltk; nltk.download('stopwords', quiet=True); nltk.download('averaged_perceptron_tagger', quiet=True); nltk.download('maxent_ne_chunker', quiet=True); nltk.download('words', quiet=True)" || echo "NLTK download failed, will use fallback"
+RUN python -c "import ssl; ssl._create_default_https_context = ssl._create_unverified_context; import nltk; nltk.download('punkt', quiet=True); nltk.download('stopwords', quiet=True); nltk.download('averaged_perceptron_tagger', quiet=True); nltk.download('maxent_ne_chunker', quiet=True); nltk.download('words', quiet=True)" || echo "NLTK download failed, will use fallback"
 
-# Pre-download sentence-transformers model
-RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('neuralmind/bert-base-portuguese-cased')" || echo "Model download failed, will download at runtime"
+# Create model directory and pre-download BERT model
+RUN mkdir -p /app/models/bert && \
+    python -c "from transformers import AutoTokenizer, AutoModel; tokenizer = AutoTokenizer.from_pretrained('neuralmind/bert-base-portuguese-cased'); model = AutoModel.from_pretrained('neuralmind/bert-base-portuguese-cased'); tokenizer.save_pretrained('/app/models/bert'); model.save_pretrained('/app/models/bert')" || echo "Model download failed, will download at runtime"
 
 # ================================
 # Stage 3: Application

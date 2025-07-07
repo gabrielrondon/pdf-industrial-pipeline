@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class DatabaseConfig:
     """Configuração do banco de dados"""
-    host: str = "localhost"
+    host: str = "postgres"
     port: int = 5432
     database: str = "pdf_pipeline"
     username: str = "pipeline_user"

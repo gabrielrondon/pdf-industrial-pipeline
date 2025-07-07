@@ -12,6 +12,8 @@ services:
       - POSTGRES_DB=pdf_pipeline
       - POSTGRES_USER=pipeline_user
       - POSTGRES_PASSWORD=pipeline_pass
+    env_file:
+      - docker/development.env
     depends_on:
       - redis
       - postgres
@@ -35,6 +37,8 @@ services:
       - POSTGRES_DB=pdf_pipeline
       - POSTGRES_USER=pipeline_user
       - POSTGRES_PASSWORD=pipeline_pass
+    env_file:
+      - docker/development.env
     depends_on:
       - redis
       - postgres
@@ -52,7 +56,7 @@ services:
     image: redis:7-alpine
     ports:
       - "6379:6379"
-    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru --protected-mode no --bind 0.0.0.0
     volumes:
       - redis-data:/data
     restart: unless-stopped

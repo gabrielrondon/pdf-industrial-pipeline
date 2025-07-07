@@ -1,0 +1,152 @@
+{
+  "auction_type": "judicial",
+  "auction_type_confidence": 0.7,
+  "auction_type_indicators": [
+    "leilão judicial",
+    "execução",
+    "juiz",
+    "vara"
+  ],
+  "publication_compliance": {
+    "diario_oficial_mentioned": true,
+    "newspaper_mentioned": false,
+    "publication_dates": [
+      "2024-03-08 00:00:00",
+      "2024-03-15 00:00:00"
+    ],
+    "auction_dates": [
+      "2024-03-15 00:00:00",
+      "2024-03-25 00:00:00"
+    ],
+    "days_between_publication_auction": 5,
+    "meets_deadline_requirement": true,
+    "compliance_status": "partially_compliant",
+    "details": "Apenas uma forma de publicação mencionada"
+  },
+  "executado_notification": {
+    "party_type": "Executado",
+    "party_identifier": null,
+    "notification_mentioned": true,
+    "notification_date": null,
+    "compliance_status": "compliant",
+    "details": "executado"
+  },
+  "other_notifications": [
+    {
+      "party_type": "cônjuge",
+      "party_identifier": null,
+      "notification_mentioned": true,
+      "notification_date": null,
+      "compliance_status": "compliant",
+      "details": "Inciso II"
+    },
+    {
+      "party_type": "credor hipotecário",
+      "party_identifier": null,
+      "notification_mentioned": true,
+      "notification_date": null,
+      "compliance_status": "compliant",
+      "details": "Inciso V"
+    },
+    {
+      "party_type": "Estado",
+      "party_identifier": null,
+      "notification_mentioned": true,
+      "notification_date": null,
+      "compliance_status": "compliant",
+      "details": "Inciso VIII"
+    }
+  ],
+  "cpc_889_compliance": "compliant",
+  "notification_analysis": "Artigo 889 do CPC mencionado",
+  "valuation": {
+    "market_value": null,
+    "first_auction_value": null,
+    "second_auction_value": null,
+    "minimum_bid_value": null,
+    "first_auction_percentage": null,
+    "second_auction_percentage": null,
+    "below_50_percent": false,
+    "risk_of_annulment": false,
+    "values_found": {},
+    "analysis_notes": "Valor de avaliação não encontrado"
+  },
+  "debts": {
+    "iptu_debt": null,
+    "condominium_debt": null,
+    "mortgage_debt": null,
+    "other_debts": {},
+    "total_debt": null,
+    "debt_responsibility": "arrematante",
+    "debts_mentioned": [],
+    "analysis_notes": "Débitos por conta do arrematante"
+  },
+  "property_status": {
+    "occupancy_status": "occupied_owner",
+    "occupancy_details": "Imóvel possivelmente ocupado pelo executado",
+    "has_tenants": true,
+    "has_squatters": false,
+    "has_disputes": false,
+    "possession_transfer_risk": "high",
+    "risk_factors": [
+      "Imissão na posse mencionada"
+    ]
+  },
+  "legal_restrictions": {
+    "has_judicial_unavailability": false,
+    "has_liens": true,
+    "has_mortgages": true,
+    "has_seizures": false,
+    "restrictions_found": [
+      "Penhora",
+      "Hipoteca",
+      "Hipoteca",
+      "ÔNUS"
+    ],
+    "transfer_viability": "viable_with_conditions",
+    "restriction_details": "Transferência possível mas com restrições a resolver"
+  },
+  "overall_risk_score": 40,
+  "investment_viability_score": 50,
+  "compliance_issues": [],
+  "recommendations": [
+    "⚠️ RISCO MODERADO: Alguns problemas identificados - análise cuidadosa recomendada",
+    "Verificar total de débitos antes da arrematação - serão de sua responsabilidade",
+    "Imóvel ocupado - verificar contratos de locação e direitos do locatário"
+  ],
+  "analysis_timestamp": "2025-07-04 15:17:04.139714",
+  "analyzer_version": "1.0.0",
+  "confidence_level": 0.75,
+  "raw_entities": {
+    "cnpj": [
+      "12.345.678/0001-90",
+      "98.765.432/0001-10"
+    ],
+    "cpf": [
+      "987.654.321-00"
+    ],
+    "process_number": [
+      "1234567-89.2024.8.26.0100"
+    ],
+    "money": [
+      "R$ 850.000,00",
+      "R$ 425.000,00",
+      "R$ 300.000,00",
+      "R$ 15.345,67",
+      "R$ 8.234,50"
+    ],
+    "date": [
+      "15/03/2024",
+      "25/03/2024",
+      "08/03/2024",
+      "09/03/2024"
+    ],
+    "cep": [
+      "01234-567"
+    ],
+    "area": [
+      "120m²"
+    ]
+  },
+  "raw_keywords": {}
+}

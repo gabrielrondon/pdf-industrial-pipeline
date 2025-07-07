@@ -44,7 +44,7 @@ class ModelPrediction:
 
 @dataclass
 class ModelPerformance:
-    """Métricas de performance de um modelo"""
+    """Performance de um modelo"""
     model_name: str
     accuracy: float
     precision: float
@@ -65,80 +65,51 @@ class LeadScoringModel:
         self.model_name = model_name
         self.model = None
         self.scaler = None
-        self.label_encoder = None
         self.feature_columns = None
         self.is_trained = False
         self.training_history = []
         self.model_path = Path(f"storage/models/{model_name}")
         self.model_path.mkdir(parents=True, exist_ok=True)
     
-    def preprocess_features(self, features_df: 'pd.DataFrame') -> 'pd.DataFrame':
-        """Pré-processa features para o modelo"""
-        if not SKLEARN_AVAILABLE:
-            return features_df
+    def preprocess_features(self, features_df: pd.DataFrame) -> pd.DataFrame:
+        """Pré-processa features para treinamento/predição"""
+        # Remover colunas não numéricas
+        numeric_cols = features_df.select_dtypes(include=['int64', 'float64']).columns
+        X = features_df[numeric_cols].copy()
         
-        # Selecionar apenas colunas numéricas relevantes
-        numeric_features = feature_engineer.get_feature_importance_names()
-        available_features = [col for col in numeric_features if col in features_df.columns]
+        # Preencher valores faltantes
+        X = X.fillna(0)
         
-        # Adicionar features categóricas processadas
-        categorical_features = ['language', 'has_financial_values', 'deadline_mentioned']
-        
-        processed_df = features_df[available_features].copy()
-        
-        # Processar features categóricas
-        for cat_feature in categorical_features:
-            if cat_feature in features_df.columns:
-                if cat_feature == 'language':
-                    # One-hot encoding para language
-                    language_dummies = pd.get_dummies(features_df[cat_feature], prefix='lang')
-                    processed_df = pd.concat([processed_df, language_dummies], axis=1)
-                else:
-                    # Boolean features
-                    processed_df[cat_feature] = features_df[cat_feature].astype(int)
-        
-        # Preencher valores NaN
-        processed_df = processed_df.fillna(0)
-        
-        return processed_df
+        return X
     
-    def train(self, features_list: List[FeatureSet], target_scores: List[float]) -> ModelPerformance:
-        """Treina o modelo com dados de features"""
-        raise NotImplementedError("Subclasses devem implementar o método train")
-    
-    def predict(self, features: FeatureSet) -> ModelPrediction:
-        """Faz predição para um conjunto de features"""
-        raise NotImplementedError("Subclasses devem implementar o método predict")
-    
-    def save_model(self):
-        """Salva o modelo treinado"""
-        if not self.is_trained:
-            logger.warning(f"Modelo {self.model_name} não está treinado")
-            return
-        
-        model_file = self.model_path / "model.pkl"
-        scaler_file = self.model_path / "scaler.pkl"
-        metadata_file = self.model_path / "metadata.json"
-        
-        # Salvar modelo
-        if SKLEARN_AVAILABLE:
-            joblib.dump(self.model, model_file)
-            if self.scaler:
-                joblib.dump(self.scaler, scaler_file)
-        
-        # Salvar metadados
-        metadata = {
-            'model_name': self.model_name,
-            'is_trained': self.is_trained,
-            'feature_columns': self.feature_columns,
-            'training_history': self.training_history,
-            'saved_at': datetime.now().isoformat()
-        }
-        
-        with open(metadata_file, 'w', encoding='utf-8') as f:
-            json.dump(metadata, f, indent=2, ensure_ascii=False)
-        
-        logger.info(f"Modelo {self.model_name} salvo em {self.model_path}")
+    def save_model(self) -> bool:
+        """Salva modelo treinado"""
+        try:
+            # Salvar modelo
+            joblib.dump(self.model, self.model_path / "model.pkl")
+            
+            # Salvar scaler se existir
+            if self.scaler is not None:
+                joblib.dump(self.scaler, self.model_path / "scaler.pkl")
+            
+            # Salvar metadados
+            metadata = {
+                'model_name': self.model_name,
+                'is_trained': self.is_trained,
+                'feature_columns': self.feature_columns,
+                'training_history': self.training_history,
+                'saved_at': datetime.now().isoformat()
+            }
+            
+            with open(self.model_path / "metadata.json", 'w', encoding='utf-8') as f:
+                json.dump(metadata, f, indent=2, ensure_ascii=False)
+            
+            logger.info(f"Modelo {self.model_name} salvo com sucesso")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Erro ao salvar modelo {self.model_name}: {e}")
+            return False
     
     def load_model(self) -> bool:
         """Carrega modelo salvo"""
@@ -180,8 +151,6 @@ class RandomForestLeadScorer(LeadScoringModel):
             self.model = RandomForestClassifier(
                 n_estimators=100,
                 max_depth=10,
-                min_samples_split=5,
-                min_samples_leaf=2,
                 random_state=42
             )
     
@@ -204,20 +173,14 @@ class RandomForestLeadScorer(LeadScoringModel):
             # Pré-processar features
             X = self.preprocess_features(features_df)
             
-            # Converter scores para classes (high, medium, low)
-            y = self._scores_to_classes(target_scores)
+            # Converter scores para classes
+            y = np.array(['high' if s >= 80 else 'medium' if s >= 50 else 'low' 
+                         for s in target_scores])
             
-            # Verificar se há classes suficientes para stratify
-            unique_classes = list(set(y))
-            if len(unique_classes) < 2 or min([y.count(cls) for cls in unique_classes]) < 2:
-                # Não usar stratify se não há classes suficientes
-                X_train, X_test, y_train, y_test = train_test_split(
-                    X, y, test_size=0.2, random_state=42
-                )
-            else:
-                X_train, X_test, y_train, y_test = train_test_split(
-                    X, y, test_size=0.2, random_state=42, stratify=y
-                )
+            # Dividir dados
+            X_train, X_test, y_train, y_test = train_test_split(
+                X, y, test_size=0.2, random_state=42
+            )
             
             # Escalar features
             self.scaler = StandardScaler()
@@ -232,6 +195,9 @@ class RandomForestLeadScorer(LeadScoringModel):
             # Avaliar performance
             y_pred = self.model.predict(X_test_scaled)
             
+            # Métricas
+            report = classification_report(y_test, y_pred, output_dict=True)
+            
             # Cross-validation (ajustar CV baseado no tamanho dos dados)
             cv_folds = min(3, len(X_train) // 2) if len(X_train) >= 4 else 2
             if cv_folds >= 2:
@@ -245,17 +211,16 @@ class RandomForestLeadScorer(LeadScoringModel):
                 self.model.feature_importances_
             ))
             
-            # Métricas
             training_time = (datetime.now() - start_time).total_seconds()
             
             performance = ModelPerformance(
                 model_name=self.model_name,
-                accuracy=self.model.score(X_test_scaled, y_test),
-                precision=0.0,  # Calcular depois
-                recall=0.0,     # Calcular depois
-                f1_score=0.0,   # Calcular depois
-                rmse=0.0,       # N/A para classificação
-                r2_score=0.0,   # N/A para classificação
+                accuracy=report['accuracy'],
+                precision=report['weighted avg']['precision'],
+                recall=report['weighted avg']['recall'],
+                f1_score=report['weighted avg']['f1-score'],
+                rmse=0.0,  # N/A para classificação
+                r2_score=0.0,  # N/A para classificação
                 cross_val_score=cv_scores.mean(),
                 feature_importance=feature_importance,
                 training_time=training_time,
@@ -267,14 +232,15 @@ class RandomForestLeadScorer(LeadScoringModel):
             self.training_history.append({
                 'timestamp': datetime.now().isoformat(),
                 'samples': len(X_train),
-                'accuracy': performance.accuracy,
+                'accuracy': report['accuracy'],
                 'cv_score': performance.cross_val_score
             })
             
             # Salvar modelo
             self.save_model()
             
-            logger.info(f"Random Forest treinado: {performance.accuracy:.3f} accuracy, "
+            logger.info(f"Random Forest treinado: Acurácia {report['accuracy']:.3f}, "
+                       f"F1 {report['weighted avg']['f1-score']:.3f}, "
                        f"{len(X_train)} amostras")
             
             return performance
@@ -302,18 +268,23 @@ class RandomForestLeadScorer(LeadScoringModel):
             X_scaled = self.scaler.transform(X)
             
             # Predição
-            prediction_proba = self.model.predict_proba(X_scaled)[0]
-            prediction_class = self.model.predict(X_scaled)[0]
+            predicted_class = self.model.predict(X_scaled)[0]
+            probabilities = self.model.predict_proba(X_scaled)[0]
             
-            # Classes: ['high', 'low', 'medium'] (alfabética)
-            classes = self.model.classes_
-            prob_dict = dict(zip(classes, prediction_proba))
+            # Mapear probabilidades para classes
+            prob_dict = dict(zip(
+                self.model.classes_,
+                probabilities
+            ))
             
-            # Score numérico baseado na probabilidade
-            class_scores = {'low': 25, 'medium': 60, 'high': 90}
-            weighted_score = sum(prob_dict[cls] * class_scores[cls] for cls in classes)
+            # Score baseado nas probabilidades
+            lead_score = (
+                prob_dict.get('high', 0) * 100 +
+                prob_dict.get('medium', 0) * 60 +
+                prob_dict.get('low', 0) * 20
+            )
             
-            # Feature importance para esta predição
+            # Feature importance
             feature_importance = dict(zip(
                 self.feature_columns,
                 self.model.feature_importances_
@@ -322,9 +293,9 @@ class RandomForestLeadScorer(LeadScoringModel):
             prediction_time = (datetime.now() - start_time).total_seconds()
             
             return ModelPrediction(
-                lead_score=weighted_score,
-                confidence=max(prediction_proba),
-                classification=prediction_class,
+                lead_score=lead_score,
+                confidence=max(probabilities),
+                classification=predicted_class,
                 probability_distribution=prob_dict,
                 feature_importance=feature_importance,
                 model_name=self.model_name,
@@ -338,18 +309,6 @@ class RandomForestLeadScorer(LeadScoringModel):
         except Exception as e:
             logger.error(f"Erro na predição Random Forest: {e}")
             return self._create_dummy_prediction()
-    
-    def _scores_to_classes(self, scores: List[float]) -> List[str]:
-        """Converte scores numéricos para classes"""
-        classes = []
-        for score in scores:
-            if score >= 80:
-                classes.append('high')
-            elif score >= 50:
-                classes.append('medium')
-            else:
-                classes.append('low')
-        return classes
     
     def _create_dummy_performance(self) -> ModelPerformance:
         """Cria performance dummy para casos de erro"""
@@ -387,11 +346,13 @@ class GradientBoostingLeadScorer(LeadScoringModel):
     def __init__(self):
         super().__init__("gradient_boosting_regressor")
         if SKLEARN_AVAILABLE:
+            # Use numpy's default_rng for random number generation
+            rng = np.random.default_rng(42)
             self.model = GradientBoostingRegressor(
                 n_estimators=100,
                 learning_rate=0.1,
                 max_depth=6,
-                random_state=42
+                random_state=rng
             )
     
     def train(self, features_list: List[FeatureSet], target_scores: List[float]) -> ModelPerformance:
@@ -676,15 +637,17 @@ class EnsembleLeadScorer:
         combined_probs = {'high': 0, 'medium': 0, 'low': 0}
         for model_name, pred in predictions.items():
             weight = self.weights[model_name] / total_weight
-            for cls in combined_probs:
-                combined_probs[cls] += pred.probability_distribution.get(cls, 0) * weight
+            for class_name, prob in pred.probability_distribution.items():
+                combined_probs[class_name] += prob * weight
         
         # Combinar feature importance
         combined_importance = {}
         for model_name, pred in predictions.items():
             weight = self.weights[model_name] / total_weight
             for feature, importance in pred.feature_importance.items():
-                combined_importance[feature] = combined_importance.get(feature, 0) + importance * weight
+                if feature not in combined_importance:
+                    combined_importance[feature] = 0
+                combined_importance[feature] += importance * weight
         
         prediction_time = (datetime.now() - start_time).total_seconds()
         
@@ -694,12 +657,12 @@ class EnsembleLeadScorer:
             classification=classification,
             probability_distribution=combined_probs,
             feature_importance=combined_importance,
-            model_name='ensemble',
+            model_name="ensemble",
             prediction_time=prediction_time,
             metadata={
                 'models_used': list(predictions.keys()),
                 'weights': self.weights,
-                'model_type': 'Ensemble'
+                'model_type': 'EnsembleModel'
             }
         )
     
@@ -711,48 +674,10 @@ class EnsembleLeadScorer:
             classification='medium',
             probability_distribution={'low': 0.3, 'medium': 0.4, 'high': 0.3},
             feature_importance={},
-            model_name='ensemble',
+            model_name="ensemble",
             prediction_time=0.0,
-            metadata={'error': 'Ensemble não disponível'}
+            metadata={'error': 'Ensemble não treinado'}
         )
-    
-    def get_model_performances(self) -> Dict[str, ModelPerformance]:
-        """Retorna performances dos modelos individuais"""
-        performances = {}
-        
-        for model_name, model in self.models.items():
-            if model.training_history:
-                last_training = model.training_history[-1]
-                # Sanitizar valores para evitar NaN/inf
-                accuracy = self._sanitize_float(last_training.get('accuracy', 0.0))
-                rmse = self._sanitize_float(last_training.get('rmse', 0.0))
-                r2_score = self._sanitize_float(last_training.get('r2_score', 0.0))
-                cv_score = self._sanitize_float(last_training.get('cv_score', 0.0))
-                
-                # Criar ModelPerformance baseado no histórico
-                performances[model_name] = ModelPerformance(
-                    model_name=model_name,
-                    accuracy=accuracy,
-                    precision=0.0,
-                    recall=0.0,
-                    f1_score=0.0,
-                    rmse=rmse,
-                    r2_score=r2_score,
-                    cross_val_score=cv_score,
-                    feature_importance={},
-                    training_time=0.0,
-                    samples_trained=last_training.get('samples', 0),
-                    last_trained=last_training.get('timestamp', '')
-                )
-        
-        return performances
-    
-    def _sanitize_float(self, value: float) -> float:
-        """Sanitiza valores float para evitar NaN/inf"""
-        import math
-        if math.isnan(value) or math.isinf(value):
-            return 0.0
-        return float(value)
 
 # Instâncias globais dos modelos
 random_forest_model = RandomForestLeadScorer()

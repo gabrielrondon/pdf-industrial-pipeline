@@ -5,19 +5,64 @@
       "page_number": 1,
       "job_id": "98ac5938-b0b8-4fc3-8546-18b65ac20115",
       "ml_prediction": {
-        "lead_score": 50.0,
-        "confidence": 0.5,
+        "lead_score": 60.3649867193006,
+        "confidence": 0.577,
         "classification": "medium",
         "probability_distribution": {
-          "low": 0.3,
-          "medium": 0.4,
-          "high": 0.3
+          "high": 0.29800000000000004,
+          "medium": 0.497,
+          "low": 0.20500000000000002
         },
-        "feature_importance": {},
+        "feature_importance": {
+          "text_length": 9.091396431583742e-05,
+          "word_count": 1.010016073215314e-05,
+          "entity_count": 0.0787282728252366,
+          "language_confidence": 0.029689261451847283,
+          "readability_score": 5.295757326542579e-07,
+          "cnpj_count": 2.0006965218190098e-05,
+          "phone_count": 0.0010080589579528527,
+          "email_count": 0.008719837976385097,
+          "money_count": 0.013415589691006197,
+          "company_count": 0.0,
+          "has_financial_values": 2.2163913449676044e-09,
+          "max_financial_value": 0.016181133304942998,
+          "total_financial_value": 2.346730580882782e-05,
+          "financial_keywords_count": 0.0024186375368145767,
+          "urgency_score": 0.0,
+          "deadline_mentioned": 0.0,
+          "urgency_keywords_count": 0.0,
+          "judicial_auction_score": 0.06809847820046756,
+          "legal_notifications_count": 0.09170515511915583,
+          "property_valuation_indicators": 0.0,
+          "property_status_score": 0.0002392100049713561,
+          "legal_compliance_score": 0.00031901473568415184,
+          "legal_restrictions_count": 0.0,
+          "investment_viability_score": 0.0,
+          "risk_level_score": 0.0,
+          "legal_authority_mentions": 0.05805165328037412,
+          "property_discount_indicators": 0.0,
+          "market_value_mentions": 0.0,
+          "auction_urgency_score": 0.0,
+          "embedding_dimension": 0.0,
+          "embedding_norm": 0.0029889917679621356,
+          "embedding_entropy": 0.0023291170865674194,
+          "text_density": 0.0215108594156796,
+          "financial_density": 0.0010415368698289931,
+          "contact_completeness": 0.0034101715869243074,
+          "lang_pt": 0.0
+        },
         "model_name": "ensemble",
-        "prediction_time": 0.0,
+        "prediction_time": 0.021935,
         "metadata": {
-          "error": "Ensemble não disponível"
+          "models_used": [
+            "random_forest",
+            "gradient_boosting"
+          ],
+          "weights": {
+            "random_forest": 0.6,
+            "gradient_boosting": 0.4
+          },
+          "model_type": "Ensemble"
         }
       },
       "original_score": 65.0,
@@ -33,15 +78,15 @@
   ],
   "statistics": {
     "total_pages": 1,
-    "average_ml_score": 50.0,
-    "max_ml_score": 50.0,
-    "min_ml_score": 50.0,
-    "average_confidence": 0.5,
+    "average_ml_score": 60.3649867193006,
+    "max_ml_score": 60.3649867193006,
+    "min_ml_score": 60.3649867193006,
+    "average_confidence": 0.577,
     "high_quality_leads": 0,
     "medium_quality_leads": 1,
     "low_quality_leads": 0,
     "high_confidence_predictions": 0
   },
-  "predicted_at": "2025-06-23T22:33:00.269149",
+  "predicted_at": "2025-06-23T22:43:26.724760",
   "model_used": "ensemble"
 }

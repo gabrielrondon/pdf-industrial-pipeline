@@ -24,7 +24,7 @@ class QueueMessage:
 class QueueManager:
     """Gerenciador de filas usando Redis"""
     
-    def __init__(self, redis_host: str = "localhost", redis_port: int = 6379, redis_db: int = 0):
+    def __init__(self, redis_host: str = "redis", redis_port: int = 6379, redis_db: int = 0):
         try:
             self.redis_client = redis.Redis(
                 host=redis_host,

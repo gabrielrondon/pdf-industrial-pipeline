@@ -38,6 +38,7 @@ from performance.database_manager import database_manager
 from performance.metrics_collector import metrics_collector, monitor_performance
 from performance.monitoring import health_monitor, register_health_check
 from performance.performance_utils import performance_utils
+from judicial_analysis import JudicialAuctionAnalyzer
 
 app = FastAPI(
     title="PDF Industrial Pipeline",
@@ -48,7 +49,7 @@ app = FastAPI(
 # Add CORS middleware for frontend integration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:8000", "http://127.0.0.1:8000"],
+    allow_origins=["*"],  # Allow all origins for testing
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -971,7 +972,186 @@ async def benchmark_endpoint(endpoint_name: str, iterations: int = 100):
         logger.error(f"Erro ao executar benchmark: {e}")
         raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
 
+# ====== JUDICIAL AUCTION ANALYSIS ENDPOINTS ======
+
+@app.post("/judicial-analysis/{job_id}")
+async def analyze_judicial_auction(job_id: str):
+    """
+    Perform comprehensive judicial auction analysis on processed documents
+    
+    Analyzes:
+    - 1.1 Auction type (judicial vs extrajudicial)
+    - 1.2 Publication compliance
+    - 1.3 & 1.4 CPC Art. 889 notifications
+    - 1.5 Valuation and minimum bid analysis
+    - 1.6 Existing debts and responsibilities
+    - 1.7 Property occupation status
+    - 1.8 Legal restrictions
+    """
+    try:
+        # Get text analysis results
+        text_analysis_path = storage_manager.get_job_path(job_id, "text_analysis", "analysis_results.json")
+        if not os.path.exists(text_analysis_path):
+            raise HTTPException(
+                status_code=404,
+                detail=f"Text analysis not found for job {job_id}. Please run text analysis first."
+            )
+        
+        text_analysis = storage_manager.load_json(text_analysis_path)
+        
+        # Initialize analyzer
+        analyzer = JudicialAuctionAnalyzer()
+        
+        # Combine text from all pages
+        combined_text = ""
+        entities = {}
+        keywords = {}
+        
+        for page_id, page_data in text_analysis.get("pages", {}).items():
+            if page_data.get("text"):
+                combined_text += page_data["text"] + "\n\n"
+            
+            # Merge entities
+            for entity_type, entity_list in page_data.get("entities", {}).items():
+                if entity_type not in entities:
+                    entities[entity_type] = []
+                entities[entity_type].extend(entity_list)
+            
+            # Merge keywords
+            for keyword, count in page_data.get("keywords", {}).items():
+                keywords[keyword] = keywords.get(keyword, 0) + count
+        
+        # Perform judicial analysis
+        analysis_result = analyzer.analyze(
+            text=combined_text,
+            entities=entities,
+            keywords=keywords
+        )
+        
+        # Convert to dict for JSON serialization
+        result_dict = analysis_result.dict()
+        
+        # Save analysis results
+        judicial_analysis_path = storage_manager.get_job_path(job_id, "judicial_analysis")
+        os.makedirs(judicial_analysis_path, exist_ok=True)
+        
+        output_path = os.path.join(judicial_analysis_path, "judicial_analysis_results.json")
+        storage_manager.save_json(result_dict, output_path)
+        
+        return {
+            "message": "Judicial auction analysis completed",
+            "job_id": job_id,
+            "analysis": result_dict,
+            "file_path": output_path
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in judicial analysis for job {job_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Error in judicial analysis: {str(e)}")
+
+@app.get("/judicial-analysis/{job_id}")
+async def get_judicial_analysis(job_id: str):
+    """
+    Retrieve judicial auction analysis results for a job
+    """
+    try:
+        analysis_path = storage_manager.get_job_path(
+            job_id, "judicial_analysis", "judicial_analysis_results.json"
+        )
+        
+        if not os.path.exists(analysis_path):
+            raise HTTPException(
+                status_code=404,
+                detail=f"Judicial analysis not found for job {job_id}"
+            )
+        
+        analysis = storage_manager.load_json(analysis_path)
+        
+        return {
+            "message": "Judicial analysis retrieved",
+            "job_id": job_id,
+            "analysis": analysis
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error retrieving judicial analysis for job {job_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Error retrieving analysis: {str(e)}")
+
 # ====== FRONTEND SERVING ======
+
+@app.post("/process-complete-pipeline")
+async def process_complete_pipeline(file: UploadFile = File(...)):
+    """
+    Complete automated pipeline that handles:
+    1. File Upload
+    2. Check job status
+    3. Get Job Manifest
+    4. Process Text Analysis
+    5. Generate Embeddings
+    6. Extract ML Features
+    7. Predict Lead Quality
+    8. Semantic Search
+    """
+    try:
+        # Step 1: Upload file
+        if not file.filename or not file.filename.endswith(".pdf"):
+            raise HTTPException(status_code=400, detail="Only PDF files are allowed")
+
+        upload_response = await upload_pdf(file)
+        job_id = upload_response["job_id"]
+        
+        logger.info(f"Starting complete pipeline for job {job_id}")
+        
+        # Step 2: Process text analysis
+        text_analysis = await process_text_analysis(job_id)
+        logger.info(f"Text analysis completed for job {job_id}")
+        
+        # Step 3: Generate embeddings
+        embeddings = await generate_job_embeddings(job_id)
+        logger.info(f"Embeddings generated for job {job_id}")
+        
+        # Step 4: Extract ML features
+        features = await extract_features(job_id)
+        logger.info(f"Features extracted for job {job_id}")
+        
+        # Step 5: Predict leads
+        predictions = await predict_job_leads(job_id)
+        logger.info(f"Lead predictions completed for job {job_id}")
+        
+        # Step 6: Get complete ML analysis
+        analysis = await get_job_ml_analysis(job_id)
+        
+        return {
+            "job_id": job_id,
+            "pipeline_status": "completed",
+            "stages_completed": {
+                "upload": True,
+                "text_analysis": True,
+                "embeddings": True,
+                "features": True,
+                "predictions": True,
+                "analysis": True
+            },
+            "results": {
+                "upload": upload_response,
+                "text_analysis": text_analysis,
+                "embeddings": embeddings,
+                "features": features,
+                "predictions": predictions,
+                "analysis": analysis
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Error in complete pipeline: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error processing complete pipeline: {str(e)}"
+        )
 
 @app.get("/{full_path:path}")
 async def serve_frontend(full_path: str):
@@ -979,8 +1159,23 @@ async def serve_frontend(full_path: str):
     Serve the frontend for all non-API routes
     This should be the last route to catch all remaining paths
     """
-    # Don't serve frontend for API routes, docs, or other special paths
+    # Don't serve frontend for API routes
     if (full_path.startswith("api/") or 
+        full_path == "process-complete-pipeline" or  # Explicitly exclude our endpoint
+        full_path.startswith("judicial-analysis") or  # Exclude judicial analysis routes
+        full_path.startswith("upload") or
+        full_path.startswith("job/") or
+        full_path.startswith("process-text/") or
+        full_path.startswith("generate-embeddings/") or
+        full_path.startswith("extract-features/") or
+        full_path.startswith("predict-leads/") or
+        full_path.startswith("train-models") or
+        full_path.startswith("search/") or
+        full_path.startswith("embeddings/") or
+        full_path.startswith("ml/") or
+        full_path.startswith("text-processing/") or
+        full_path.startswith("performance/") or
+        full_path.startswith("health") or
         full_path.startswith("docs") or 
         full_path.startswith("redoc") or
         full_path.startswith("openapi.json") or

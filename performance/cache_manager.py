@@ -37,7 +37,7 @@ class CacheConfig:
     default_ttl: int = 3600  # 1 hora
     max_memory: int = 512    # 512MB
     eviction_policy: str = "allkeys-lru"
-    redis_host: str = "localhost"
+    redis_host: str = "redis"
     redis_port: int = 6379
     redis_db: int = 1  # DB separado para cache
 
