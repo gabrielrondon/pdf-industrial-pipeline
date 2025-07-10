@@ -48,7 +48,53 @@ async def test_database():
         return {
             "database_configured": bool(database_url),
             "redis_configured": bool(redis_url),
-            "environment": os.getenv("ENVIRONMENT", "unknown")
+            "environment": os.getenv("ENVIRONMENT", "unknown"),
+            "database_url_prefix": database_url[:20] + "..." if database_url else None,
+            "redis_url_prefix": redis_url[:20] + "..." if redis_url else None
+        }
+    except Exception as e:
+        return {"error": str(e), "status": "error"}
+
+@app.get("/debug-env")
+async def debug_environment():
+    """Debug endpoint to show environment variables (safe info only)"""
+    try:
+        env_vars = {}
+        
+        # Safe environment variables to show
+        safe_vars = [
+            "ENVIRONMENT", "PORT", "PYTHONPATH", "SECRET_KEY", 
+            "DEBUG", "API_VERSION"
+        ]
+        
+        for var in safe_vars:
+            value = os.getenv(var)
+            if var == "SECRET_KEY" and value:
+                # Only show first 8 chars of secret key
+                env_vars[var] = value[:8] + "..." if len(value) > 8 else "***"
+            else:
+                env_vars[var] = value
+        
+        # Check for database URLs without exposing full URLs
+        database_url = os.getenv("DATABASE_URL")
+        redis_url = os.getenv("REDIS_URL")
+        
+        env_vars["DATABASE_URL_EXISTS"] = bool(database_url)
+        env_vars["REDIS_URL_EXISTS"] = bool(redis_url)
+        
+        if database_url:
+            env_vars["DATABASE_URL_PREFIX"] = database_url[:30] + "..." 
+        if redis_url:
+            env_vars["REDIS_URL_PREFIX"] = redis_url[:30] + "..."
+            
+        # Show all environment variables that start with common prefixes
+        all_env = dict(os.environ)
+        railway_vars = {k: v for k, v in all_env.items() if k.startswith(('RAILWAY_', 'DATABASE_', 'REDIS_', 'POSTGRES'))}
+        
+        return {
+            "configured_vars": env_vars,
+            "railway_vars": railway_vars,
+            "total_env_vars": len(all_env)
         }
     except Exception as e:
         return {"error": str(e), "status": "error"}
