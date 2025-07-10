@@ -16,7 +16,11 @@
       "Bash(git push:*)",
       "Bash(true)",
       "Bash(npm run build:client:*)",
-      "Bash(npm run build:admin:*)"
+      "Bash(npm run build:admin:*)",
+      "Bash(cp:*)",
+      "Bash(pkill:*)",
+      "Bash(npm run dev:*)",
+      "Bash(pip3 install:*)"
     ],
     "deny": []
   }

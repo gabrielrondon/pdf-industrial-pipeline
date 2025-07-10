@@ -1,42 +1,58 @@
-# 🔧 Setup & Configuration
+# 🔧 Setup Documentation
 
-*Complete installation and configuration guides*
+Complete setup guides for deploying the PDF Industrial Pipeline in production.
 
-## 📋 Setup Documentation
+## 📚 Available Guides
 
 ### 🚀 Quick Start
-- **[Installation Guide](installation.md)** - Step-by-step installation instructions
-- **[Configuration Guide](configuration.md)** - Environment variables and settings
-- **[Docker Setup](docker.md)** - Container deployment guide
+- **[Quick Start Production](QUICK_START_PRODUCTION.md)** - Get production-ready in 2 hours
 
-## 🛠️ Installation Options
+### 📖 Comprehensive Guides  
+- **[External Services Setup](EXTERNAL_SERVICES_SETUP.md)** - Step-by-step setup for all external services
+- **[Production Deployment Checklist](PRODUCTION_DEPLOYMENT_CHECKLIST.md)** - Complete pre-deployment verification
 
-### Option 1: Local Development
+### 📋 Setup Overview
+
+| Service Type | Required | Setup Time | Complexity |
+|--------------|----------|------------|------------|
+| **Database** (PostgreSQL, Redis) | ✅ Yes | 15 min | Easy |
+| **Authentication** (Supabase) | ✅ Yes | 20 min | Easy |
+| **Payment** (Stripe) | ✅ Yes | 25 min | Medium |
+| **Storage** (S3/MinIO) | 🟡 Recommended | 15 min | Easy |
+| **Monitoring** (Prometheus/Grafana) | 🟡 Recommended | 30 min | Medium |
+| **AI Services** (OpenAI/Claude) | ⚪ Optional | 10 min | Easy |
+
+## 🎯 Setup Paths
+
+### 🏃‍♂️ Fast Track (2 hours)
+Perfect for getting started quickly:
+1. [Quick Start Production](QUICK_START_PRODUCTION.md)
+2. Use managed services (Neon, Upstash, Supabase)
+3. Deploy to Netlify + Docker
+
+### 🏗️ Full Production (4-6 hours)
+Complete production setup with all services:
+1. [External Services Setup](EXTERNAL_SERVICES_SETUP.md)
+2. Self-hosted monitoring stack
+3. Complete security hardening
+4. [Production Deployment Checklist](PRODUCTION_DEPLOYMENT_CHECKLIST.md)
+
+### 🧪 Development Setup (30 minutes)
+For local development:
 ```bash
-# Clone repository
-git clone <repo-url>
-cd pdf-industrial-pipeline
-
-# Create virtual environment
-python -m venv .venv
-source .venv/bin/activate  # Linux/macOS
-# or .venv\Scripts\activate  # Windows
-
 # Install dependencies
-pip install -r requirements.txt
+npm install
+cd apps/api && pip install -r requirements.txt
 
-# Start services
-python -m uvicorn main:app --reload --port 8000
-```
+# Start local services
+docker-compose up -d redis postgres
 
-### Option 2: Docker Deployment
-```bash
-# Using Docker Compose
-docker-compose up -d
+# Configure local environment
+cp .env.development.template .env
 
-# Or build from source
-docker build -t pdf-pipeline .
-docker run -p 8000:8000 pdf-pipeline
+# Start applications
+npm run dev        # Frontends
+npm run dev:api    # Backend API
 ```
 
 ## 📋 Prerequisites

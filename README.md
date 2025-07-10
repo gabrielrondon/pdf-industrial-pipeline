@@ -27,7 +27,7 @@ This monorepo contains:
 
 ### Prerequisites
 - Node.js 18+ and npm 9+
-- Python 3.8+
+- Python 3.11+
 - PostgreSQL (Neon)
 
 ### 🚀 Launch in 5 Minutes
@@ -39,7 +39,7 @@ cd pdf-industrial-pipeline
 
 # 2. Install all dependencies
 npm install
-pip install -r requirements.txt
+cd apps/api && pip install -r requirements.txt && cd ../..
 
 # 3. Configure environment files
 cp apps/client-frontend/.env.example apps/client-frontend/.env
@@ -610,13 +610,25 @@ locust -f tests/load/locustfile.py --host=http://localhost
 
 ## 📚 Documentation
 
-### Available Documentation
+### 📖 Comprehensive Documentation Hub
 
-- **[Production Architecture](PRODUCTION_ARCHITECTURE.md)**: Complete system design
-- **[Deployment Guide](DEPLOYMENT_GUIDE.md)**: Step-by-step deployment
-- **[Transformation Summary](TRANSFORMATION_SUMMARY.md)**: Complete upgrade overview
-- **[API Documentation](http://localhost/docs)**: Interactive API docs
-- **[Configuration Guide](CONFIG.md)**: Environment configuration
+All documentation has been organized in the [`docs/`](docs/) directory:
+
+| Section | Description | Key Files |
+|---------|-------------|-----------|
+| 🔗 **[API Reference](docs/api-reference/)** | Complete API documentation | Endpoints, schemas, authentication |
+| 🏛️ **[Judicial Analysis](docs/judicial-analysis/)** | Brazilian legal system integration | Usage guides, technical details |
+| 🔌 **[Integration](docs/integration/)** | API integration guides | Complete workflow examples |
+| 📮 **[Postman](docs/postman/)** | API testing collections | Ready-to-use testing setup |
+| 📚 **[Tutorials](docs/tutorials/)** | Step-by-step guides | Navigation, workflows |
+| 🏗️ **[Architecture](docs/architecture/)** | System design | Production architecture, patterns |
+| 🚀 **[Deployment](docs/deployment/)** | Production setup | Complete deployment guide |
+| 🧪 **[Testing](docs/testing/)** | Quality assurance | Testing strategies, results |
+
+### Quick Access
+- **[Documentation Index](docs/README.md)** - Complete navigation guide
+- **[API Documentation](http://localhost:8000/docs)** - Interactive API interface
+- **[Getting Started](docs/tutorials/)** - New user tutorials
 
 ### API Documentation
 

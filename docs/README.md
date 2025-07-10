@@ -1,265 +1,217 @@
 # 📚 PDF Industrial Pipeline - Complete Documentation
 
-*Comprehensive documentation for the PDF Industrial Pipeline system*
+*Comprehensive documentation for the PDF Industrial Pipeline monorepo system*
 
-## 📋 Table of Contents
+## 📋 Quick Navigation
 
 ### 🚀 Getting Started
-- [Quick Start Guide](#quick-start)
-- [Installation Instructions](setup/installation.md)
-- [Configuration Guide](setup/configuration.md)
-- [Docker Setup](setup/docker.md)
+- [Main README](../README.md) - Project overview and quick start
+- [Setup Guide](setup/README.md) - Installation and configuration
+- [Architecture Overview](architecture/README.md) - System design
 
-### 🌐 API Documentation
-- [Postman Setup Guide](api/postman-setup-guide.md)
-- [REST API Reference](api/reference.md)
-- [Authentication](api/authentication.md)
-- [Rate Limiting](api/rate-limiting.md)
+### 📖 Documentation Sections
 
-### 🏗️ System Architecture
-- [Pipeline Context](architecture/pipeline_context.md)
-- [Storage Implementation](architecture/STORAGE_IMPLEMENTATION.md)
-- [Performance Architecture](architecture/performance.md)
-- [Security Model](architecture/security.md)
+| Section | Description | Key Files |
+|---------|-------------|-----------|
+| 🔗 **[API Reference](api-reference/)** | Complete API documentation | `ENDPOINTS_REFERENCE.md` |
+| 🏛️ **[Judicial Analysis](judicial-analysis/)** | Brazilian legal system integration | `JUDICIAL_ANALYSIS_USAGE.md`, `SYSTEM_ANALYSIS_JUDICIAL_AUCTIONS.md` |
+| 🔌 **[Integration](integration/)** | API integration guides | `API_INTEGRATION_GUIDE.md` |
+| 📮 **[Postman](postman/)** | API testing with Postman | `POSTMAN_COMPLETE_GUIDE.md`, `POSTMAN_JUDICIAL_EXAMPLE.md` |
+| 📚 **[Tutorials](tutorials/)** | Step-by-step guides | `DOCS_NAVIGATION_GUIDE.md` |
+| 🏗️ **[Architecture](architecture/)** | System design and patterns | `PRODUCTION_ARCHITECTURE.md`, `TRANSFORMATION_SUMMARY.md` |
+| 🚀 **[Deployment](deployment/)** | Production setup | `DEPLOYMENT_GUIDE.md`, stage completion summaries |
+| 🧪 **[Testing](testing/)** | Quality assurance | Test results and documentation |
+| 📝 **[Guides](guides/)** | User and developer guides | Business configuration, model training |
 
-### 🧪 Testing Documentation
-- [Testing Strategy](testing/testing-guide.md)
-- [Load Testing Results](testing/load-testing.md)
-- [Stage Test Results](testing/)
-- [Quality Assurance](testing/qa-checklist.md)
+---
+
+## 🏗️ Monorepo Structure
+
+This monorepo contains multiple applications:
+
+```
+pdf-industrial-pipeline/
+├── apps/
+│   ├── client-frontend/     # Customer-facing React app (Port 8080)
+│   ├── admin-frontend/      # Admin interface (Port 3001)
+│   └── api/                 # Python FastAPI backend (Port 8000)
+├── packages/                # Shared utilities and types
+└── docs/                    # Comprehensive documentation
+```
+
+### Application Overview
+
+| Application | Port | Purpose | Technology |
+|-------------|------|---------|------------|
+| **Client Frontend** | 8080 | Customer document analysis interface | React, TypeScript, Tailwind |
+| **Admin Frontend** | 3001 | System administration and testing | React, TypeScript, Vite |
+| **API Backend** | 8000 | PDF processing and ML analysis | Python, FastAPI, ML/AI |
+
+---
+
+## 🚀 Quick Start Commands
+
+```bash
+# Start all applications
+npm run dev          # Start both frontends
+npm run dev:api      # Start Python API (separate terminal)
+
+# Individual applications
+npm run dev:client   # Client frontend only
+npm run dev:admin    # Admin frontend only
+
+# Production builds
+npm run build        # Build all applications
+```
+
+---
+
+## 📚 Documentation Categories
+
+### 🔗 API Reference
+Complete API endpoint documentation, request/response schemas, and authentication details.
+- **[Endpoints Reference](api-reference/ENDPOINTS_REFERENCE.md)** - All API endpoints
+- **[Postman Setup](api/postman-setup-guide.md)** - API testing setup
+
+### 🏛️ Judicial Analysis
+Specialized functionality for Brazilian judicial auction documents.
+- **[Usage Guide](judicial-analysis/JUDICIAL_ANALYSIS_USAGE.md)** - How to use judicial analysis features
+- **[System Analysis](judicial-analysis/SYSTEM_ANALYSIS_JUDICIAL_AUCTIONS.md)** - Technical implementation details
+- **[Assessment Guide](judicial-analysis/judicial_auction_assessment.md)** - Evaluation criteria
+
+### 🔌 Integration
+Guides for integrating with the PDF processing system.
+- **[API Integration](integration/API_INTEGRATION_GUIDE.md)** - Complete integration workflow
+- **[Authentication](api/README.md)** - API authentication and security
+
+### 📮 Postman Collections
+Ready-to-use Postman collections for API testing.
+- **[Complete Guide](postman/POSTMAN_COMPLETE_GUIDE.md)** - Full Postman setup
+- **[Judicial Examples](postman/POSTMAN_JUDICIAL_EXAMPLE.md)** - Specific judicial analysis examples
+
+### 📚 Tutorials
+Step-by-step guides for common tasks.
+- **[Navigation Guide](tutorials/DOCS_NAVIGATION_GUIDE.md)** - How to navigate the API documentation
+
+### 🏗️ Architecture
+System design, patterns, and technical architecture.
+- **[Production Architecture](architecture/PRODUCTION_ARCHITECTURE.md)** - Complete system architecture
+- **[Transformation Summary](architecture/TRANSFORMATION_SUMMARY.md)** - Monorepo transformation details
+- **[Storage Implementation](architecture/STORAGE_IMPLEMENTATION.md)** - Data storage patterns
+- **[Pipeline Context](architecture/pipeline_context.md)** - Processing pipeline design
 
 ### 🚀 Deployment
-- [Production Deployment](deployment/production.md)
-- [Stage Completion Reports](deployment/)
-- [Monitoring Setup](deployment/monitoring.md)
-- [Backup & Recovery](deployment/backup.md)
+Production deployment guides and summaries.
+- **[Deployment Guide](deployment/DEPLOYMENT_GUIDE.md)** - Complete deployment instructions
+- **[Stage Summaries](deployment/)** - Development stage completion reports
 
-### 📝 User Guides
-- [End User Guide](guides/user-guide.md)
-- [Developer Guide](guides/developer-guide.md)
-- [Troubleshooting](guides/troubleshooting.md)
-- [FAQ](guides/faq.md)
+### 🧪 Testing
+Quality assurance and testing documentation.
+- **[Testing Strategy](testing/README.md)** - Testing approach and methodologies
+- **[Test Results](testing/)** - Stage-specific test results and reports
 
----
-
-## 🚀 Quick Start
-
-### Prerequisites
-- Python 3.11+
-- Redis server
-- Tesseract OCR
-- Docker (optional)
-
-### Installation
-```bash
-# Clone repository
-git clone <repository-url>
-cd pdf-industrial-pipeline
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Start services
-docker-compose up -d redis
-
-# Run server
-python3 -m uvicorn main:app --reload --port 8000
-```
-
-### First API Call
-```bash
-# Health check
-curl http://localhost:8000/health
-
-# Upload PDF
-curl -X POST "http://localhost:8000/upload" \
-  -H "Content-Type: multipart/form-data" \
-  -F "file=@document.pdf"
-```
+### 📝 Guides
+User and developer guides for specific workflows.
+- **[Business Configuration](guides/business-configuration.md)** - Business rule configuration
+- **[Model Training](guides/model-training-tutorial.md)** - ML model training guide
 
 ---
 
-## 🔧 System Overview
+## 🔍 Finding Information
 
-The PDF Industrial Pipeline is a comprehensive document processing system that transforms raw PDF documents into structured, searchable, and analytically valuable data. The system is built for high-performance processing of industrial documents with advanced ML capabilities.
+### By Use Case
+- **New Developer Setup** → [Setup Guide](setup/README.md)
+- **API Integration** → [Integration Guide](integration/API_INTEGRATION_GUIDE.md)
+- **Testing APIs** → [Postman Guide](postman/POSTMAN_COMPLETE_GUIDE.md)
+- **Production Deployment** → [Deployment Guide](deployment/DEPLOYMENT_GUIDE.md)
+- **Judicial Analysis** → [Judicial Usage Guide](judicial-analysis/JUDICIAL_ANALYSIS_USAGE.md)
 
-### Core Components
-
-#### 1. **PDF Processing Engine**
-- Advanced PDF splitting and page extraction
-- Image-based content detection
-- Metadata preservation and enhancement
-
-#### 2. **OCR & Text Extraction**
-- Tesseract integration for image-to-text conversion
-- Multi-language support (Portuguese, English)
-- Quality validation and error handling
-
-#### 3. **ML & NLP Pipeline**
-- Feature engineering for document classification
-- Sentiment analysis and entity extraction
-- Lead scoring with machine learning models
-
-#### 4. **Semantic Search**
-- BERT-based embeddings generation
-- FAISS vector database for fast similarity search
-- Natural language query processing
-
-#### 5. **Performance & Monitoring**
-- Redis-based caching and job queuing
-- Parallel processing with worker pools
-- Comprehensive metrics and health monitoring
-
-### Architecture Highlights
-
-```
-┌─────────────┐    ┌──────────────┐    ┌─────────────┐
-│   Frontend  │───▶│  FastAPI     │───▶│  Processing │
-│   (React)   │    │  Server      │    │  Pipeline   │
-└─────────────┘    └──────────────┘    └─────────────┘
-                          │                    │
-                          ▼                    ▼
-                   ┌──────────────┐    ┌─────────────┐
-                   │    Redis     │    │   Storage   │
-                   │   (Cache)    │    │  (Files)    │
-                   └──────────────┘    └─────────────┘
-```
+### By Role
+- **Frontend Developer** → Client/Admin frontend READMEs, API Reference
+- **Backend Developer** → API documentation, Architecture guides
+- **DevOps Engineer** → Deployment, Architecture, Testing
+- **Business User** → Judicial Analysis guides, Tutorials
+- **QA Engineer** → Testing documentation, API testing guides
 
 ---
 
-## 📊 Performance Metrics
+## 📊 Key Features
 
-| Metric | Value | Description |
-|--------|-------|-------------|
-| **Processing Speed** | ~2 pages/second | Average PDF page processing |
-| **Memory Usage** | <1GB | Single instance footprint |
-| **Concurrent Jobs** | 50+ | Parallel processing capacity |
-| **API Response** | <100ms | Health check latency |
-| **Search Speed** | <50ms | Semantic search queries |
+### 💪 Superior Performance
+- Sub-second processing (< 1 second per PDF page)
+- Massive file support (500MB+ PDFs)
+- Parallel processing with intelligent chunking
+- Streaming architecture with no memory limitations
+
+### 🧠 Advanced Intelligence
+- Ensemble ML Models (Random Forest + XGBoost + LightGBM)
+- ONNX Optimization (10x faster inference)
+- Multi-language NLP (Portuguese, English, Spanish)
+- Semantic Search with BERT-based embeddings
+
+### 🏛️ Judicial Auction Expertise
+- Legal Compliance (CPC Art. 889 verification)
+- Property Valuation with market-based analysis
+- Risk Assessment with 50+ factor scoring
+- Brazilian Law specialization
 
 ---
 
 ## 🛠️ Technology Stack
 
-### Backend
-- **FastAPI**: Modern, fast web framework
-- **Python 3.11+**: Core programming language
-- **Redis**: Caching and job queuing
-- **Tesseract**: OCR engine
+### Frontend Applications
+- **React 18+** with TypeScript
+- **Tailwind CSS** for styling
+- **Vite** for build tooling
+- **Supabase** for authentication and database
 
-### ML/AI
-- **SentenceTransformers**: BERT embeddings
-- **FAISS**: Vector similarity search
-- **NLTK**: Natural language processing
-- **scikit-learn**: Machine learning models
-
-### Frontend
-- **React**: User interface framework
-- **Tailwind CSS**: Styling framework
-- **JavaScript/ES6**: Frontend scripting
+### Backend API
+- **Python 3.11+** with FastAPI
+- **PostgreSQL** for data persistence
+- **Redis** for caching and queues
+- **Celery** for background processing
+- **ML/AI Stack**: BERT, FAISS, scikit-learn
 
 ### Infrastructure
-- **Docker**: Containerization
-- **Docker Compose**: Multi-container orchestration
-- **Nginx**: Reverse proxy and load balancing
-- **Prometheus**: Metrics collection
-
----
-
-## 📈 Development Stages
-
-### ✅ Completed Stages
-
-#### Stage 1-3: Core Foundation
-- Basic PDF processing pipeline
-- OCR integration and text extraction
-- Storage system implementation
-
-#### Stage 4-6: Advanced Features
-- Machine learning integration
-- Semantic search capabilities
-- Performance optimizations
-
-#### Stage 7: Frontend Integration
-- React-based user interface
-- API integration and user workflows
-- Real-time status updates
-
-#### Stage 8: Production Deployment
-- Docker containerization
-- Production configuration
-- Monitoring and logging
-
-### 🔄 Current Development
-
-#### Stage 9: Advanced ML Features
-- Enhanced lead scoring models
-- Advanced analytics dashboard
-- Automated report generation
+- **Docker** containerization
+- **Nginx** reverse proxy
+- **Prometheus** metrics
+- **Grafana** dashboards
 
 ---
 
 ## 🤝 Contributing
 
-### Development Setup
-1. **Fork the repository**
-2. **Create development environment**
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate  # Linux/Mac
-   pip install -r requirements.txt
-   ```
-3. **Run tests**
-   ```bash
-   python -m pytest tests/
-   ```
-4. **Submit pull request**
+### Documentation Contributions
+1. **Keep it current**: Update docs with code changes
+2. **Clear examples**: Include practical examples
+3. **Consistent format**: Follow existing documentation patterns
+4. **Test instructions**: Verify all examples work
 
-### Code Standards
-- **PEP 8**: Python code formatting
-- **Type hints**: All functions should include type annotations
-- **Docstrings**: Comprehensive function documentation
-- **Tests**: Unit tests for new features
+### Code Contributions
+1. **Follow conventions**: Maintain existing code style
+2. **Update docs**: Include documentation updates
+3. **Test thoroughly**: Ensure all tests pass
+4. **Review security**: Follow security best practices
 
 ---
 
-## 📄 Documentation Standards
-
-This documentation follows these principles:
-- **Clear structure**: Logical organization of information
-- **Practical examples**: Real-world usage scenarios
-- **Up-to-date**: Regular updates with system changes
-- **Accessible**: Multiple skill levels supported
-
-### Documentation Categories
-
-| Category | Purpose | Audience |
-|----------|---------|----------|
-| **Setup** | Installation and configuration | Developers, DevOps |
-| **API** | Endpoint documentation | Frontend developers |
-| **Architecture** | System design and patterns | System architects |
-| **Testing** | Quality assurance procedures | QA engineers |
-| **Deployment** | Production setup | DevOps, SRE |
-| **Guides** | User and developer workflows | End users, developers |
-
----
-
-## 🆘 Support & Help
+## 🆘 Support
 
 ### Getting Help
-- **Documentation**: Check relevant sections above
-- **Issues**: GitHub Issues for bug reports
-- **Discussions**: GitHub Discussions for questions
-- **Email**: Direct contact for urgent issues
+- **📖 Documentation**: Start here for most questions
+- **🐛 Issues**: GitHub Issues for bug reports
+- **💬 Discussions**: GitHub Discussions for questions
+- **📧 Contact**: Direct contact for urgent issues
 
-### Common Issues
-- **Server won't start**: Check Redis connection
-- **Upload fails**: Verify file permissions
-- **Slow processing**: Monitor system resources
-- **Search not working**: Verify FAISS index
+### Common Solutions
+- **Setup Issues** → Check [Setup Guide](setup/README.md)
+- **API Problems** → Review [API Reference](api-reference/)
+- **Integration Help** → See [Integration Guide](integration/)
+- **Performance Issues** → Check [Architecture Docs](architecture/)
 
 ---
 
-**📚 This documentation is continuously updated. Last updated: [Current Date]**
+**📚 This documentation is continuously updated. For the most current information, always refer to the latest version.**
 
-For the most current information, always refer to the latest documentation version.
+*Built with ❤️ for the Brazilian legal and investment community*

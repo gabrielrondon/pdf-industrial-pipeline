@@ -15,10 +15,12 @@
     "clean": "npm run clean --workspaces --if-present",
     "dev:client": "npm run dev --workspace=apps/client-frontend",
     "dev:admin": "npm run dev --workspace=apps/admin-frontend",
-    "dev:api": "npm run dev --workspace=apps/api",
+    "dev:api": "cd apps/api && python main_v2.py",
     "build:client": "npm run build --workspace=apps/client-frontend",
     "build:admin": "npm run build --workspace=apps/admin-frontend",
-    "start:api": "npm run start --workspace=apps/api"
+    "start:api": "cd apps/api && python main_v2.py",
+    "setup": "npm install && cd apps/api && pip install -r requirements.txt",
+    "start:all": "concurrently \"npm run dev:client\" \"npm run dev:admin\" \"npm run dev:api\""
   },
   "devDependencies": {
     "@types/node": "^22.5.5",
