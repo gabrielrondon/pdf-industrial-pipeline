@@ -1,10 +1,10 @@
 [build]
   publish = "dist"
-  command = "npm run build"
+  command = "npm ci && npm run build"
   base = "apps/admin-frontend"
 
 [build.environment]
-  NODE_VERSION = "18"
+  NODE_VERSION = "20"
 
 [[headers]]
   for = "/assets/*"
@@ -20,4 +20,4 @@
   environment = { NODE_ENV = "production" }
 
 [context.branch-deploy]
-  command = "npm run build:dev"
+  command = "npm ci && npm run build:dev"
