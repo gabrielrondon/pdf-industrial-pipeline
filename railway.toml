@@ -1,0 +1,12 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "apps/api/Dockerfile.railway"
+
+[deploy]
+startCommand = "python main_v2.py"
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+
+[variables]
+PORT = "8000"
+PYTHONPATH = "/app"
