@@ -10,7 +10,13 @@
       "Bash(mkdir:*)",
       "Bash(mv:*)",
       "Bash(npm install:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git rm:*)",
+      "Bash(rm:*)",
+      "Bash(git push:*)",
+      "Bash(true)",
+      "Bash(npm run build:client:*)",
+      "Bash(npm run build:admin:*)"
     ],
     "deny": []
   }

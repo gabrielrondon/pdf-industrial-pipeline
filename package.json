@@ -15,9 +15,10 @@
     "clean": "npm run clean --workspaces --if-present",
     "dev:client": "npm run dev --workspace=apps/client-frontend",
     "dev:admin": "npm run dev --workspace=apps/admin-frontend",
+    "dev:api": "npm run dev --workspace=apps/api",
     "build:client": "npm run build --workspace=apps/client-frontend",
     "build:admin": "npm run build --workspace=apps/admin-frontend",
-    "start:api": "python main.py"
+    "start:api": "npm run start --workspace=apps/api"
   },
   "devDependencies": {
     "@types/node": "^22.5.5",

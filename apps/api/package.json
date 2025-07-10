@@ -1,0 +1,18 @@
+{
+  "name": "@pdf-pipeline/api",
+  "version": "1.0.0",
+  "description": "Python FastAPI backend for PDF processing and analysis",
+  "scripts": {
+    "dev": "python main.py",
+    "start": "python main.py",
+    "test": "python -m pytest tests/",
+    "clean": "find . -type d -name __pycache__ -exec rm -rf {} + || true"
+  },
+  "keywords": [
+    "pdf",
+    "processing",
+    "fastapi",
+    "machine-learning",
+    "python"
+  ]
+}

@@ -19,8 +19,8 @@ Transform massive PDF documents into actionable intelligence with **maximum qual
 This monorepo contains:
 
 - **apps/client-frontend** - Customer-facing React application for document analysis (Port 8080)
-- **apps/admin-frontend** - Administrative interface for system management and testing (Port 3001)
-- **Python API** - Existing robust backend with ML/AI capabilities (Port 8000)
+- **apps/admin-frontend** - Administrative interface for system management and testing (Port 3001)  
+- **apps/api** - Python FastAPI backend with ML/AI capabilities (Port 8000)
 - **packages/** - Shared utilities, types, and configurations
 
 ## ⚡ Quick Start
@@ -47,11 +47,11 @@ cp apps/admin-frontend/.env.example apps/admin-frontend/.env
 
 # 4. Start all applications
 npm run dev          # Start both frontends
-python main.py       # Start Python API (separate terminal)
+npm run dev:api      # Start Python API (separate terminal)
 
 # 5. Access the applications
 # Client Frontend: http://localhost:8080
-# Admin Frontend: http://localhost:3001
+# Admin Frontend: http://localhost:3001  
 # API Docs: http://localhost:8000/docs
 ```
 
@@ -76,7 +76,7 @@ Administrative interface with:
 - API testing tools
 
 ### Python API (http://localhost:8000)
-Robust backend with:
+Robust FastAPI backend with:
 - PDF processing and OCR
 - Machine learning models
 - Vector embeddings
