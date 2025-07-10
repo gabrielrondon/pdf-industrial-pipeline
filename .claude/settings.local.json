@@ -25,7 +25,11 @@
       "Bash(grep:*)",
       "Bash(touch:*)",
       "Bash(git restore:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(npm ci:*)",
+      "Bash(cat:*)",
+      "Bash(git check-ignore:*)",
+      "Bash(curl:*)"
     ],
     "deny": []
   }

@@ -1,6 +1,8 @@
 
 import { useState } from 'react';
 import { DocumentUploader } from '@/components/document/DocumentUploader';
+import { SimpleDocumentUploader } from '@/components/document/SimpleDocumentUploader';
+import { ApiTest } from '@/components/debug/ApiTest';
 import { DocumentAnalysis } from '@/types';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -78,9 +80,20 @@ export default function UploadPage() {
           <div className="space-y-10">
             <UploadIntro />
             
-            <DocumentUploader 
+            {/* Teste de conectividade com API Railway */}
+            <div className="flex justify-center">
+              <ApiTest />
+            </div>
+            
+            {/* Usando SimpleDocumentUploader que usa nossa API Railway */}
+            <SimpleDocumentUploader 
               onAnalysisComplete={handleAnalysisComplete} 
             />
+            
+            {/* Componente original (com problemas de RLS) - mantido para referência */}
+            {/* <DocumentUploader 
+              onAnalysisComplete={handleAnalysisComplete} 
+            /> */}
             
             <FeaturesSection />
           </div>
