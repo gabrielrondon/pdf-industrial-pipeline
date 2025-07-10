@@ -2,10 +2,10 @@
 # Minimal dependencies for Railway deployment
 
 # Core Framework
-fastapi==0.104.1
-uvicorn[standard]==0.30.1
+fastapi==0.110.0
+uvicorn[standard]==0.27.0
 python-multipart==0.0.9
-pydantic==2.5.0
+pydantic==2.6.1
 pydantic-settings==2.1.0
 
 # PDF Processing - Essential Only
@@ -15,7 +15,6 @@ Pillow==10.4.0
 
 # OCR - Essential Only
 pytesseract==0.3.10
-opencv-python-headless==4.9.0.80
 
 # Database & Storage
 sqlalchemy==2.0.23
@@ -39,8 +38,7 @@ nltk==3.8.1
 langdetect==1.0.9
 regex==2023.12.25
 
-# Embeddings - Lightweight
-sentence-transformers==3.0.1
+# Basic ML & Math
 numpy==1.26.4
 scipy==1.11.4
 
@@ -56,7 +54,7 @@ sentry-sdk[fastapi]==1.39.2
 # Performance & Scaling
 psutil==5.9.8
 aiofiles==23.2.1
-anyio==4.2.0
+anyio==3.7.1
 httpx==0.26.0
 
 # Configuration & Environment
