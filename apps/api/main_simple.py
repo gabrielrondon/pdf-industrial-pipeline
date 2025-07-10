@@ -54,13 +54,77 @@ async def test_database():
         return {"error": str(e), "status": "error"}
 
 # Include basic API routes
+from fastapi import File, UploadFile, HTTPException
+import uuid
+import tempfile
+
+# In-memory job storage for demo (use database in production)
+jobs_storage = {}
+
 @app.post("/api/v1/upload")
-async def upload_file():
-    return {"message": "Upload endpoint - to be implemented"}
+async def upload_file(file: UploadFile = File(...)):
+    """Upload PDF file for processing"""
+    try:
+        # Validate file type
+        if not file.filename.lower().endswith('.pdf'):
+            raise HTTPException(status_code=400, detail="Only PDF files are allowed")
+        
+        # Validate file size (500MB limit)
+        max_size = 500 * 1024 * 1024  # 500MB
+        content = await file.read()
+        if len(content) > max_size:
+            raise HTTPException(status_code=400, detail="File too large (max 500MB)")
+        
+        # Generate job ID
+        job_id = str(uuid.uuid4())
+        
+        # Save file temporarily (in production, save to proper storage)
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:
+            tmp.write(content)
+            file_path = tmp.name
+        
+        # Store job info
+        jobs_storage[job_id] = {
+            "job_id": job_id,
+            "filename": file.filename,
+            "file_size": len(content),
+            "status": "completed",  # Mock as completed for demo
+            "file_path": file_path,
+            "results": {
+                "message": "PDF processado com sucesso!",
+                "pages": 1,
+                "text_extracted": "Conteúdo do PDF extraído...",
+                "analysis": "Análise básica realizada."
+            }
+        }
+        
+        logger.info(f"File uploaded successfully: {file.filename} ({len(content)} bytes)")
+        
+        return {
+            "success": True,
+            "job_id": job_id,
+            "message": f"Arquivo {file.filename} enviado com sucesso",
+            "file_size": len(content)
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Upload error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
 
 @app.get("/api/v1/jobs/{job_id}")
 async def get_job(job_id: str):
-    return {"job_id": job_id, "status": "pending", "message": "Job endpoint - to be implemented"}
+    """Get job status and results"""
+    if job_id not in jobs_storage:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    return jobs_storage[job_id]
+
+@app.get("/api/v1/jobs")
+async def list_jobs():
+    """List all jobs"""
+    return list(jobs_storage.values())
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
