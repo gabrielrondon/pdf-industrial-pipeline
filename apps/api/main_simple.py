@@ -83,7 +83,7 @@ async def upload_file(file: UploadFile = File(...)):
             tmp.write(content)
             file_path = tmp.name
         
-        # Store job info
+        # Store job info with format expected by frontend
         jobs_storage[job_id] = {
             "job_id": job_id,
             "filename": file.filename,
@@ -91,10 +91,39 @@ async def upload_file(file: UploadFile = File(...)):
             "status": "completed",  # Mock as completed for demo
             "file_path": file_path,
             "results": {
-                "message": "PDF processado com sucesso!",
-                "pages": 1,
-                "text_extracted": "Conteúdo do PDF extraído...",
-                "analysis": "Análise básica realizada."
+                # Format esperado pelo frontend DocumentAnalysis
+                "id": job_id,
+                "file_name": file.filename,
+                "document_type": "edital",
+                "analysis_type": "native",
+                "analysis_points": [
+                    {
+                        "category": "Info Geral",
+                        "point": f"Arquivo {file.filename} processado com sucesso",
+                        "confidence": 1.0,
+                        "page": 1
+                    },
+                    {
+                        "category": "Tamanho",
+                        "point": f"Arquivo de {round(len(content)/(1024*1024), 2)}MB carregado",
+                        "confidence": 1.0,
+                        "page": 1
+                    },
+                    {
+                        "category": "Status",
+                        "point": "Upload e processamento realizado via Railway API",
+                        "confidence": 1.0,
+                        "page": 1
+                    }
+                ],
+                "summary": {
+                    "total_points": 3,
+                    "high_confidence": 3,
+                    "medium_confidence": 0,
+                    "low_confidence": 0
+                },
+                "processing_time": 1.5,
+                "created_at": "2024-01-01T00:00:00Z"
             }
         }
         
