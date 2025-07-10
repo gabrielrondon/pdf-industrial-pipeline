@@ -10,7 +10,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# Note: commented out to allow TypeScript lib/ directories in frontend apps
+# lib/
 lib64/
 parts/
 sdist/
