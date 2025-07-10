@@ -1,8 +1,8 @@
-# PDF Industrial Pipeline 2.0 🚀
+# PDF Industrial Pipeline - Monorepo 🚀
 
-## World-Class PDF Analysis System for Brazilian Judicial Auctions
+## Complete PDF Analysis Platform with Multi-Frontend Architecture
 
-> **The most advanced PDF processing and analysis system on Earth, specialized for Brazilian judicial auction documents.**
+> **A comprehensive monorepo containing client frontend, admin interface, and world-class PDF processing API specialized for Brazilian judicial auction documents.**
 
 [![Production Ready](https://img.shields.io/badge/Production-Ready-green.svg)](https://github.com/your-repo/pdf-industrial-pipeline)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
@@ -14,13 +14,21 @@
 
 Transform massive PDF documents into actionable intelligence with **maximum quality**, **economic efficiency**, and **planetary-scale performance**. This system processes large PDFs (500MB+), splits them into optimized chunks, analyzes them with state-of-the-art ML models, and delivers world-class insights for judicial auction investment decisions.
 
+## 🏗️ Monorepo Architecture
+
+This monorepo contains:
+
+- **apps/client-frontend** - Customer-facing React application for document analysis (Port 8080)
+- **apps/admin-frontend** - Administrative interface for system management and testing (Port 3001)
+- **Python API** - Existing robust backend with ML/AI capabilities (Port 8000)
+- **packages/** - Shared utilities, types, and configurations
+
 ## ⚡ Quick Start
 
 ### Prerequisites
-- Docker 20.10+
-- Docker Compose 2.0+
-- 16GB+ RAM (recommended)
-- 100GB+ storage
+- Node.js 18+ and npm 9+
+- Python 3.8+
+- PostgreSQL (Neon)
 
 ### 🚀 Launch in 5 Minutes
 
@@ -29,21 +37,51 @@ Transform massive PDF documents into actionable intelligence with **maximum qual
 git clone <your-repo-url>
 cd pdf-industrial-pipeline
 
-# 2. Copy and configure environment
-cp .env.production.example .env.production
-# Edit .env.production with your settings
+# 2. Install all dependencies
+npm install
+pip install -r requirements.txt
 
-# 3. Deploy production system
-docker-compose -f docker-compose.production.yml up -d
+# 3. Configure environment files
+cp apps/client-frontend/.env.example apps/client-frontend/.env
+cp apps/admin-frontend/.env.example apps/admin-frontend/.env
 
-# 4. Check system health
-curl http://localhost/health
+# 4. Start all applications
+npm run dev          # Start both frontends
+python main.py       # Start Python API (separate terminal)
 
-# 5. Access the API docs
-open http://localhost/docs
+# 5. Access the applications
+# Client Frontend: http://localhost:8080
+# Admin Frontend: http://localhost:3001
+# API Docs: http://localhost:8000/docs
 ```
 
-**🎉 Your world-class PDF analyzer is now running!**
+**🎉 Your complete PDF analysis platform is now running!**
+
+## 📱 Applications
+
+### Client Frontend (http://localhost:8080)
+Customer-facing application with:
+- Document upload and analysis
+- User authentication (Supabase/Neon)
+- Payment processing (Stripe)
+- AI-powered document insights
+- Community features
+
+### Admin Frontend (http://localhost:3001)
+Administrative interface with:
+- System health monitoring
+- Document processing testing
+- ML model management
+- Database administration
+- API testing tools
+
+### Python API (http://localhost:8000)
+Robust backend with:
+- PDF processing and OCR
+- Machine learning models
+- Vector embeddings
+- Judicial document analysis
+- Background job processing
 
 ## 🌟 What Makes This World-Class
 

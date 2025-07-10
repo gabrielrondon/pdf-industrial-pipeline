@@ -1,0 +1,13 @@
+{
+  "name": "@pdf-pipeline/types",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "types": "index.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.3"
+  }
+}

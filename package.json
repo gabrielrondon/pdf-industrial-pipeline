@@ -1,0 +1,45 @@
+{
+  "name": "pdf-industrial-pipeline",
+  "version": "1.0.0",
+  "private": true,
+  "description": "PDF Industrial Pipeline - Monorepo for client frontend, admin interface, and API",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "clean": "npm run clean --workspaces --if-present",
+    "dev:client": "npm run dev --workspace=apps/client-frontend",
+    "dev:admin": "npm run dev --workspace=apps/admin-frontend",
+    "build:client": "npm run build --workspace=apps/client-frontend",
+    "build:admin": "npm run build --workspace=apps/admin-frontend",
+    "start:api": "python main.py"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.5",
+    "typescript": "^5.5.3",
+    "concurrently": "^8.2.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/pdf-industrial-pipeline.git"
+  },
+  "keywords": [
+    "pdf",
+    "industrial",
+    "pipeline",
+    "monorepo",
+    "react",
+    "typescript",
+    "python",
+    "ai"
+  ]
+}
