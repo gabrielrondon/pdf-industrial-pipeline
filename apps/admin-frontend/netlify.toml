@@ -1,6 +1,6 @@
 [build]
   publish = "dist"
-  command = "npm ci && npm run build"
+  command = "npm install && npm run build"
   base = "apps/admin-frontend"
 
 [build.environment]
@@ -20,4 +20,4 @@
   environment = { NODE_ENV = "production" }
 
 [context.branch-deploy]
-  command = "npm ci && npm run build:dev"
+  command = "npm install && npm run build:dev"

@@ -20,7 +20,12 @@
       "Bash(cp:*)",
       "Bash(pkill:*)",
       "Bash(npm run dev:*)",
-      "Bash(pip3 install:*)"
+      "Bash(pip3 install:*)",
+      "Bash(git commit:*)",
+      "Bash(grep:*)",
+      "Bash(touch:*)",
+      "Bash(git restore:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": []
   }
