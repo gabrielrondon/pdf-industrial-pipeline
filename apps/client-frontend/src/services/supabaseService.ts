@@ -272,9 +272,65 @@ export class SupabaseService {
     return { success: true, isPrivate: newPrivacyState };
   }
 
+  // Debug database state
+  static async debugDatabase(userId: string): Promise<void> {
+    console.log('🔍 === DEBUG DATABASE COMPLETO ===');
+    console.log('👤 User ID procurado:', userId);
+    
+    try {
+      // 1. Verificar se existem documentos na tabela (independente do usuário)
+      const { data: allDocs, error: allError } = await supabase
+        .from('documents')
+        .select('id, user_id, file_name, created_at')
+        .limit(10);
+      
+      console.log('📊 Total documentos na tabela:', allDocs?.length || 0);
+      if (allDocs && allDocs.length > 0) {
+        console.log('📄 Primeiros documentos:', allDocs);
+        console.log('🆔 User IDs encontrados:', [...new Set(allDocs.map(d => d.user_id))]);
+      }
+      
+      // 2. Verificar se o user_id procurado existe
+      const { data: userDocs, error: userError } = await supabase
+        .from('documents')
+        .select('*')
+        .eq('user_id', userId);
+      
+      console.log('👤 Documentos do usuário atual:', userDocs?.length || 0);
+      if (userDocs && userDocs.length > 0) {
+        console.log('📋 Documentos encontrados:', userDocs);
+      }
+      
+      // 3. Verificar perfil do usuário
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id, email, name')
+        .eq('id', userId)
+        .single();
+      
+      console.log('👤 Perfil do usuário:', profile);
+      
+      // 4. Verificar se há documentos com user_id similar
+      const similarUserIds = await supabase
+        .from('documents')
+        .select('user_id')
+        .ilike('user_id', `%${userId.slice(-8)}%`);
+      
+      console.log('🔍 User IDs similares:', similarUserIds.data);
+      
+    } catch (error) {
+      console.error('❌ Erro no debug:', error);
+    }
+    
+    console.log('🔍 === FIM DEBUG ===');
+  }
+
   // Get user documents
   static async getUserDocuments(userId: string): Promise<DocumentAnalysis[]> {
     console.log('📋 Buscando documentos para usuário:', userId);
+    
+    // Execute debug completo primeiro
+    await this.debugDatabase(userId);
     
     const { data: documents, error: docError } = await supabase
       .from('documents')
