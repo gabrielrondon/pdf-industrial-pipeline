@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { FileText, Download, Share2, Lock, Eye, TrendingUp, AlertTriangle, DollarSign, Calendar } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { FileText, Download, Share2, Lock, Eye, TrendingUp, AlertTriangle, DollarSign, Calendar, ChevronDown, ChevronRight, ExternalLink, BookOpen } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDocuments } from '@/contexts/DocumentContext';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -21,6 +22,7 @@ export function AnalysisResult({ analysis }: AnalysisResultProps) {
   const [isPrivate, setIsPrivate] = useState(analysis.isPrivate);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   
   const getDocumentTypeLabel = (type: string): string => {
     const types: Record<string, string> = {
@@ -100,6 +102,22 @@ export function AnalysisResult({ analysis }: AnalysisResultProps) {
   };
   
   const canTogglePrivacy = user?.plan !== 'free';
+  
+  const toggleExpanded = (pointId: string) => {
+    const newExpanded = new Set(expandedItems);
+    if (newExpanded.has(pointId)) {
+      newExpanded.delete(pointId);
+    } else {
+      newExpanded.add(pointId);
+    }
+    setExpandedItems(newExpanded);
+  };
+
+  const handleViewPage = async (pageNum: number) => {
+    // This could open a modal or navigate to a page viewer
+    // For now, we'll just show an alert with the page number
+    alert(`Página ${pageNum} - Em breve: visualização de página específica`);
+  };
   
   // Agrupar leads por categoria - with null safety
   const leadsByCategory = (analysis.points || []).reduce((acc, point) => {
@@ -201,48 +219,122 @@ export function AnalysisResult({ analysis }: AnalysisResultProps) {
               </div>
               
               <div className="space-y-3 pl-6">
-                {leads.map((point) => (
-                  <div 
-                    key={point.id} 
-                    className={cn(
-                      "p-4 rounded-md border-l-4",
-                      getPriorityColor((point as any).priority || 'medium'),
-                      getStatusColor(point.status)
-                    )}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div className="font-medium flex items-center gap-2">
-                        {point.title}
-                        {(point as any).value && (
-                          <Badge variant="outline" className="text-green-700 bg-green-50">
-                            {(point as any).value}
-                          </Badge>
+                {leads.map((point) => {
+                  const pointAny = point as any;
+                  const isExpanded = expandedItems.has(point.id);
+                  const hasDetails = pointAny.details || pointAny.page_reference;
+                  
+                  return (
+                    <Collapsible key={point.id} open={isExpanded} onOpenChange={() => toggleExpanded(point.id)}>
+                      <div 
+                        className={cn(
+                          "p-4 rounded-md border-l-4",
+                          getPriorityColor(pointAny.priority || 'medium'),
+                          getStatusColor(point.status)
+                        )}
+                      >
+                        <div className="flex justify-between items-start">
+                          <div className="font-medium flex items-center gap-2">
+                            {point.title}
+                            {pointAny.value && (
+                              <Badge variant="outline" className="text-green-700 bg-green-50">
+                                {pointAny.value}
+                              </Badge>
+                            )}
+                            {pointAny.page_reference && (
+                              <Badge variant="outline" className="text-blue-700 bg-blue-50">
+                                <BookOpen className="h-3 w-3 mr-1" />
+                                Pág. {pointAny.page_reference}
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex gap-2 items-center">
+                            <Badge variant="outline" className={getCategoryColor(category)}>
+                              {category}
+                            </Badge>
+                            <Badge variant="outline">
+                              {point.status}
+                            </Badge>
+                            {pointAny.priority && (
+                              <Badge 
+                                variant="outline" 
+                                className={
+                                  pointAny.priority === 'high' ? 'border-red-500 text-red-700' :
+                                  pointAny.priority === 'medium' ? 'border-yellow-500 text-yellow-700' :
+                                  'border-green-500 text-green-700'
+                                }
+                              >
+                                {pointAny.priority}
+                              </Badge>
+                            )}
+                            {hasDetails && (
+                              <CollapsibleTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                                  {isExpanded ? (
+                                    <ChevronDown className="h-4 w-4" />
+                                  ) : (
+                                    <ChevronRight className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </CollapsibleTrigger>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <p className="mt-2 text-sm">{point.comment}</p>
+                        
+                        {hasDetails && (
+                          <CollapsibleContent className="mt-3">
+                            <div className="bg-gray-50 p-3 rounded-md border">
+                              <h5 className="font-medium text-sm mb-2 flex items-center">
+                                <Eye className="h-4 w-4 mr-1" />
+                                Detalhes Específicos
+                              </h5>
+                              
+                              {pointAny.page_reference && (
+                                <div className="mb-2">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm text-gray-600">
+                                      📄 Localização: Página {pointAny.page_reference}
+                                    </span>
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm" 
+                                      onClick={() => handleViewPage(pointAny.page_reference)}
+                                      className="h-6 text-xs"
+                                    >
+                                      <ExternalLink className="h-3 w-3 mr-1" />
+                                      Ver Página
+                                    </Button>
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {pointAny.details && (
+                                <div className="space-y-1">
+                                  {Object.entries(pointAny.details).map(([key, value]) => (
+                                    <div key={key} className="flex justify-between text-sm">
+                                      <span className="text-gray-600 capitalize">
+                                        {key.replace(/_/g, ' ')}:
+                                      </span>
+                                      <span className="font-medium">{String(value)}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              
+                              {pointAny.raw_value && (
+                                <div className="mt-2 text-xs text-gray-500">
+                                  Valor original encontrado: "{pointAny.raw_value}"
+                                </div>
+                              )}
+                            </div>
+                          </CollapsibleContent>
                         )}
                       </div>
-                      <div className="flex gap-2">
-                        <Badge variant="outline" className={getCategoryColor(category)}>
-                          {category}
-                        </Badge>
-                        <Badge variant="outline">
-                          {point.status}
-                        </Badge>
-                        {(point as any).priority && (
-                          <Badge 
-                            variant="outline" 
-                            className={
-                              (point as any).priority === 'high' ? 'border-red-500 text-red-700' :
-                              (point as any).priority === 'medium' ? 'border-yellow-500 text-yellow-700' :
-                              'border-green-500 text-green-700'
-                            }
-                          >
-                            {(point as any).priority}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                    <p className="mt-2 text-sm">{point.comment}</p>
-                  </div>
-                ))}
+                    </Collapsible>
+                  );
+                })}
               </div>
             </div>
           ))}
