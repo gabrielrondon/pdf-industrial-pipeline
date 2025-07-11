@@ -12,6 +12,36 @@ export function transformRailwayResultsToDocumentAnalysis(
   console.log('🔍 Railway API Results:', railwayResults);
   console.log('📊 Analysis Points Available:', railwayResults?.points);
   
+  /* 
+   * REAL VALUABLE LEADS SHOULD LOOK LIKE:
+   * 
+   * {
+   *   title: "Apartamento de 3 Quartos Identificado",
+   *   status: "confirmado", 
+   *   comment: "Imóvel residencial de 85m² na Zona Sul. Valor de avaliação: R$ 280.000"
+   * },
+   * {
+   *   title: "Oportunidade de Investimento Alto Potencial",
+   *   status: "confirmado",
+   *   comment: "Lance mínimo R$ 196.000 (30% desconto). ROI estimado: 15-20% ao ano"  
+   * },
+   * {
+   *   title: "Leilão Agendado - 15 Dias",
+   *   status: "alerta", 
+   *   comment: "Data: 25/01/2024 às 14h00. Local: 1º Vara Cível. Prepare documentação"
+   * },
+   * {
+   *   title: "Contato do Leiloeiro Oficial",
+   *   status: "confirmado",
+   *   comment: "João Silva Leilões - (11) 98765-4321 - joao@silvaleiloes.com.br"
+   * },
+   * {
+   *   title: "Verificação CPC Art. 889 - Conforme",
+   *   status: "confirmado", 
+   *   comment: "Notificações legais realizadas corretamente. Processo em conformidade"
+   * }
+   */
+  
   if (!railwayResults || !railwayResults.points) {
     console.warn('⚠️ No analysis points found, using default analysis');
     // Create a default analysis if no results
@@ -51,15 +81,27 @@ function createDefaultAnalysis(jobId: string, fileName: string): DocumentAnalysi
     meaningfulPoints.push(
       {
         id: 'edital_detected',
-        title: 'Edital de Leilão Detectado',
+        title: 'Leilão Judicial Identificado',
         status: 'confirmado',
-        comment: 'Documento identificado como edital de leilão judicial. Analisando oportunidades de investimento...'
+        comment: 'Documento contém informações sobre leilão judicial. Verifique datas, valores e condições de participação.'
       },
       {
-        id: 'analysis_in_progress',
-        title: 'Análise Detalhada em Andamento',
+        id: 'property_analysis',
+        title: 'Análise de Imóvel em Processamento',
         status: 'alerta',
-        comment: 'Extraindo informações sobre valores, datas, e condições do leilão. Resultados completos em breve.'
+        comment: 'Identificando tipo de propriedade, localização e valor de avaliação. Análise completa em breve.'
+      },
+      {
+        id: 'financial_extraction',
+        title: 'Extração de Valores Financeiros',
+        status: 'alerta',
+        comment: 'Buscando valores de avaliação, lance mínimo e possíveis ônus. Aguarde a análise completa.'
+      },
+      {
+        id: 'deadline_analysis',
+        title: 'Verificação de Prazos Importantes',
+        status: 'alerta',
+        comment: 'Analisando datas de leilão, prazos de pagamento e deadlines críticos.'
       }
     );
   } else if (documentType === 'processo') {
