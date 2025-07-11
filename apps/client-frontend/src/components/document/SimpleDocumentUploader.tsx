@@ -13,6 +13,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDocuments } from '@/contexts/DocumentContext';
 import { railwayApi, JobStatus } from '@/services/railwayApiService';
 import { transformRailwayResultsToDocumentAnalysis } from '@/utils/dataTransformers';
 
@@ -43,6 +44,7 @@ let messageIndex = 0;
 
 export function SimpleDocumentUploader({ onAnalysisComplete }: SimpleDocumentUploaderProps) {
   const { user } = useAuth();
+  const { addDocument } = useDocuments();
   const [file, setFile] = useState<File | null>(null);
   const [progress, setProgress] = useState(0);
   const [displayProgress, setDisplayProgress] = useState(0);
@@ -196,14 +198,26 @@ export function SimpleDocumentUploader({ onAnalysisComplete }: SimpleDocumentUpl
               title: "Processamento concluído!",
               description: "Análise do documento finalizada.",
             });
-            if (onAnalysisComplete && status.results) {
+            if (status.results) {
               // Transform Railway API results to DocumentAnalysis format
               const documentAnalysis = transformRailwayResultsToDocumentAnalysis(
                 status.results,
                 jobId,
                 file?.name || 'documento.pdf'
               );
-              onAnalysisComplete(documentAnalysis);
+              
+              // Save document to context so it appears in "Meus Documentos"
+              try {
+                await addDocument(documentAnalysis);
+                console.log('✅ Documento salvo na lista "Meus Documentos"');
+              } catch (error) {
+                console.error('❌ Erro ao salvar documento:', error);
+              }
+              
+              // Notify parent component
+              if (onAnalysisComplete) {
+                onAnalysisComplete(documentAnalysis);
+              }
             }
             return; // Para o loop
           case 'failed':

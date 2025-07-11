@@ -116,7 +116,70 @@ export function AnalysisResult({ analysis }: AnalysisResultProps) {
   const handleViewPage = async (pageNum: number) => {
     // This could open a modal or navigate to a page viewer
     // For now, we'll just show an alert with the page number
-    alert(`Página ${pageNum} - Em breve: visualização de página específica`);
+    alert(`📄 Página ${pageNum}\n\n🔍 Aqui você poderá visualizar o conteúdo específico desta página do documento original.\n\n💡 Funcionalidade em desenvolvimento - em breve você terá acesso direto ao texto da página!`);
+  };
+
+  const getDetailedExplanation = (point: any) => {
+    const category = point.category;
+    const title = point.title.toLowerCase();
+    
+    if (category === 'financeiro' || title.includes('lance') || title.includes('avaliação') || title.includes('valor')) {
+      return {
+        icon: '💰',
+        tips: [
+          'Compare com avaliações de mercado da região',
+          'Verifique se há ônus ou dívidas associadas',
+          'Calcule custos adicionais (ITBI, cartório, etc.)',
+          'Considere o potencial de valorização'
+        ]
+      };
+    }
+    
+    if (category === 'prazo' || title.includes('data') || title.includes('prazo')) {
+      return {
+        icon: '⏰',
+        tips: [
+          'Marque na agenda com antecedência',
+          'Prepare documentação necessária',
+          'Organize recursos financeiros',
+          'Verifique requisitos para participação'
+        ]
+      };
+    }
+    
+    if (category === 'contato' || title.includes('contato') || title.includes('telefone')) {
+      return {
+        icon: '📞',
+        tips: [
+          'Entre em contato para esclarecimentos',
+          'Tire dúvidas sobre o processo',
+          'Confirme informações importantes',
+          'Solicite visita ao imóvel se possível'
+        ]
+      };
+    }
+    
+    if (category === 'leilao' || title.includes('leilão') || title.includes('hasta')) {
+      return {
+        icon: '🏛️',
+        tips: [
+          'Estude o edital completo',
+          'Verifique condições de pagamento',
+          'Confirme documentação exigida',
+          'Analise histórico do processo'
+        ]
+      };
+    }
+    
+    return {
+      icon: '📋',
+      tips: [
+        'Analise com atenção os detalhes',
+        'Consulte um advogado se necessário',
+        'Verifique documentação relacionada',
+        'Considere riscos e oportunidades'
+      ]
+    };
   };
   
   // Agrupar leads por categoria - with null safety
@@ -285,49 +348,78 @@ export function AnalysisResult({ analysis }: AnalysisResultProps) {
                         
                         {hasDetails && (
                           <CollapsibleContent className="mt-3">
-                            <div className="bg-gray-50 p-3 rounded-md border">
+                            <div className="bg-gray-50 p-4 rounded-md border space-y-3">
                               <h5 className="font-medium text-sm mb-2 flex items-center">
                                 <Eye className="h-4 w-4 mr-1" />
                                 Detalhes Específicos
                               </h5>
                               
                               {pointAny.page_reference && (
-                                <div className="mb-2">
-                                  <div className="flex items-center justify-between">
-                                    <span className="text-sm text-gray-600">
-                                      📄 Localização: Página {pointAny.page_reference}
+                                <div className="bg-blue-50 p-3 rounded border-l-4 border-blue-400">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <span className="text-sm font-medium text-blue-800">
+                                      📄 Localização no Documento
                                     </span>
                                     <Button 
                                       variant="outline" 
                                       size="sm" 
                                       onClick={() => handleViewPage(pointAny.page_reference)}
-                                      className="h-6 text-xs"
+                                      className="h-7 text-xs bg-blue-100 hover:bg-blue-200 border-blue-300"
                                     >
                                       <ExternalLink className="h-3 w-3 mr-1" />
-                                      Ver Página
+                                      Ver Página {pointAny.page_reference}
                                     </Button>
                                   </div>
+                                  <span className="text-xs text-blue-600">
+                                    Esta informação foi encontrada na página {pointAny.page_reference} do documento original
+                                  </span>
                                 </div>
                               )}
                               
                               {pointAny.details && (
-                                <div className="space-y-1">
-                                  {Object.entries(pointAny.details).map(([key, value]) => (
-                                    <div key={key} className="flex justify-between text-sm">
-                                      <span className="text-gray-600 capitalize">
-                                        {key.replace(/_/g, ' ')}:
-                                      </span>
-                                      <span className="font-medium">{String(value)}</span>
-                                    </div>
-                                  ))}
+                                <div className="bg-white p-3 rounded border">
+                                  <h6 className="font-medium text-xs text-gray-700 mb-2">INFORMAÇÕES TÉCNICAS</h6>
+                                  <div className="space-y-2">
+                                    {Object.entries(pointAny.details).map(([key, value]) => (
+                                      <div key={key} className="flex justify-between text-sm">
+                                        <span className="text-gray-600 capitalize">
+                                          {key.replace(/_/g, ' ')}:
+                                        </span>
+                                        <span className="font-medium text-gray-900">{String(value)}</span>
+                                      </div>
+                                    ))}
+                                  </div>
                                 </div>
                               )}
                               
                               {pointAny.raw_value && (
-                                <div className="mt-2 text-xs text-gray-500">
-                                  Valor original encontrado: "{pointAny.raw_value}"
+                                <div className="bg-yellow-50 p-2 rounded border-l-4 border-yellow-400">
+                                  <div className="text-xs font-medium text-yellow-800 mb-1">TEXTO ORIGINAL</div>
+                                  <div className="text-xs text-yellow-700 italic">
+                                    "{pointAny.raw_value}"
+                                  </div>
                                 </div>
                               )}
+
+                              {(() => {
+                                const explanation = getDetailedExplanation(pointAny);
+                                return (
+                                  <div className="bg-green-50 p-3 rounded border-l-4 border-green-400">
+                                    <h6 className="font-medium text-sm text-green-800 mb-2 flex items-center">
+                                      <span className="mr-1">{explanation.icon}</span>
+                                      DICAS PARA AÇÃO
+                                    </h6>
+                                    <ul className="space-y-1">
+                                      {explanation.tips.map((tip, index) => (
+                                        <li key={index} className="text-xs text-green-700 flex items-start">
+                                          <span className="text-green-500 mr-1 mt-0.5">▸</span>
+                                          {tip}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                );
+                              })()}
                             </div>
                           </CollapsibleContent>
                         )}

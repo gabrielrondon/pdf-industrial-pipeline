@@ -11,6 +11,7 @@ export function transformRailwayResultsToDocumentAnalysis(
   // Debug logging to understand what we're receiving
   console.log('🔍 Railway API Results:', railwayResults);
   console.log('📊 Analysis Points Available:', railwayResults?.points);
+  console.log('🔍 Individual points details:', JSON.stringify(railwayResults?.points, null, 2));
   
   /* 
    * REAL VALUABLE LEADS SHOULD LOOK LIKE:
@@ -48,12 +49,36 @@ export function transformRailwayResultsToDocumentAnalysis(
     return createDefaultAnalysis(jobId, fileName);
   }
 
-  const points: AnalysisPoint[] = railwayResults.points.map((point: any, index: number) => ({
-    id: point.id || `point_${index}`,
-    title: point.title || 'Ponto de Análise',
-    status: mapStatus(point.status) || 'não identificado',
-    comment: point.comment || 'Análise em andamento...'
-  }));
+  const points: AnalysisPoint[] = railwayResults.points.map((point: any, index: number) => {
+    // Preserve all fields from Railway API, including page_reference, details, etc.
+    const enhancedPoint = {
+      id: point.id || `point_${index}`,
+      title: point.title || 'Ponto de Análise',
+      status: mapStatus(point.status) || 'não identificado',
+      comment: point.comment || 'Análise em andamento...',
+      // Preserve additional fields for expandable details
+      ...(point.page_reference && { page_reference: point.page_reference }),
+      ...(point.details && { details: point.details }),
+      ...(point.category && { category: point.category }),
+      ...(point.priority && { priority: point.priority }),
+      ...(point.raw_value && { raw_value: point.raw_value }),
+      ...(point.value && { value: point.value }),
+      // Preserve any other fields
+      ...Object.keys(point).reduce((acc, key) => {
+        if (!['id', 'title', 'status', 'comment'].includes(key)) {
+          acc[key] = point[key];
+        }
+        return acc;
+      }, {} as any)
+    };
+
+    // Add enhanced context for better user experience
+    if (point.page_reference) {
+      enhancedPoint.comment += ` (Página ${point.page_reference})`;
+    }
+
+    return enhancedPoint;
+  });
 
   return {
     id: jobId,

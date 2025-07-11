@@ -54,7 +54,7 @@ export function MainNav() {
       needsAuth: true,
     },
     {
-      label: 'Documentos',
+      label: 'Meus Documentos',
       href: '/documents',
       icon: FileText,
       needsAuth: true,
