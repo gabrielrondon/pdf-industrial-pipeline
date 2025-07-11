@@ -113,10 +113,32 @@ export function AnalysisResult({ analysis }: AnalysisResultProps) {
     setExpandedItems(newExpanded);
   };
 
-  const handleViewPage = async (pageNum: number) => {
-    // This could open a modal or navigate to a page viewer
-    // For now, we'll just show an alert with the page number
-    alert(`📄 Página ${pageNum}\n\n🔍 Aqui você poderá visualizar o conteúdo específico desta página do documento original.\n\n💡 Funcionalidade em desenvolvimento - em breve você terá acesso direto ao texto da página!`);
+  const handleViewPage = async (pageNum: number, jobId?: string) => {
+    if (!jobId) {
+      alert(`📄 Página ${pageNum}\n\n❌ ID do job não encontrado.\n\n💡 Esta funcionalidade precisa do ID do processamento para acessar o conteúdo da página.`);
+      return;
+    }
+
+    try {
+      // Call Railway API to get page content
+      const response = await fetch(`https://pdf-industrial-pipeline-production.up.railway.app/api/v1/jobs/${jobId}/page/${pageNum}`);
+      
+      if (!response.ok) {
+        throw new Error(`Erro ${response.status}: ${response.statusText}`);
+      }
+      
+      const pageData = await response.json();
+      
+      // Show page content in a clean modal-like alert
+      const content = pageData.page_content;
+      const truncatedContent = content.length > 500 ? content.substring(0, 500) + '...' : content;
+      
+      alert(`📄 PÁGINA ${pageNum} - ${pageData.filename}\n\n📖 CONTEÚDO:\n\n${truncatedContent}\n\n📊 Total de páginas: ${pageData.total_pages}\n\n💡 Dica: Este é o texto extraído exatamente desta página do documento original!`);
+      
+    } catch (error) {
+      console.error('Erro ao buscar conteúdo da página:', error);
+      alert(`📄 Página ${pageNum}\n\n❌ Não foi possível carregar o conteúdo da página.\n\nErro: ${error instanceof Error ? error.message : 'Erro desconhecido'}\n\n💡 Verifique sua conexão ou tente novamente mais tarde.`);
+    }
   };
 
   const getDetailedExplanation = (point: any) => {
@@ -289,62 +311,63 @@ export function AnalysisResult({ analysis }: AnalysisResultProps) {
                   
                   return (
                     <Collapsible key={point.id} open={isExpanded} onOpenChange={() => toggleExpanded(point.id)}>
-                      <div 
-                        className={cn(
-                          "p-4 rounded-md border-l-4",
-                          getPriorityColor(pointAny.priority || 'medium'),
-                          getStatusColor(point.status)
-                        )}
-                      >
-                        <div className="flex justify-between items-start">
-                          <div className="font-medium flex items-center gap-2">
-                            {point.title}
-                            {pointAny.value && (
-                              <Badge variant="outline" className="text-green-700 bg-green-50">
-                                {pointAny.value}
+                      <CollapsibleTrigger asChild>
+                        <div 
+                          className={cn(
+                            "p-4 rounded-md border-l-4 cursor-pointer hover:bg-gray-50 transition-colors",
+                            getPriorityColor(pointAny.priority || 'medium'),
+                            getStatusColor(point.status)
+                          )}
+                        >
+                          <div className="flex justify-between items-start">
+                            <div className="font-medium flex items-center gap-2">
+                              {point.title}
+                              {pointAny.value && (
+                                <Badge variant="outline" className="text-green-700 bg-green-50">
+                                  {pointAny.value}
+                                </Badge>
+                              )}
+                              {pointAny.page_reference && (
+                                <Badge variant="outline" className="text-blue-700 bg-blue-50">
+                                  <BookOpen className="h-3 w-3 mr-1" />
+                                  Pág. {pointAny.page_reference}
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex gap-2 items-center">
+                              <Badge variant="outline" className={getCategoryColor(category)}>
+                                {category}
                               </Badge>
-                            )}
-                            {pointAny.page_reference && (
-                              <Badge variant="outline" className="text-blue-700 bg-blue-50">
-                                <BookOpen className="h-3 w-3 mr-1" />
-                                Pág. {pointAny.page_reference}
+                              <Badge variant="outline">
+                                {point.status}
                               </Badge>
-                            )}
-                          </div>
-                          <div className="flex gap-2 items-center">
-                            <Badge variant="outline" className={getCategoryColor(category)}>
-                              {category}
-                            </Badge>
-                            <Badge variant="outline">
-                              {point.status}
-                            </Badge>
-                            {pointAny.priority && (
-                              <Badge 
-                                variant="outline" 
-                                className={
-                                  pointAny.priority === 'high' ? 'border-red-500 text-red-700' :
-                                  pointAny.priority === 'medium' ? 'border-yellow-500 text-yellow-700' :
-                                  'border-green-500 text-green-700'
-                                }
-                              >
-                                {pointAny.priority}
-                              </Badge>
-                            )}
-                            {hasDetails && (
-                              <CollapsibleTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                              {pointAny.priority && (
+                                <Badge 
+                                  variant="outline" 
+                                  className={
+                                    pointAny.priority === 'high' ? 'border-red-500 text-red-700' :
+                                    pointAny.priority === 'medium' ? 'border-yellow-500 text-yellow-700' :
+                                    'border-green-500 text-green-700'
+                                  }
+                                >
+                                  {pointAny.priority}
+                                </Badge>
+                              )}
+                              {hasDetails && (
+                                <div className="h-6 w-6 flex items-center justify-center">
                                   {isExpanded ? (
                                     <ChevronDown className="h-4 w-4" />
                                   ) : (
                                     <ChevronRight className="h-4 w-4" />
                                   )}
-                                </Button>
-                              </CollapsibleTrigger>
-                            )}
+                                </div>
+                              )}
+                            </div>
                           </div>
+                          
+                          <p className="mt-2 text-sm">{point.comment}</p>
                         </div>
-                        
-                        <p className="mt-2 text-sm">{point.comment}</p>
+                      </CollapsibleTrigger>
                         
                         {hasDetails && (
                           <CollapsibleContent className="mt-3">
@@ -363,7 +386,10 @@ export function AnalysisResult({ analysis }: AnalysisResultProps) {
                                     <Button 
                                       variant="outline" 
                                       size="sm" 
-                                      onClick={() => handleViewPage(pointAny.page_reference)}
+                                      onClick={(e) => {
+                                        e.stopPropagation(); // Prevent triggering the collapsible
+                                        handleViewPage(pointAny.page_reference, analysis.id);
+                                      }}
                                       className="h-7 text-xs bg-blue-100 hover:bg-blue-200 border-blue-300"
                                     >
                                       <ExternalLink className="h-3 w-3 mr-1" />
