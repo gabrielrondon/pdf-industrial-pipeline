@@ -58,7 +58,13 @@ class RailwayApiService {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `Upload failed: ${response.status}`);
+        
+        // Handle HTTPException detail format from FastAPI
+        if (errorData.detail && typeof errorData.detail === 'object') {
+          throw new Error(errorData.detail.message || errorData.detail.error || `Upload failed: ${response.status}`);
+        }
+        
+        throw new Error(errorData.message || errorData.error || `Upload failed: ${response.status}`);
       }
 
       return await response.json();

@@ -108,7 +108,17 @@ from datetime import datetime
 from typing import Dict, Any, List
 
 # Database import for PostgreSQL storage
+DATABASE_AVAILABLE = False
+jobs_storage = {}  # Fallback storage
+
 try:
+    import sys
+    import os
+    # Add the current directory to Python path
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    if current_dir not in sys.path:
+        sys.path.append(current_dir)
+    
     from database.connection import get_db
     from database.models import Job, TextAnalysis, MLPrediction
     from sqlalchemy.orm import Session
@@ -116,15 +126,19 @@ try:
     print("✅ Database models imported successfully")
 except ImportError as e:
     print(f"⚠️ Database not available: {e}")
+    print(f"📁 Current working directory: {os.getcwd()}")
+    print(f"🐍 Python path: {sys.path}")
     DATABASE_AVAILABLE = False
-    # Fallback to in-memory storage
-    jobs_storage = {}
+except Exception as e:
+    print(f"❌ Unexpected database error: {e}")
+    DATABASE_AVAILABLE = False
 
 # Real PDF text extraction and analysis functions
 def extract_text_from_pdf(file_path: str) -> tuple[str, dict]:
     """Extract text from PDF file using PyMuPDF with page tracking"""
     try:
         import fitz  # PyMuPDF
+        logger.info("✅ PyMuPDF imported successfully")
         doc = fitz.open(file_path)
         full_text = ""
         page_texts = {}
@@ -136,15 +150,22 @@ def extract_text_from_pdf(file_path: str) -> tuple[str, dict]:
             full_text += page_text + "\n"
         
         doc.close()
+        logger.info(f"✅ PDF text extraction completed: {len(full_text)} characters")
         return full_text, page_texts
-    except ImportError:
-        # Fallback if PyMuPDF not available
-        logger.warning("PyMuPDF not available, using mock text extraction")
-        mock_text = f"[Mock] Text extracted from PDF file at {file_path}. Leilão judicial de imóvel residencial. Valor de avaliação: R$ 250.000,00. Lance mínimo: R$ 175.000,00. Data do leilão: 15/02/2024. Contato: (11) 98765-4321. Email: leilao@tribunal.gov.br"
-        return mock_text, {1: mock_text}
+    except ImportError as import_error:
+        logger.warning(f"⚠️ PyMuPDF (fitz) not available: {import_error}")
+        # Fallback: return filename as text
+        import os
+        filename = os.path.basename(file_path)
+        fallback_text = f"Documento PDF: {filename}\nTexto extraído automaticamente usando fallback."
+        logger.info("🔄 Using fallback text extraction")
+        return fallback_text, {1: fallback_text}
     except Exception as e:
-        logger.error(f"PDF text extraction failed: {str(e)}")
-        mock_text = f"[Error] Could not extract text: {str(e)}. Mock text: leilão judicial, imóvel residencial, valor de avaliação R$ 250.000,00, contato (11) 98765-4321."
+        logger.error(f"❌ PDF text extraction failed: {str(e)}")
+        import os
+        filename = os.path.basename(file_path)
+        mock_text = f"[Error] Could not extract text from {filename}: {str(e)}. Mock text: leilão judicial, imóvel residencial, valor de avaliação R$ 250.000,00, contato (11) 98765-4321."
+        logger.info("🔄 Using error fallback text")
         return mock_text, {1: mock_text}
 
 def is_judicial_document(text: str) -> bool:
@@ -524,6 +545,8 @@ def perform_comprehensive_analysis(text: str, page_texts: dict, filename: str) -
 async def upload_file(file: UploadFile = File(...)):
     """Upload PDF file for processing"""
     try:
+        logger.info(f"🚀 Starting upload for file: {file.filename}")
+        
         # Validate file type
         if not file.filename.lower().endswith('.pdf'):
             raise HTTPException(status_code=400, detail="Only PDF files are allowed")
@@ -531,19 +554,22 @@ async def upload_file(file: UploadFile = File(...)):
         # Validate file size (500MB limit)
         max_size = 500 * 1024 * 1024  # 500MB
         content = await file.read()
+        logger.info(f"📁 File size: {len(content)} bytes")
         if len(content) > max_size:
             raise HTTPException(status_code=400, detail="File too large (max 500MB)")
         
         # Generate job ID
         job_id = str(uuid.uuid4())
+        logger.info(f"🆔 Generated job ID: {job_id}")
         
         # Save file temporarily (in production, save to proper storage)
         with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:
             tmp.write(content)
             file_path = tmp.name
+        logger.info(f"💾 Saved temporary file: {file_path}")
         
         # Extract text from PDF for real analysis with page tracking
-        logger.info(f"Extracting text from PDF: {file.filename}")
+        logger.info(f"🔍 Extracting text from PDF: {file.filename}")
         extracted_text, page_texts = extract_text_from_pdf(file_path)
         
         # Perform comprehensive analysis on the extracted text with page tracking
@@ -638,8 +664,22 @@ async def upload_file(file: UploadFile = File(...)):
     except HTTPException:
         raise
     except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
         logger.error(f"Upload error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
+        logger.error(f"Full traceback: {error_details}")
+        
+        # Return as proper error response with 500 status
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "success": False,
+                "error": str(e),
+                "error_type": type(e).__name__,
+                "database_available": DATABASE_AVAILABLE,
+                "message": f"Erro no upload: {str(e)}"
+            }
+        )
 
 @app.post("/api/v1/semantic-search")
 async def semantic_search(request: dict):
