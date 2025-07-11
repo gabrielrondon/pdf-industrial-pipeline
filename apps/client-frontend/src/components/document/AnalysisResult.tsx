@@ -449,7 +449,6 @@ export function AnalysisResult({ analysis }: AnalysisResultProps) {
                             </div>
                           </CollapsibleContent>
                         )}
-                      </div>
                     </Collapsible>
                   );
                 })}
