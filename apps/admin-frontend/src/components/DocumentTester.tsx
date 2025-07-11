@@ -37,7 +37,7 @@ const DocumentTester: React.FC = () => {
       formData.append('file', selectedFile)
       formData.append('analysis_type', analysisType)
 
-      const response = await fetch('/api/v1/upload', {
+      const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData
       })
@@ -52,7 +52,9 @@ const DocumentTester: React.FC = () => {
         // Poll for completion
         pollJobStatus(result.job_id)
       } else {
-        throw new Error('Upload failed')
+        const errorData = await response.json().catch(() => ({ detail: 'Upload failed' }))
+        console.error('Upload error:', { status: response.status, error: errorData })
+        throw new Error(errorData.detail || errorData.message || `Upload failed with status ${response.status}`)
       }
     } catch (error) {
       setProcessingResult({
@@ -71,7 +73,7 @@ const DocumentTester: React.FC = () => {
 
     const poll = async () => {
       try {
-        const response = await fetch(`/api/v1/jobs/${jobId}/status`)
+        const response = await fetch(`/api/job/${jobId}/status`)
         if (response.ok) {
           const status = await response.json()
           
@@ -79,7 +81,7 @@ const DocumentTester: React.FC = () => {
             setProcessingResult({
               jobId,
               status: 'completed',
-              result: status.result,
+              result: status.results || status.result,
               processingTime: status.processing_time
             })
             return
@@ -87,10 +89,14 @@ const DocumentTester: React.FC = () => {
             setProcessingResult({
               jobId,
               status: 'failed',
-              error: status.error
+              error: status.error_message || status.error
             })
             return
           }
+        } else {
+          const errorData = await response.json().catch(() => ({ detail: 'Status check failed' }))
+          console.error('Status check error:', { status: response.status, error: errorData })
+          throw new Error(errorData.detail || `Status check failed with status ${response.status}`)
         }
 
         attempts++
