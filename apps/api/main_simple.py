@@ -107,8 +107,18 @@ import re
 from datetime import datetime
 from typing import Dict, Any, List
 
-# In-memory job storage for demo (use database in production)
-jobs_storage = {}
+# Database import for PostgreSQL storage
+try:
+    from database.connection import get_db
+    from database.models import Job, TextAnalysis, MLPrediction
+    from sqlalchemy.orm import Session
+    DATABASE_AVAILABLE = True
+    print("✅ Database models imported successfully")
+except ImportError as e:
+    print(f"⚠️ Database not available: {e}")
+    DATABASE_AVAILABLE = False
+    # Fallback to in-memory storage
+    jobs_storage = {}
 
 # Real PDF text extraction and analysis functions
 def extract_text_from_pdf(file_path: str) -> tuple[str, dict]:
@@ -546,18 +556,75 @@ async def upload_file(file: UploadFile = File(...)):
         
         logger.info(f"Analysis completed: {len(analysis_points)} points identified")
         
-        # Store job info with real analysis results and page tracking
-        jobs_storage[job_id] = {
-            "job_id": job_id,
-            "filename": file.filename,
-            "file_size": len(content),
-            "status": "completed",
-            "file_path": file_path,
-            "extracted_text_length": len(extracted_text),
-            "total_pages": len(page_texts),
-            "page_texts": page_texts,  # Store page-by-page text for future reference
-            "results": analysis_results  # Real analysis results from comprehensive analysis
-        }
+        # Store job info in PostgreSQL (or fallback to memory)
+        if DATABASE_AVAILABLE:
+            try:
+                # Save to PostgreSQL database
+                db_session = next(get_db())
+                
+                # Create Job record
+                job_record = Job(
+                    id=job_id,
+                    user_id=job_id,  # Temporary: usar job_id como user_id
+                    filename=file.filename,
+                    file_size=len(content),
+                    status="completed",
+                    page_count=len(page_texts),
+                    processing_completed_at=datetime.now(),
+                    processing_time_seconds=1.0,  # Placeholder
+                    config={"extracted_text_length": len(extracted_text)}
+                )
+                db_session.add(job_record)
+                
+                # Create TextAnalysis record
+                text_analysis = TextAnalysis(
+                    job_id=job_id,
+                    entities={"analysis_points": analysis_points},
+                    keywords=list(set([point.get('title', '') for point in analysis_points])),
+                    business_indicators=analysis_results.get('summary', {}),
+                    financial_data=analysis_results.get('financial_summary', {})
+                )
+                db_session.add(text_analysis)
+                
+                # Create MLPrediction record
+                ml_prediction = MLPrediction(
+                    job_id=job_id,
+                    model_name="comprehensive_analyzer",
+                    model_version="1.0",
+                    lead_score=analysis_results.get('overall_score', 0.5),
+                    confidence=0.85,  # High confidence for rule-based analysis
+                    predictions=analysis_results
+                )
+                db_session.add(ml_prediction)
+                
+                db_session.commit()
+                db_session.close()
+                
+                logger.info(f"✅ Job {job_id} saved to PostgreSQL database")
+                
+            except Exception as e:
+                logger.error(f"❌ Error saving to database: {e}")
+                # Fallback to memory storage
+                jobs_storage[job_id] = {
+                    "job_id": job_id,
+                    "filename": file.filename,
+                    "file_size": len(content),
+                    "status": "completed",
+                    "results": analysis_results
+                }
+        else:
+            # Fallback to memory storage
+            jobs_storage[job_id] = {
+                "job_id": job_id,
+                "filename": file.filename,
+                "file_size": len(content),
+                "status": "completed",
+                "file_path": file_path,
+                "extracted_text_length": len(extracted_text),
+                "total_pages": len(page_texts),
+                "page_texts": page_texts,
+                "results": analysis_results
+            }
         
         logger.info(f"File uploaded successfully: {file.filename} ({len(content)} bytes)")
         
@@ -574,9 +641,172 @@ async def upload_file(file: UploadFile = File(...)):
         logger.error(f"Upload error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
 
+@app.post("/api/v1/semantic-search")
+async def semantic_search(request: dict):
+    """Busca semântica nos documentos processados"""
+    try:
+        query = request.get('query', '').strip()
+        document_ids = request.get('documentIds', [])
+        limit = request.get('limit', 10)
+        threshold = request.get('threshold', 0.6)
+        
+        if not query:
+            raise HTTPException(status_code=400, detail="Query é obrigatória")
+        
+        logger.info(f"Semantic search: '{query}' (docs: {len(document_ids)}, limit: {limit})")
+        
+        # Buscar nos jobs armazenados
+        results = []
+        search_method = "text_based"  # Para agora, busca baseada em texto
+        
+        if DATABASE_AVAILABLE:
+            try:
+                db_session = next(get_db())
+                
+                # Buscar jobs no PostgreSQL
+                query_builder = db_session.query(Job, TextAnalysis).join(
+                    TextAnalysis, Job.id == TextAnalysis.job_id
+                ).filter(Job.status == 'completed')
+                
+                if document_ids:
+                    query_builder = query_builder.filter(Job.id.in_(document_ids))
+                
+                jobs_with_analysis = query_builder.all()
+                
+                # Busca simples por palavras-chave
+                query_words = query.lower().split()
+                
+                for job, analysis in jobs_with_analysis:
+                    # Verificar se a query está nas keywords ou entidades
+                    keywords = analysis.keywords or []
+                    entities_text = str(analysis.entities or {}).lower()
+                    business_text = str(analysis.business_indicators or {}).lower()
+                    
+                    # Calcular similaridade simples baseada em matches de palavras
+                    matches = 0
+                    total_text = ' '.join(keywords).lower() + ' ' + entities_text + ' ' + business_text
+                    
+                    for word in query_words:
+                        if word in total_text:
+                            matches += 1
+                    
+                    similarity = matches / len(query_words) if query_words else 0
+                    
+                    if similarity >= threshold:
+                        results.append({
+                            'chunkId': str(job.id),
+                            'content': f"Análise de {job.filename}: {', '.join(keywords[:5])}...",
+                            'similarity': similarity,
+                            'wordCount': len(keywords),
+                            'pageStart': 1,
+                            'pageEnd': job.page_count or 1,
+                            'document': {
+                                'id': str(job.id),
+                                'file_name': job.filename,
+                                'type': 'documento'
+                            }
+                        })
+                
+                db_session.close()
+                search_method = "postgresql_text_search"
+                
+            except Exception as e:
+                logger.error(f"Database search error: {e}")
+                # Fallback para busca em memória
+                pass
+        
+        # Fallback: busca em jobs_storage se database não disponível
+        if not results and not DATABASE_AVAILABLE:
+            for job_id, job_data in jobs_storage.items():
+                if document_ids and job_id not in document_ids:
+                    continue
+                
+                # Busca simples no texto extraído e resultados
+                job_text = (
+                    job_data.get('filename', '') + ' ' +
+                    str(job_data.get('results', {}))
+                ).lower()
+                
+                # Calcular matches simples
+                matches = sum(1 for word in query.lower().split() if word in job_text)
+                similarity = matches / len(query.split()) if query.split() else 0
+                
+                if similarity >= threshold:
+                    results.append({
+                        'chunkId': job_id,
+                        'content': f"Documento: {job_data.get('filename', 'Unknown')}",
+                        'similarity': similarity,
+                        'wordCount': len(job_text.split()),
+                        'pageStart': 1,
+                        'pageEnd': job_data.get('total_pages', 1),
+                        'document': {
+                            'id': job_id,
+                            'file_name': job_data.get('filename', 'Unknown'),
+                            'type': 'documento'
+                        }
+                    })
+            
+            search_method = "memory_text_search"
+        
+        # Ordenar por similaridade
+        results.sort(key=lambda x: x['similarity'], reverse=True)
+        results = results[:limit]
+        
+        logger.info(f"Search completed: {len(results)} results found using {search_method}")
+        
+        return {
+            "success": True,
+            "results": results,
+            "searchMethod": search_method,
+            "query": query,
+            "totalResults": len(results)
+        }
+        
+    except Exception as e:
+        logger.error(f"Semantic search error: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "results": [],
+            "searchMethod": "error"
+        }
+
 @app.get("/api/v1/jobs/{job_id}")
 async def get_job(job_id: str):
     """Get job status and results"""
+    if DATABASE_AVAILABLE:
+        try:
+            db_session = next(get_db())
+            
+            # Buscar job no PostgreSQL
+            job = db_session.query(Job).filter(Job.id == job_id).first()
+            if not job:
+                raise HTTPException(status_code=404, detail="Job not found")
+            
+            # Buscar análises relacionadas
+            text_analysis = db_session.query(TextAnalysis).filter(TextAnalysis.job_id == job_id).first()
+            ml_prediction = db_session.query(MLPrediction).filter(MLPrediction.job_id == job_id).first()
+            
+            db_session.close()
+            
+            # Formar resposta no formato esperado
+            return {
+                "job_id": str(job.id),
+                "filename": job.filename,
+                "file_size": job.file_size,
+                "status": job.status,
+                "total_pages": job.page_count,
+                "results": ml_prediction.predictions if ml_prediction else {},
+                "lead_score": ml_prediction.lead_score if ml_prediction else 0.5,
+                "confidence": ml_prediction.confidence if ml_prediction else 0.5
+            }
+            
+        except Exception as e:
+            logger.error(f"Database error: {e}")
+            # Fallback to memory
+            pass
+    
+    # Fallback para memória
     if job_id not in jobs_storage:
         raise HTTPException(status_code=404, detail="Job not found")
     
@@ -585,6 +815,40 @@ async def get_job(job_id: str):
 @app.get("/api/v1/jobs")
 async def list_jobs():
     """List all jobs"""
+    if DATABASE_AVAILABLE:
+        try:
+            db_session = next(get_db())
+            
+            # Buscar todos os jobs no PostgreSQL
+            jobs = db_session.query(Job).order_by(Job.created_at.desc()).limit(100).all()
+            
+            results = []
+            for job in jobs:
+                # Buscar ML prediction para lead score
+                ml_prediction = db_session.query(MLPrediction).filter(MLPrediction.job_id == job.id).first()
+                
+                results.append({
+                    "job_id": str(job.id),
+                    "filename": job.filename,
+                    "file_size": job.file_size,
+                    "status": job.status,
+                    "created_at": job.created_at.isoformat(),
+                    "total_pages": job.page_count,
+                    "lead_score": ml_prediction.lead_score if ml_prediction else 0.5,
+                    "user_id": str(job.user_id)
+                })
+            
+            db_session.close()
+            
+            logger.info(f"📊 Retornando {len(results)} jobs do PostgreSQL")
+            return results
+            
+        except Exception as e:
+            logger.error(f"Database error: {e}")
+            # Fallback to memory
+            pass
+    
+    # Fallback para memória
     return list(jobs_storage.values())
 
 @app.get("/api/v1/jobs/{job_id}/page/{page_num}")

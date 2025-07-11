@@ -61,6 +61,13 @@ export interface DashboardStats {
   documentTypes: { type: DocumentType; count: number }[];
   statusDistribution: { status: AnalysisStatus; count: number }[];
   commonIssues: { issue: string; count: number }[];
+  // Novas métricas para estatísticas mais ricas
+  monthlyAnalyses?: { month: string; analyses: number; leads: number }[];
+  successRate?: number;
+  averageProcessingTime?: number;
+  totalFileSize?: number;
+  averageConfidence?: number;
+  topPerformingDocumentType?: DocumentType;
 }
 
 export interface CreditTransaction {

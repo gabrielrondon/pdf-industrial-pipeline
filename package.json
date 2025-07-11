@@ -19,7 +19,9 @@
     "build:admin": "npm run build --workspace=apps/admin-frontend",
     "start:api": "cd apps/api && python main_v2.py",
     "setup": "npm install && cd apps/api && pip install -r requirements.txt",
-    "start:all": "concurrently \"npm run dev:client\" \"npm run dev:admin\" \"npm run dev:api\""
+    "start:all": "concurrently \"npm run dev:client\" \"npm run dev:admin\" \"npm run dev:api\"",
+    "lint:architecture": "node scripts/architecture-lint.js",
+    "check:architecture": "npm run lint:architecture"
   },
   "devDependencies": {
     "@types/node": "^22.5.5",

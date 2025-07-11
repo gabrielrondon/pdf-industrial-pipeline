@@ -88,6 +88,19 @@ app.conf.update(
             'task': 'tasks.maintenance_tasks.health_check',
             'schedule': 300.0,  # Every 5 minutes
         },
+        # 🤖 NOVOS TASKS DE INTELIGÊNCIA AUTOMÁTICA
+        'auto-retraining-check': {
+            'task': 'tasks.ml_tasks.run_auto_retraining',
+            'schedule': 86400.0,  # Daily - verifica se precisa retreinar
+        },
+        'identify-uncertain-predictions': {
+            'task': 'tasks.ml_tasks.identify_uncertain_cases',
+            'schedule': 21600.0,  # Every 6 hours - identifica casos incertos
+        },
+        'process-pending-feedback': {
+            'task': 'tasks.ml_tasks.process_feedback_batch',
+            'schedule': 43200.0,  # Every 12 hours - processa feedback acumulado
+        },
         'model-performance-check': {
             'task': 'tasks.ml_tasks.check_model_performance',
             'schedule': 86400.0,  # Daily

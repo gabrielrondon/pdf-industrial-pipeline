@@ -1,10 +1,10 @@
-# CLAUDE.md
+# CLAUDE.md - CLIENT FRONTEND
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with the client frontend of this repository.
 
 ## Project Overview
 
-Arremate360 Lead Analyzer is a React/TypeScript application for analyzing Brazilian auction documents (editais de leilão). It uses Supabase for backend services, Stripe for payments, and offers both native rule-based analysis and AI-powered analysis using multiple models.
+PDF Industrial Pipeline Client Frontend - React/TypeScript application for analyzing Brazilian judicial auction documents. **Uses Railway API as primary backend**, with Supabase only for authentication, profiles, and subscription management.
 
 ## Common Commands
 
@@ -32,22 +32,18 @@ supabase functions secrets set   # Set environment variables for functions
 - **Routing**: React Router v6
 - **Forms**: React Hook Form with Zod validation
 
-### Backend Architecture (Supabase)
-- **Database**: PostgreSQL with Row Level Security and vector embeddings
-- **Authentication**: Supabase Auth with persistent sessions and password reset
-- **Storage**: File storage for PDF documents
-- **Edge Functions**: 11 serverless functions handling business logic:
-  - `analyze-document`: Document processing and AI analysis
-  - `process-document-chunks`: Background document chunking and embedding generation
-  - `semantic-search`: AI-powered document search using OpenAI embeddings
-  - `setup-vector-tables`: Database schema setup for vector operations
-  - `create-checkout`: Stripe payment initialization
-  - `create-upgrade`: Plan upgrade handling
-  - `customer-portal`: Stripe portal access
-  - `check-subscription`: Subscription validation
-  - `calculate-proration`: Billing calculations
-  - `manage-credits`: Credit system operations
-  - `toggle-document-privacy`: Lead sharing controls
+### Backend Architecture
+**PRIMARY: Railway API (PostgreSQL + FastAPI)**
+- **Database**: PostgreSQL with comprehensive models (Job, User, TextAnalysis, MLPrediction, JudicialAnalysis)
+- **Processing**: 7-stage PDF pipeline with ML/AI capabilities
+- **Storage**: File uploads and document processing
+- **APIs**: FastAPI with async/await, comprehensive endpoints
+
+**SECONDARY: Supabase (Auth + UI Support Only)**
+- **Authentication**: Supabase Auth with persistent sessions
+- **Profiles**: User profiles, credits, subscription management
+- **Payments**: Stripe integration via Edge Functions
+- **Edge Functions**: Limited to auth/payments/credits (NOT document processing)
 
 ### Authentication System
 - Context-based authentication with SSR-safe patterns
@@ -56,15 +52,18 @@ supabase functions secrets set   # Set environment variables for functions
 - Recent fixes for SSR/hydration issues and session management
 
 ### Document Processing Workflow
-1. PDF upload to Supabase Storage
-2. Choice between native analyzer (Brazilian legal documents) or AI models
-3. Background processing: document chunking and embedding generation
-4. Native processing uses rule-based analysis with legal citations
-5. AI processing supports OpenAI, Anthropic Claude, and Mistral models
-6. Semantic search capability using vector embeddings and cosine similarity
-7. Results stored in `documents`, `analysis_points`, `document_chunks`, and `document_embeddings` tables
-8. Real-time processing status tracking with job management
-9. Automatic lead extraction and community sharing features
+**⚠️ IMPORTANT: ALL DOCUMENT PROCESSING VIA RAILWAY API**
+1. PDF upload via `railwayApi.uploadDocument()` → Railway FastAPI
+2. Processing via Railway's 7-stage pipeline (ingestion → chunking → OCR → NLP → ML → judicial analysis → delivery)
+3. Status monitoring via `railwayApi.getJobStatus(jobId)`
+4. Results retrieved from Railway PostgreSQL database
+5. UI displays results via `getUserDocuments()` → Railway API
+
+**Document display flow:**
+- `SimpleDocumentUploader` → Railway API upload
+- `useDocumentUpload` hook → Railway API processing  
+- `SupabaseService.getUserDocuments()` → **FETCHES FROM RAILWAY** (not Supabase)
+- `getDashboardStats()` → **FETCHES FROM RAILWAY** (not Supabase)
 
 ### Payment System
 - Stripe integration with subscription tiers: Free, Pro (R$39), Premium (R$99)
@@ -88,13 +87,20 @@ Required in `.env` file:
 
 ## Database Schema
 
-Core tables:
+**Railway PostgreSQL (PRIMARY - Document Processing):**
+- `jobs`: PDF processing jobs (equivalent to documents)
+- `job_chunks`: PDF page chunks for parallel processing
+- `text_analyses`: NLP analysis results
+- `ml_predictions`: Machine learning predictions
+- `judicial_analyses`: Brazilian legal document analysis
+- `embeddings`: Vector embeddings for semantic search
+- `users`: Railway's own user management
+
+**Supabase PostgreSQL (SECONDARY - Auth & UI):**
 - `profiles`: User profiles with plan and credit information
-- `documents`: Uploaded PDF documents and metadata
-- `analysis_points`: Extracted analysis results and legal citations
-- `document_chunks`: Text chunks for semantic search processing
-- `document_embeddings`: Vector embeddings for AI-powered search
-- `processing_jobs`: Background job tracking and status management
+- `subscriptions`: Stripe subscription management
+- `credit_transactions`: Credit earning/spending tracking
+- ⚠️ `documents` & `analysis_points`: **DEPRECATED** - não usar mais
 
 ## Key Features
 

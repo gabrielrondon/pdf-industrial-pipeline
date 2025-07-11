@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Search, FileText, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { supabase } from '@/integrations/supabase/client';
+import { railwayApi } from '@/services/railwayApiService';
 import { toast } from '@/components/ui/use-toast';
 
 interface SearchResult {
@@ -46,25 +46,27 @@ export function SemanticSearch({ documentIds, onResultClick }: SemanticSearchPro
 
     setIsSearching(true);
     try {
-      const { data, error } = await supabase.functions.invoke('semantic-search', {
-        body: {
+      // Usar Railway API para busca semântica
+      const searchData = await railwayApi.makeRequest('/api/v1/semantic-search', {
+        method: 'POST',
+        body: JSON.stringify({
           query: query.trim(),
           documentIds,
           limit: 10,
           threshold: 0.6
-        }
+        })
       });
 
-      if (error) {
-        throw new Error(error.message);
+      if (!searchData.success) {
+        throw new Error(searchData.error || 'Erro na busca');
       }
 
-      setResults(data.results || []);
-      setSearchMethod(data.searchMethod || 'unknown');
+      setResults(searchData.results || []);
+      setSearchMethod(searchData.searchMethod || 'railway_api');
       
       toast({
         title: "Busca concluída",
-        description: `Encontrados ${data.results?.length || 0} trechos relevantes.`,
+        description: `Encontrados ${searchData.results?.length || 0} trechos relevantes.`,
       });
 
     } catch (error) {

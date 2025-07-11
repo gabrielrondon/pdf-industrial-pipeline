@@ -1,11 +1,10 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { SupabaseService } from '@/services/supabaseService';
-import { supabase } from '@/integrations/supabase/client';
 import { DocumentAnalysis, DocumentType } from '@/types';
 import { AIModel } from '@/components/document/ModelSelector';
-import { UploadDocumentParams, DocumentUploadResult } from '../types/documentTypes';
+import { railwayApi } from '@/services/railwayApiService';
+import { transformRailwayResultsToDocumentAnalysis } from '@/utils/dataTransformers';
 
 export function useDocumentUpload() {
   const { user } = useAuth();
@@ -17,89 +16,64 @@ export function useDocumentUpload() {
     }
 
     setIsLoading(true);
-    const startTime = Date.now();
     
     try {
-      // Track upload event
-      await SupabaseService.trackEvent(user.id, 'document_upload_started', {
-        fileName: file.name,
-        fileSize: file.size,
-        analysisModel
-      });
-
-      // Upload file to storage
-      const fileUrl = await SupabaseService.uploadDocument(file, user.id);
+      console.log('🚂 Uploading document via Railway API...');
       
-      // Determine document type
-      const documentType: DocumentType = 
-        file.name.toLowerCase().includes('edital') ? 'edital' :
-        file.name.toLowerCase().includes('processo') ? 'processo' :
-        file.name.toLowerCase().includes('laudo') ? 'laudo' : 'outro';
-
-      // Call edge function for analysis
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('model', analysisModel);
-      formData.append('documentType', documentType);
-
-      const response = await supabase.functions.invoke('analyze-document', {
-        body: formData
-      });
-
-      if (response.error) {
-        throw new Error(response.error.message);
+      // Upload and process via Railway API
+      const uploadResult = await railwayApi.uploadDocument(file);
+      
+      if (!uploadResult.success) {
+        throw new Error(uploadResult.error || 'Upload failed');
       }
 
-      const analysisResult = response.data;
-      const analysisDurationMs = Date.now() - startTime;
+      // If we have a job_id, monitor the processing
+      if (uploadResult.job_id) {
+        console.log('📡 Monitoring job:', uploadResult.job_id);
+        
+        // Poll for completion (simplified version)
+        let attempts = 0;
+        const maxAttempts = 30; // 2.5 minutes max
+        
+        while (attempts < maxAttempts) {
+          const jobStatus = await railwayApi.getJobStatus(uploadResult.job_id);
+          
+          if (jobStatus.status === 'completed') {
+            // Transform Railway results to DocumentAnalysis format
+            return transformRailwayResultsToDocumentAnalysis(
+              jobStatus.results || jobStatus,
+              uploadResult.job_id,
+              file.name
+            );
+          }
+          
+          if (jobStatus.status === 'failed') {
+            throw new Error(jobStatus.error || 'Processing failed');
+          }
+          
+          // Wait 5 seconds before next check
+          await new Promise(resolve => setTimeout(resolve, 5000));
+          attempts++;
+        }
+        
+        throw new Error('Processing timeout - job taking too long');
+      }
 
-      // Save document to database
-      const documentId = await SupabaseService.saveDocumentAnalysis(
-        user.id,
-        file.name,
-        fileUrl,
-        file.size,
-        file.type,
-        analysisModel,
-        analysisDurationMs,
-        documentType,
-        user.plan === 'free' ? false : true
-      );
-
-      // Save analysis points and leads
-      await SupabaseService.saveAnalysisPoints(documentId, analysisResult.points);
-      await SupabaseService.saveLeads(documentId, user.id, analysisResult.points);
-
-      // Track completion
-      await SupabaseService.trackEvent(user.id, 'document_analysis_completed', {
-        documentId,
-        pointsCount: analysisResult.points.length,
-        analysisDurationMs,
-        analysisModel
-      });
-
-      const newDocument: DocumentAnalysis = {
-        id: documentId,
+      // If no job tracking, create a basic document analysis
+      return {
+        id: uploadResult.job_id || 'temp-' + Date.now(),
         userId: user.id,
         fileName: file.name,
-        fileUrl,
-        type: documentType,
+        fileUrl: '',
+        type: determineDocumentType(file.name),
         uploadedAt: new Date().toISOString(),
         analyzedAt: new Date().toISOString(),
-        isPrivate: user.plan === 'free' ? false : true,
-        points: analysisResult.points
+        isPrivate: false,
+        points: []
       };
 
-      return newDocument;
     } catch (error) {
-      console.error('Error uploading document:', error);
-      
-      // Track error
-      await SupabaseService.trackEvent(user.id, 'document_upload_error', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        fileName: file.name
-      });
-      
+      console.error('❌ Railway upload error:', error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -107,4 +81,13 @@ export function useDocumentUpload() {
   };
 
   return { uploadDocument, isLoading };
+}
+
+// Helper function
+function determineDocumentType(filename: string): DocumentType {
+  const name = filename.toLowerCase();
+  if (name.includes('edital')) return 'edital';
+  if (name.includes('processo')) return 'processo';
+  if (name.includes('laudo')) return 'laudo';
+  return 'outro';
 }

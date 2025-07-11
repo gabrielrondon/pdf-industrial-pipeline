@@ -20,7 +20,7 @@ export interface JobStatus {
 }
 
 class RailwayApiService {
-  private async makeRequest(endpoint: string, options: RequestInit = {}) {
+  async makeRequest(endpoint: string, options: RequestInit = {}) {
     const url = `${API_BASE_URL}${endpoint}`;
     
     try {
