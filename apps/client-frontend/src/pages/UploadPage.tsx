@@ -1,6 +1,5 @@
 
 import { useState } from 'react';
-import { DocumentUploader } from '@/components/document/DocumentUploader';
 import { SimpleDocumentUploader } from '@/components/document/SimpleDocumentUploader';
 import { ApiTest } from '@/components/debug/ApiTest';
 import { DocumentAnalysis } from '@/types';
@@ -89,11 +88,6 @@ export default function UploadPage() {
             <SimpleDocumentUploader 
               onAnalysisComplete={handleAnalysisComplete} 
             />
-            
-            {/* Componente original (com problemas de RLS) - mantido para referência */}
-            {/* <DocumentUploader 
-              onAnalysisComplete={handleAnalysisComplete} 
-            /> */}
             
             <FeaturesSection />
           </div>
