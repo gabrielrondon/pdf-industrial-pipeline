@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { railwayApi, JobStatus } from '@/services/railwayApiService';
+import { transformRailwayResultsToDocumentAnalysis } from '@/utils/dataTransformers';
 
 interface SimpleDocumentUploaderProps {
   onAnalysisComplete?: (results: any) => void;
@@ -35,7 +36,7 @@ export function SimpleDocumentUploader({ onAnalysisComplete }: SimpleDocumentUpl
       return 'Apenas arquivos PDF são permitidos';
     }
 
-    const maxSize = parseInt(import.meta.env.VITE_MAX_FILE_SIZE || '524288000'); // 500MB default
+    const maxSize = parseInt(import.meta.env.VITE_MAX_FILE_SIZE || '104857600'); // 100MB default
     if (file.size > maxSize) {
       const maxSizeMB = Math.round(maxSize / (1024 * 1024));
       return `Arquivo muito grande. Máximo permitido: ${maxSizeMB}MB`;
@@ -137,7 +138,13 @@ export function SimpleDocumentUploader({ onAnalysisComplete }: SimpleDocumentUpl
               description: "Análise do documento finalizada.",
             });
             if (onAnalysisComplete && status.results) {
-              onAnalysisComplete(status.results);
+              // Transform Railway API results to DocumentAnalysis format
+              const documentAnalysis = transformRailwayResultsToDocumentAnalysis(
+                status.results,
+                jobId,
+                file?.name || 'documento.pdf'
+              );
+              onAnalysisComplete(documentAnalysis);
             }
             return; // Para o loop
           case 'failed':

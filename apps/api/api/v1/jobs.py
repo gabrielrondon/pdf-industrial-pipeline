@@ -182,6 +182,11 @@ async def get_job_status(
         except Exception as e:
             logger.warning(f"Could not get task status: {str(e)}")
     
+    # Get analysis results if job is completed
+    results = None
+    if job.status == "completed" and job.config and "analysis_results" in job.config:
+        results = job.config["analysis_results"]
+    
     return JobStatusResponse(
         job_id=job_id,
         status=job.status,
@@ -193,7 +198,8 @@ async def get_job_status(
         processing_completed_at=job.processing_completed_at,
         error_message=job.error_message,
         task_status=task_status,
-        task_info=task_info
+        task_info=task_info,
+        results=results
     )
 
 

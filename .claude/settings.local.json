@@ -29,7 +29,9 @@
       "Bash(npm ci:*)",
       "Bash(cat:*)",
       "Bash(git check-ignore:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(railway projects:*)",
+      "Bash(railway:*)"
     ],
     "deny": []
   }

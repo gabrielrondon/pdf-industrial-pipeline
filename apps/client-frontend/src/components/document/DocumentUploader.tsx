@@ -55,8 +55,8 @@ export function DocumentUploader({ onAnalysisComplete }: DocumentUploaderProps) 
       return;
     }
     
-    if (selectedFile.size > 50 * 1024 * 1024) {
-      setError('O arquivo é muito grande. O tamanho máximo é de 50MB.');
+    if (selectedFile.size > 100 * 1024 * 1024) {
+      setError('O arquivo é muito grande. O tamanho máximo é de 100MB.');
       return;
     }
     
@@ -82,8 +82,8 @@ export function DocumentUploader({ onAnalysisComplete }: DocumentUploaderProps) 
         return;
       }
       
-      if (droppedFile.size > 50 * 1024 * 1024) {
-        setError('O arquivo é muito grande. O tamanho máximo é de 50MB.');
+      if (droppedFile.size > 100 * 1024 * 1024) {
+        setError('O arquivo é muito grande. O tamanho máximo é de 100MB.');
         return;
       }
       
@@ -548,7 +548,7 @@ export function DocumentUploader({ onAnalysisComplete }: DocumentUploaderProps) 
                 <Upload className="h-10 w-10 text-muted-foreground" />
                 <h3 className="font-medium text-lg">Arraste um arquivo ou clique para selecionar</h3>
                 <p className="text-sm text-muted-foreground">
-                  Suportamos arquivos PDF de até 50MB e 1000 páginas
+                  Suportamos arquivos PDF de até 100MB e 1000 páginas
                 </p>
                 {file && (
                   <div className="mt-2 flex items-center gap-2 text-sm bg-secondary/10 p-2 rounded-md">

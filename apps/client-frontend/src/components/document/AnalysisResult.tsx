@@ -101,8 +101,8 @@ export function AnalysisResult({ analysis }: AnalysisResultProps) {
   
   const canTogglePrivacy = user?.plan !== 'free';
   
-  // Agrupar leads por categoria
-  const leadsByCategory = analysis.points.reduce((acc, point) => {
+  // Agrupar leads por categoria - with null safety
+  const leadsByCategory = (analysis.points || []).reduce((acc, point) => {
     const category = (point as any).category || 'geral';
     if (!acc[category]) {
       acc[category] = [];
@@ -111,9 +111,9 @@ export function AnalysisResult({ analysis }: AnalysisResultProps) {
     return acc;
   }, {} as Record<string, typeof analysis.points>);
   
-  // Estatísticas dos leads
-  const totalLeads = analysis.points.length;
-  const highPriorityLeads = analysis.points.filter(p => (p as any).priority === 'high').length;
+  // Estatísticas dos leads - with null safety
+  const totalLeads = (analysis.points || []).length;
+  const highPriorityLeads = (analysis.points || []).filter(p => (p as any).priority === 'high').length;
   const categories = Object.keys(leadsByCategory);
   
   return (

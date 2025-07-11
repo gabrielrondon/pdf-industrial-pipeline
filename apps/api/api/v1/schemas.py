@@ -66,6 +66,7 @@ class JobStatusResponse(BaseModel):
     error_message: Optional[str] = None
     task_status: Optional[str] = None
     task_info: Optional[Dict[str, Any]] = None
+    results: Optional[Dict[str, Any]] = None
 
 
 # Authentication Schemas

@@ -4,8 +4,7 @@
   "private": true,
   "description": "PDF Industrial Pipeline - Monorepo for client frontend, admin interface, and API",
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "apps/*"
   ],
   "scripts": {
     "dev": "npm run dev --workspaces --if-present",
