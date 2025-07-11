@@ -235,9 +235,10 @@ export class SupabaseService {
         return [];
       }
 
-      // Transformar jobs da Railway para formato DocumentAnalysis
+      // Transformar jobs da Railway para formato DocumentAnalysis  
+      // TEMPORÁRIO: Não filtrar por user_id pois Railway API usa job_id como user_id
+      console.log('⚠️ TEMPORÁRIO: Mostrando todos os jobs (Railway API não tem user management ainda)');
       const documents: DocumentAnalysis[] = railwayJobs
-        .filter((job: any) => job.user_id === userId) // Filtrar por usuário
         .map((job: any) => ({
           id: job.id || job.job_id,
           userId: job.user_id || userId,
@@ -379,10 +380,11 @@ export class SupabaseService {
         
         console.log('📄 Total jobs na Railway:', railwayJobs?.length || 0);
         
-        // Filtrar jobs do usuário atual
-        documents = railwayJobs?.filter((job: any) => job.user_id === user.id) || [];
+        // TEMPORÁRIO: Não filtrar por user_id (Railway API não tem user management)
+        console.log('⚠️ TEMPORÁRIO: Usando todos os jobs para stats (Railway API não tem user management)');
+        documents = railwayJobs || [];
         
-        console.log('👤 Jobs do usuário atual:', documents.length);
+        console.log('📊 Jobs totais para stats:', documents.length);
         
       } catch (railwayError) {
         console.error('❌ Erro na Railway API para stats:', railwayError);
