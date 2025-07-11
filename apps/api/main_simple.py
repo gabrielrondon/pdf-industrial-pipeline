@@ -600,47 +600,44 @@ async def upload_file(file: UploadFile = File(...), user_id: str = None):
         if DATABASE_AVAILABLE:
             try:
                 # Save to PostgreSQL database
-                db_session = next(get_db())
-                
-                # Create Job record
-                job_record = Job(
-                    id=job_id,
-                    user_id=user_id,  # Now using real user_id from frontend
-                    filename=file.filename,
-                    file_size=len(content),
-                    status="completed",
-                    page_count=len(page_texts),
-                    processing_completed_at=datetime.now(),
-                    processing_time_seconds=1.0,  # Placeholder
-                    config={"extracted_text_length": len(extracted_text)}
-                )
-                db_session.add(job_record)
-                
-                # Create TextAnalysis record
-                text_analysis = TextAnalysis(
-                    job_id=job_id,
-                    entities={"analysis_points": analysis_points},
-                    keywords=list(set([point.get('title', '') for point in analysis_points])),
-                    business_indicators=analysis_results.get('summary', {}),
-                    financial_data=analysis_results.get('financial_summary', {})
-                )
-                db_session.add(text_analysis)
-                
-                # Create MLPrediction record
-                ml_prediction = MLPrediction(
-                    job_id=job_id,
-                    model_name="comprehensive_analyzer",
-                    model_version="1.0",
-                    lead_score=analysis_results.get('overall_score', 0.5),
-                    confidence=0.85,  # High confidence for rule-based analysis
-                    predictions=analysis_results
-                )
-                db_session.add(ml_prediction)
-                
-                db_session.commit()
-                db_session.close()
-                
-                logger.info(f"✅ Job {job_id} saved to PostgreSQL database")
+                with get_db() as db_session:
+                    # Create Job record
+                    job_record = Job(
+                        id=job_id,
+                        user_id=user_id,  # Now using real user_id from frontend
+                        filename=file.filename,
+                        file_size=len(content),
+                        status="completed",
+                        page_count=len(page_texts),
+                        processing_completed_at=datetime.now(),
+                        processing_time_seconds=1.0,  # Placeholder
+                        config={"extracted_text_length": len(extracted_text)}
+                    )
+                    db_session.add(job_record)
+                    
+                    # Create TextAnalysis record
+                    text_analysis = TextAnalysis(
+                        job_id=job_id,
+                        entities={"analysis_points": analysis_points},
+                        keywords=list(set([point.get('title', '') for point in analysis_points])),
+                        business_indicators=analysis_results.get('summary', {}),
+                        financial_data=analysis_results.get('financial_summary', {})
+                    )
+                    db_session.add(text_analysis)
+                    
+                    # Create MLPrediction record
+                    ml_prediction = MLPrediction(
+                        job_id=job_id,
+                        model_name="comprehensive_analyzer",
+                        model_version="1.0",
+                        lead_score=analysis_results.get('overall_score', 0.5),
+                        confidence=0.85,  # High confidence for rule-based analysis
+                        predictions=analysis_results
+                    )
+                    db_session.add(ml_prediction)
+                    
+                    # Session will auto-commit and close via context manager
+                    logger.info(f"✅ Job {job_id} saved to PostgreSQL database")
                 
             except Exception as e:
                 logger.error(f"❌ Error saving to database: {e}")
@@ -668,11 +665,21 @@ async def upload_file(file: UploadFile = File(...), user_id: str = None):
         
         logger.info(f"File uploaded successfully: {file.filename} ({len(content)} bytes)")
         
+        # CLEANUP: Delete temporary file after processing (Option 1 strategy)
+        try:
+            import os
+            if os.path.exists(file_path):
+                os.unlink(file_path)
+                logger.info(f"🗑️ Cleaned up temporary file: {file_path}")
+        except Exception as cleanup_error:
+            logger.warning(f"⚠️ Could not cleanup temp file {file_path}: {cleanup_error}")
+        
         return {
             "success": True,
             "job_id": job_id,
-            "message": f"Arquivo {file.filename} enviado com sucesso",
-            "file_size": len(content)
+            "message": f"Arquivo {file.filename} processado com sucesso (original removido)",
+            "file_size": len(content),
+            "storage_strategy": "process_and_delete"
         }
         
     except HTTPException:
@@ -715,54 +722,52 @@ async def semantic_search(request: dict):
         
         if DATABASE_AVAILABLE:
             try:
-                db_session = next(get_db())
-                
-                # Buscar jobs no PostgreSQL
-                query_builder = db_session.query(Job, TextAnalysis).join(
-                    TextAnalysis, Job.id == TextAnalysis.job_id
-                ).filter(Job.status == 'completed')
-                
-                if document_ids:
-                    query_builder = query_builder.filter(Job.id.in_(document_ids))
-                
-                jobs_with_analysis = query_builder.all()
-                
-                # Busca simples por palavras-chave
-                query_words = query.lower().split()
-                
-                for job, analysis in jobs_with_analysis:
-                    # Verificar se a query está nas keywords ou entidades
-                    keywords = analysis.keywords or []
-                    entities_text = str(analysis.entities or {}).lower()
-                    business_text = str(analysis.business_indicators or {}).lower()
+                with get_db() as db_session:
+                    # Buscar jobs no PostgreSQL
+                    query_builder = db_session.query(Job, TextAnalysis).join(
+                        TextAnalysis, Job.id == TextAnalysis.job_id
+                    ).filter(Job.status == 'completed')
                     
-                    # Calcular similaridade simples baseada em matches de palavras
-                    matches = 0
-                    total_text = ' '.join(keywords).lower() + ' ' + entities_text + ' ' + business_text
+                    if document_ids:
+                        query_builder = query_builder.filter(Job.id.in_(document_ids))
                     
-                    for word in query_words:
-                        if word in total_text:
-                            matches += 1
+                    jobs_with_analysis = query_builder.all()
                     
-                    similarity = matches / len(query_words) if query_words else 0
+                    # Busca simples por palavras-chave
+                    query_words = query.lower().split()
                     
-                    if similarity >= threshold:
-                        results.append({
-                            'chunkId': str(job.id),
-                            'content': f"Análise de {job.filename}: {', '.join(keywords[:5])}...",
-                            'similarity': similarity,
-                            'wordCount': len(keywords),
-                            'pageStart': 1,
-                            'pageEnd': job.page_count or 1,
-                            'document': {
-                                'id': str(job.id),
-                                'file_name': job.filename,
-                                'type': 'documento'
-                            }
-                        })
-                
-                db_session.close()
-                search_method = "postgresql_text_search"
+                    for job, analysis in jobs_with_analysis:
+                        # Verificar se a query está nas keywords ou entidades
+                        keywords = analysis.keywords or []
+                        entities_text = str(analysis.entities or {}).lower()
+                        business_text = str(analysis.business_indicators or {}).lower()
+                        
+                        # Calcular similaridade simples baseada em matches de palavras
+                        matches = 0
+                        total_text = ' '.join(keywords).lower() + ' ' + entities_text + ' ' + business_text
+                        
+                        for word in query_words:
+                            if word in total_text:
+                                matches += 1
+                        
+                        similarity = matches / len(query_words) if query_words else 0
+                        
+                        if similarity >= threshold:
+                            results.append({
+                                'chunkId': str(job.id),
+                                'content': f"Análise de {job.filename}: {', '.join(keywords[:5])}...",
+                                'similarity': similarity,
+                                'wordCount': len(keywords),
+                                'pageStart': 1,
+                                'pageEnd': job.page_count or 1,
+                                'document': {
+                                    'id': str(job.id),
+                                    'file_name': job.filename,
+                                    'type': 'documento'
+                                }
+                            })
+                    
+                    search_method = "postgresql_text_search"
                 
             except Exception as e:
                 logger.error(f"Database search error: {e}")
@@ -830,30 +835,27 @@ async def get_job(job_id: str):
     """Get job status and results"""
     if DATABASE_AVAILABLE:
         try:
-            db_session = next(get_db())
-            
-            # Buscar job no PostgreSQL
-            job = db_session.query(Job).filter(Job.id == job_id).first()
-            if not job:
-                raise HTTPException(status_code=404, detail="Job not found")
-            
-            # Buscar análises relacionadas
-            text_analysis = db_session.query(TextAnalysis).filter(TextAnalysis.job_id == job_id).first()
-            ml_prediction = db_session.query(MLPrediction).filter(MLPrediction.job_id == job_id).first()
-            
-            db_session.close()
-            
-            # Formar resposta no formato esperado
-            return {
-                "job_id": str(job.id),
-                "filename": job.filename,
-                "file_size": job.file_size,
-                "status": job.status,
-                "total_pages": job.page_count,
-                "results": ml_prediction.predictions if ml_prediction else {},
-                "lead_score": ml_prediction.lead_score if ml_prediction else 0.5,
-                "confidence": ml_prediction.confidence if ml_prediction else 0.5
-            }
+            with get_db() as db_session:
+                # Buscar job no PostgreSQL
+                job = db_session.query(Job).filter(Job.id == job_id).first()
+                if not job:
+                    raise HTTPException(status_code=404, detail="Job not found")
+                
+                # Buscar análises relacionadas
+                text_analysis = db_session.query(TextAnalysis).filter(TextAnalysis.job_id == job_id).first()
+                ml_prediction = db_session.query(MLPrediction).filter(MLPrediction.job_id == job_id).first()
+                
+                # Formar resposta no formato esperado
+                return {
+                    "job_id": str(job.id),
+                    "filename": job.filename,
+                    "file_size": job.file_size,
+                    "status": job.status,
+                    "total_pages": job.page_count,
+                    "results": ml_prediction.predictions if ml_prediction else {},
+                    "lead_score": ml_prediction.lead_score if ml_prediction else 0.5,
+                    "confidence": ml_prediction.confidence if ml_prediction else 0.5
+                }
             
         except Exception as e:
             logger.error(f"Database error: {e}")
@@ -871,31 +873,28 @@ async def list_jobs():
     """List all jobs"""
     if DATABASE_AVAILABLE:
         try:
-            db_session = next(get_db())
-            
-            # Buscar todos os jobs no PostgreSQL
-            jobs = db_session.query(Job).order_by(Job.created_at.desc()).limit(100).all()
-            
-            results = []
-            for job in jobs:
-                # Buscar ML prediction para lead score
-                ml_prediction = db_session.query(MLPrediction).filter(MLPrediction.job_id == job.id).first()
+            with get_db() as db_session:
+                # Buscar todos os jobs no PostgreSQL
+                jobs = db_session.query(Job).order_by(Job.created_at.desc()).limit(100).all()
                 
-                results.append({
-                    "job_id": str(job.id),
-                    "filename": job.filename,
-                    "file_size": job.file_size,
-                    "status": job.status,
-                    "created_at": job.created_at.isoformat(),
-                    "total_pages": job.page_count,
-                    "lead_score": ml_prediction.lead_score if ml_prediction else 0.5,
-                    "user_id": str(job.user_id)
-                })
-            
-            db_session.close()
-            
-            logger.info(f"📊 Retornando {len(results)} jobs do PostgreSQL")
-            return results
+                results = []
+                for job in jobs:
+                    # Buscar ML prediction para lead score
+                    ml_prediction = db_session.query(MLPrediction).filter(MLPrediction.job_id == job.id).first()
+                    
+                    results.append({
+                        "job_id": str(job.id),
+                        "filename": job.filename,
+                        "file_size": job.file_size,
+                        "status": job.status,
+                        "created_at": job.created_at.isoformat(),
+                        "total_pages": job.page_count,
+                        "lead_score": ml_prediction.lead_score if ml_prediction else 0.5,
+                        "user_id": str(job.user_id)
+                    })
+                
+                logger.info(f"📊 Retornando {len(results)} jobs do PostgreSQL")
+                return results
             
         except Exception as e:
             logger.error(f"Database error: {e}")
@@ -928,6 +927,138 @@ async def get_job_page(job_id: str, page_num: int):
             "next_page": page_num + 1 if page_num < job.get('total_pages', 0) else None
         }
     }
+
+# Storage cleanup utilities
+def cleanup_old_files():
+    """Clean up old temporary files and enforce storage limits"""
+    import os
+    import time
+    from pathlib import Path
+    
+    cleanup_paths = [
+        "./uploads",
+        "./temp_splits", 
+        "./storage/jobs",
+        "./storage/embeddings"
+    ]
+    
+    total_cleaned = 0
+    total_size_freed = 0
+    
+    for path_str in cleanup_paths:
+        try:
+            path = Path(path_str)
+            if not path.exists():
+                continue
+                
+            # Files older than 24 hours
+            cutoff_time = time.time() - (24 * 60 * 60)
+            
+            for file_path in path.rglob("*"):
+                if file_path.is_file():
+                    try:
+                        file_age = file_path.stat().st_mtime
+                        if file_age < cutoff_time:
+                            file_size = file_path.stat().st_size
+                            file_path.unlink()
+                            total_cleaned += 1
+                            total_size_freed += file_size
+                            
+                    except Exception as e:
+                        logger.warning(f"Could not cleanup {file_path}: {e}")
+                        
+        except Exception as e:
+            logger.warning(f"Could not access cleanup path {path_str}: {e}")
+    
+    if total_cleaned > 0:
+        size_mb = total_size_freed / (1024 * 1024)
+        logger.info(f"🧹 Cleanup complete: {total_cleaned} files removed, {size_mb:.1f}MB freed")
+    
+    return total_cleaned, total_size_freed
+
+@app.on_event("startup")
+async def startup_cleanup():
+    """Run cleanup on server startup"""
+    logger.info("🚀 Server starting - running storage cleanup...")
+    cleanup_old_files()
+
+@app.get("/api/v1/cleanup")
+async def manual_cleanup():
+    """Manual cleanup endpoint for maintenance"""
+    try:
+        files_cleaned, bytes_freed = cleanup_old_files()
+        return {
+            "success": True,
+            "files_cleaned": files_cleaned,
+            "bytes_freed": bytes_freed,
+            "mb_freed": round(bytes_freed / (1024 * 1024), 2)
+        }
+    except Exception as e:
+        logger.error(f"Cleanup error: {e}")
+        raise HTTPException(status_code=500, detail=f"Cleanup failed: {str(e)}")
+
+@app.get("/api/v1/storage-stats")
+async def get_storage_stats():
+    """Get current storage usage statistics"""
+    try:
+        from pathlib import Path
+        import os
+        
+        storage_paths = {
+            "uploads": "./uploads",
+            "temp_splits": "./temp_splits",
+            "storage": "./storage",
+            "storage_jobs": "./storage/jobs",
+            "storage_embeddings": "./storage/embeddings"
+        }
+        
+        stats = {}
+        total_size = 0
+        total_files = 0
+        
+        for name, path_str in storage_paths.items():
+            path = Path(path_str)
+            if path.exists():
+                size = 0
+                files = 0
+                
+                for file_path in path.rglob("*"):
+                    if file_path.is_file():
+                        try:
+                            file_size = file_path.stat().st_size
+                            size += file_size
+                            files += 1
+                        except:
+                            pass
+                
+                stats[name] = {
+                    "size_bytes": size,
+                    "size_mb": round(size / (1024 * 1024), 2),
+                    "files": files,
+                    "exists": True
+                }
+                total_size += size
+                total_files += files
+            else:
+                stats[name] = {
+                    "size_bytes": 0,
+                    "size_mb": 0,
+                    "files": 0,
+                    "exists": False
+                }
+        
+        return {
+            "storage_strategy": "process_and_delete",
+            "total_size_bytes": total_size,
+            "total_size_mb": round(total_size / (1024 * 1024), 2),
+            "total_files": total_files,
+            "paths": stats,
+            "cleanup_threshold_mb": 100,  # Alert if over 100MB
+            "needs_cleanup": total_size > (100 * 1024 * 1024)
+        }
+    except Exception as e:
+        logger.error(f"Storage stats error: {e}")
+        raise HTTPException(status_code=500, detail=f"Storage stats failed: {str(e)}")
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
