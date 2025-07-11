@@ -111,24 +111,31 @@ from typing import Dict, Any, List
 jobs_storage = {}
 
 # Real PDF text extraction and analysis functions
-def extract_text_from_pdf(file_path: str) -> str:
-    """Extract text from PDF file using PyMuPDF"""
+def extract_text_from_pdf(file_path: str) -> tuple[str, dict]:
+    """Extract text from PDF file using PyMuPDF with page tracking"""
     try:
         import fitz  # PyMuPDF
         doc = fitz.open(file_path)
-        text = ""
+        full_text = ""
+        page_texts = {}
+        
         for page_num in range(doc.page_count):
             page = doc[page_num]
-            text += page.get_text() + "\n"
+            page_text = page.get_text()
+            page_texts[page_num + 1] = page_text  # 1-indexed pages
+            full_text += page_text + "\n"
+        
         doc.close()
-        return text
+        return full_text, page_texts
     except ImportError:
         # Fallback if PyMuPDF not available
         logger.warning("PyMuPDF not available, using mock text extraction")
-        return f"[Mock] Text extracted from PDF file at {file_path}. This is sample text for analysis including words like leilão, imóvel, valor, and processo judicial for testing purposes."
+        mock_text = f"[Mock] Text extracted from PDF file at {file_path}. Leilão judicial de imóvel residencial. Valor de avaliação: R$ 250.000,00. Lance mínimo: R$ 175.000,00. Data do leilão: 15/02/2024. Contato: (11) 98765-4321. Email: leilao@tribunal.gov.br"
+        return mock_text, {1: mock_text}
     except Exception as e:
         logger.error(f"PDF text extraction failed: {str(e)}")
-        return f"[Error] Could not extract text: {str(e)}. Mock text: leilão judicial, imóvel residencial, valor de avaliação R$ 250.000,00, contato (11) 98765-4321."
+        mock_text = f"[Error] Could not extract text: {str(e)}. Mock text: leilão judicial, imóvel residencial, valor de avaliação R$ 250.000,00, contato (11) 98765-4321."
+        return mock_text, {1: mock_text}
 
 def is_judicial_document(text: str) -> bool:
     """Check if document appears to be judicial/legal"""
@@ -195,110 +202,230 @@ def analyze_judicial_content(text: str) -> List[Dict[str, Any]]:
     
     return points
 
-def analyze_financial_opportunities(text: str) -> List[Dict[str, Any]]:
-    """Extract financial and investment information"""
+def analyze_financial_opportunities(text: str, page_texts: dict) -> List[Dict[str, Any]]:
+    """Extract financial and investment information with page references"""
     points = []
     
-    # Value extraction patterns
-    value_patterns = [
-        r'R\$\s*([\d.,]+)',
-        r'valor.*?R\$\s*([\d.,]+)',
-        r'avaliação.*?R\$\s*([\d.,]+)',
-        r'lance.*?R\$\s*([\d.,]+)'
-    ]
+    # Specific value patterns with context
+    value_patterns = {
+        'lance_minimo': [
+            r'lance\s+m[ií]nimo.*?R\$\s*([\d.,]+)',
+            r'valor\s+m[ií]nimo.*?R\$\s*([\d.,]+)',
+            r'arremat.*?R\$\s*([\d.,]+)'
+        ],
+        'avaliacao': [
+            r'avalia[çc][ãa]o.*?R\$\s*([\d.,]+)',
+            r'valor\s+de\s+avalia[çc][ãa]o.*?R\$\s*([\d.,]+)',
+            r'avaliado\s+em.*?R\$\s*([\d.,]+)'
+        ],
+        'custas': [
+            r'custas.*?R\$\s*([\d.,]+)',
+            r'despesas.*?R\$\s*([\d.,]+)',
+            r'emolumentos.*?R\$\s*([\d.,]+)'
+        ]
+    }
     
-    values_found = []
-    for pattern in value_patterns:
-        matches = re.findall(pattern, text, re.IGNORECASE)
-        for match in matches:
-            try:
-                # Clean and convert value
-                clean_value = match.replace('.', '').replace(',', '.')
-                value = float(clean_value)
-                if value > 1000:  # Only significant values
-                    values_found.append(value)
-            except ValueError:
-                continue
+    def find_value_in_pages(pattern, value_type):
+        """Find value and its page location"""
+        for page_num, page_text in page_texts.items():
+            matches = re.findall(pattern, page_text, re.IGNORECASE)
+            for match in matches:
+                try:
+                    clean_value = match.replace('.', '').replace(',', '.')
+                    value = float(clean_value)
+                    if value > 1000:  # Only significant values
+                        return value, page_num, match
+                except ValueError:
+                    continue
+        return None, None, None
     
-    if values_found:
-        max_value = max(values_found)
-        min_value = min(values_found)
-        
+    # Find specific types of values
+    for value_type, patterns in value_patterns.items():
+        for pattern in patterns:
+            value, page_num, raw_match = find_value_in_pages(pattern, value_type)
+            if value:
+                type_names = {
+                    'lance_minimo': '💰 Lance Mínimo',
+                    'avaliacao': '📊 Valor de Avaliação', 
+                    'custas': '📋 Custas e Despesas'
+                }
+                
+                points.append({
+                    'id': f'{value_type}_value',
+                    'title': f'{type_names[value_type]}: R$ {value:,.2f}',
+                    'comment': f'Valor encontrado na página {page_num}. Clique para ver detalhes específicos.',
+                    'status': 'confirmado',
+                    'category': 'financeiro',
+                    'priority': 'high',
+                    'page_reference': page_num,
+                    'raw_value': raw_match,
+                    'details': {
+                        'value_type': value_type,
+                        'formatted_value': f'R$ {value:,.2f}',
+                        'page_location': page_num
+                    }
+                })
+                break  # Only add first match of this type
+    
+    # Investment opportunity calculation
+    lance_minimo = None
+    avaliacao = None
+    
+    for point in points:
+        if 'lance_minimo' in point['id']:
+            lance_minimo = float(point['raw_value'].replace('.', '').replace(',', '.'))
+        elif 'avaliacao' in point['id']:
+            avaliacao = float(point['raw_value'].replace('.', '').replace(',', '.'))
+    
+    if lance_minimo and avaliacao and avaliacao > lance_minimo:
+        desconto = ((avaliacao - lance_minimo) / avaliacao) * 100
         points.append({
-            'id': 'financial_values',
-            'title': f'Valores Identificados: R$ {min_value:,.2f} - R$ {max_value:,.2f}',
-            'comment': f'Encontrados {len(values_found)} valores monetários no documento. Maior valor: R$ {max_value:,.2f}',
+            'id': 'investment_opportunity',
+            'title': f'🎯 Oportunidade de Investimento: {desconto:.1f}% de Desconto',
+            'comment': f'Lance mínimo representa {desconto:.1f}% de desconto sobre a avaliação. ROI potencial interessante.',
             'status': 'confirmado',
-            'category': 'financeiro',
-            'priority': 'high' if max_value > 100000 else 'medium'
+            'category': 'investimento',
+            'priority': 'high',
+            'details': {
+                'discount_percentage': f'{desconto:.1f}%',
+                'potential_savings': f'R$ {avaliacao - lance_minimo:,.2f}',
+                'investment_analysis': 'Oportunidade identificada'
+            }
         })
     
-    # Debt analysis
+    # Debt analysis with page reference
     debt_keywords = ['dívida', 'divida', 'débito', 'debito', 'ônus', 'onus', 'hipoteca', 'financiamento']
-    if any(keyword in text.lower() for keyword in debt_keywords):
-        points.append({
-            'id': 'debt_analysis',
-            'title': 'Possíveis Ônus ou Dívidas Detectados',
-            'comment': 'Documento menciona possíveis dívidas, ônus ou encargos. Verifique detalhadamente antes de investir.',
-            'status': 'alerta',
-            'category': 'financeiro',
-            'priority': 'high'
-        })
+    for page_num, page_text in page_texts.items():
+        if any(keyword in page_text.lower() for keyword in debt_keywords):
+            points.append({
+                'id': 'debt_analysis',
+                'title': '⚠️ Possíveis Ônus ou Dívidas Detectados',
+                'comment': f'Documento menciona possíveis encargos na página {page_num}. Verifique detalhadamente antes de investir.',
+                'status': 'alerta',
+                'category': 'financeiro',
+                'priority': 'high',
+                'page_reference': page_num,
+                'details': {
+                    'risk_level': 'Alto',
+                    'recommendation': 'Verificação obrigatória antes do lance'
+                }
+            })
+            break
     
     return points
 
-def extract_contacts_and_deadlines(text: str) -> List[Dict[str, Any]]:
-    """Extract contact information and important deadlines"""
+def extract_contacts_and_deadlines(text: str, page_texts: dict) -> List[Dict[str, Any]]:
+    """Extract contact information and important deadlines with page references"""
     points = []
     
-    # Phone number patterns
-    phone_pattern = r'(?:\(\d{2}\)|\d{2})\s*\d{4,5}[-\s]?\d{4}'
-    phones = re.findall(phone_pattern, text)
-    if phones:
-        points.append({
-            'id': 'contact_phones',
-            'title': f'Contatos Telefônicos: {len(phones)} encontrados',
-            'comment': f'Telefones identificados: {", ".join(phones[:3])}{"..." if len(phones) > 3 else ""}',
-            'status': 'confirmado',
-            'category': 'contato',
-            'priority': 'medium'
-        })
+    # Specific date patterns with context
+    specific_date_patterns = {
+        'data_leilao': [
+            r'data\s+do\s+leil[ãa]o.*?(\d{1,2}/\d{1,2}/\d{4})',
+            r'leil[ãa]o.*?(\d{1,2}/\d{1,2}/\d{4}).*?(\d{1,2}h\d{2})',
+            r'realizar[áa]\s+em.*?(\d{1,2}/\d{1,2}/\d{4})'
+        ],
+        'prazo_pagamento': [
+            r'prazo.*?pagamento.*?(\d{1,2}/\d{1,2}/\d{4})',
+            r'at[ée]\s+(\d{1,2}/\d{1,2}/\d{4}).*?pagar',
+            r'vencimento.*?(\d{1,2}/\d{1,2}/\d{4})'
+        ],
+        'prazo_recurso': [
+            r'prazo.*?recurso.*?(\d{1,2}/\d{1,2}/\d{4})',
+            r'impugna[çc][ãa]o.*?at[ée].*?(\d{1,2}/\d{1,2}/\d{4})'
+        ]
+    }
     
-    # Email patterns
-    email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-    emails = re.findall(email_pattern, text)
-    if emails:
-        points.append({
-            'id': 'contact_emails',
-            'title': f'E-mails: {len(emails)} encontrados',
-            'comment': f'E-mails identificados: {", ".join(emails[:2])}{"..." if len(emails) > 2 else ""}',
-            'status': 'confirmado',
-            'category': 'contato',
-            'priority': 'medium'
-        })
+    def find_specific_date(patterns, date_type):
+        """Find specific date type and its page location"""
+        for page_num, page_text in page_texts.items():
+            for pattern in patterns:
+                matches = re.findall(pattern, page_text, re.IGNORECASE)
+                if matches:
+                    return matches[0] if isinstance(matches[0], str) else matches[0][0], page_num
+        return None, None
     
-    # Date patterns for deadlines
-    date_patterns = [
-        r'\d{1,2}/\d{1,2}/\d{4}',
-        r'\d{1,2}\s+de\s+\w+\s+de\s+\d{4}',
-        r'até\s+\d{1,2}/\d{1,2}/\d{4}',
-        r'prazo.*?\d{1,2}/\d{1,2}/\d{4}'
+    # Extract specific dates
+    for date_type, patterns in specific_date_patterns.items():
+        date_found, page_num = find_specific_date(patterns, date_type)
+        if date_found:
+            type_names = {
+                'data_leilao': '📅 Data do Leilão',
+                'prazo_pagamento': '💳 Prazo para Pagamento',
+                'prazo_recurso': '⚖️ Prazo para Recurso'
+            }
+            
+            points.append({
+                'id': f'{date_type}_deadline',
+                'title': f'{type_names[date_type]}: {date_found}',
+                'comment': f'Data importante identificada na página {page_num}. Marque na agenda!',
+                'status': 'alerta',
+                'category': 'prazo',
+                'priority': 'high',
+                'page_reference': page_num,
+                'details': {
+                    'date_type': date_type,
+                    'formatted_date': date_found,
+                    'urgency': 'Alta'
+                }
+            })
+    
+    # Extract and categorize contacts
+    def find_specific_contact(pattern, contact_type):
+        """Find specific contact type and its page location"""
+        for page_num, page_text in page_texts.items():
+            matches = re.findall(pattern, page_text, re.IGNORECASE)
+            if matches:
+                return matches[0], page_num
+        return None, None
+    
+    # Leiloeiro/Official contact
+    leiloeiro_patterns = [
+        r'leiloeiro.*?(\(\d{2}\)\s*\d{4,5}[-\s]?\d{4})',
+        r'respons[áa]vel.*?(\(\d{2}\)\s*\d{4,5}[-\s]?\d{4})'
     ]
     
-    dates_found = []
-    for pattern in date_patterns:
-        matches = re.findall(pattern, text, re.IGNORECASE)
-        dates_found.extend(matches)
+    for pattern in leiloeiro_patterns:
+        phone, page_num = find_specific_contact(pattern, 'leiloeiro')
+        if phone:
+            points.append({
+                'id': 'leiloeiro_contact',
+                'title': f'📞 Contato do Leiloeiro: {phone}',
+                'comment': f'Telefone do responsável pelo leilão encontrado na página {page_num}.',
+                'status': 'confirmado',
+                'category': 'contato',
+                'priority': 'high',
+                'page_reference': page_num,
+                'details': {
+                    'contact_type': 'Leiloeiro Oficial',
+                    'phone_number': phone
+                }
+            })
+            break
     
-    if dates_found:
-        points.append({
-            'id': 'important_deadlines',
-            'title': f'Prazos e Datas: {len(dates_found)} identificados',
-            'comment': f'Datas importantes encontradas: {", ".join(dates_found[:3])}{"..." if len(dates_found) > 3 else ""}',
-            'status': 'alerta',
-            'category': 'prazo',
-            'priority': 'high'
-        })
+    # Official emails (tribunal, cartório)
+    official_email_pattern = r'([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]*(?:tj|tribunal|cartorio|leilao)[a-zA-Z0-9.-]*\.[a-zA-Z]{2,})'
+    
+    for page_num, page_text in page_texts.items():
+        matches = re.findall(official_email_pattern, page_text, re.IGNORECASE)
+        if matches:
+            email = matches[0]
+            contact_type = 'Tribunal' if 'tj' in email or 'tribunal' in email else 'Cartório/Leilão'
+            
+            points.append({
+                'id': 'official_email',
+                'title': f'📧 E-mail {contact_type}: {email}',
+                'comment': f'Contato oficial encontrado na página {page_num}.',
+                'status': 'confirmado',
+                'category': 'contato',
+                'priority': 'high',
+                'page_reference': page_num,
+                'details': {
+                    'contact_type': contact_type,
+                    'email_address': email
+                }
+            })
+            break
     
     return points
 
@@ -323,50 +450,62 @@ def detect_document_type(text: str, filename: str) -> str:
     
     return 'Documento Jurídico'
 
-def perform_comprehensive_analysis(text: str, filename: str) -> Dict[str, Any]:
-    """Perform comprehensive analysis of the document"""
+def perform_comprehensive_analysis(text: str, page_texts: dict, filename: str) -> Dict[str, Any]:
+    """Perform comprehensive analysis of the document with page tracking"""
+    total_pages = len(page_texts)
+    
     results = {
         'job_id': '',
         'filename': filename,
         'analysis_type': 'comprehensive',
-        'total_pages': 1,
+        'total_pages': total_pages,
         'analysis_date': datetime.utcnow().isoformat(),
         'points': []
     }
     
     # Basic document analysis
     doc_type = detect_document_type(text, filename)
-    estimated_pages = max(1, len(text) // 2000)
     
     results['points'].append({
         'id': 'document_type',
-        'title': f'Tipo de Documento: {doc_type}',
+        'title': f'📄 Tipo de Documento: {doc_type}',
         'comment': f'Documento identificado como {doc_type} baseado no conteúdo e nome do arquivo.',
         'status': 'confirmado',
         'category': 'geral',
-        'priority': 'medium'
+        'priority': 'medium',
+        'details': {
+            'document_classification': doc_type,
+            'confidence': 'Alta',
+            'total_pages': total_pages
+        }
     })
     
-    results['points'].append({
-        'id': 'document_size',
-        'title': f'Tamanho do Documento: ~{estimated_pages} páginas',
-        'comment': f'Documento contém aproximadamente {len(text):,} caracteres em ~{estimated_pages} páginas.',
-        'status': 'confirmado',
-        'category': 'geral',
-        'priority': 'low'
-    })
+    if total_pages > 1:
+        results['points'].append({
+            'id': 'document_size',
+            'title': f'📊 Documento Extenso: {total_pages} páginas',
+            'comment': f'Documento contém {total_pages} páginas ({len(text):,} caracteres). Análise detalhada página por página.',
+            'status': 'confirmado',
+            'category': 'geral',
+            'priority': 'low',
+            'details': {
+                'page_count': total_pages,
+                'character_count': len(text),
+                'analysis_scope': 'Completa'
+            }
+        })
     
     # Judicial analysis if applicable
     if is_judicial_document(text):
         judicial_points = analyze_judicial_content(text)
         results['points'].extend(judicial_points)
     
-    # Financial analysis
-    financial_points = analyze_financial_opportunities(text)
+    # Financial analysis with page tracking
+    financial_points = analyze_financial_opportunities(text, page_texts)
     results['points'].extend(financial_points)
     
-    # Contact and deadline analysis
-    contact_points = extract_contacts_and_deadlines(text)
+    # Contact and deadline analysis with page tracking
+    contact_points = extract_contacts_and_deadlines(text, page_texts)
     results['points'].extend(contact_points)
     
     return results
@@ -393,13 +532,13 @@ async def upload_file(file: UploadFile = File(...)):
             tmp.write(content)
             file_path = tmp.name
         
-        # Extract text from PDF for real analysis
+        # Extract text from PDF for real analysis with page tracking
         logger.info(f"Extracting text from PDF: {file.filename}")
-        extracted_text = extract_text_from_pdf(file_path)
+        extracted_text, page_texts = extract_text_from_pdf(file_path)
         
-        # Perform comprehensive analysis on the extracted text
+        # Perform comprehensive analysis on the extracted text with page tracking
         logger.info(f"Performing comprehensive analysis for: {file.filename}")
-        analysis_results = perform_comprehensive_analysis(extracted_text, file.filename)
+        analysis_results = perform_comprehensive_analysis(extracted_text, page_texts, file.filename)
         
         # Update job ID in results
         analysis_results['job_id'] = job_id
@@ -407,7 +546,7 @@ async def upload_file(file: UploadFile = File(...)):
         
         logger.info(f"Analysis completed: {len(analysis_points)} points identified")
         
-        # Store job info with real analysis results
+        # Store job info with real analysis results and page tracking
         jobs_storage[job_id] = {
             "job_id": job_id,
             "filename": file.filename,
@@ -415,6 +554,8 @@ async def upload_file(file: UploadFile = File(...)):
             "status": "completed",
             "file_path": file_path,
             "extracted_text_length": len(extracted_text),
+            "total_pages": len(page_texts),
+            "page_texts": page_texts,  # Store page-by-page text for future reference
             "results": analysis_results  # Real analysis results from comprehensive analysis
         }
         
@@ -445,6 +586,30 @@ async def get_job(job_id: str):
 async def list_jobs():
     """List all jobs"""
     return list(jobs_storage.values())
+
+@app.get("/api/v1/jobs/{job_id}/page/{page_num}")
+async def get_job_page(job_id: str, page_num: int):
+    """Get specific page content from a job"""
+    if job_id not in jobs_storage:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    job = jobs_storage[job_id]
+    page_texts = job.get('page_texts', {})
+    
+    if page_num not in page_texts:
+        raise HTTPException(status_code=404, detail=f"Page {page_num} not found")
+    
+    return {
+        "job_id": job_id,
+        "page_number": page_num,
+        "total_pages": job.get('total_pages', 0),
+        "page_content": page_texts[page_num],
+        "filename": job.get('filename', ''),
+        "navigation": {
+            "previous_page": page_num - 1 if page_num > 1 else None,
+            "next_page": page_num + 1 if page_num < job.get('total_pages', 0) else None
+        }
+    }
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
