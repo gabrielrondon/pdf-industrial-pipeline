@@ -15,6 +15,7 @@ import ResetPasswordPage from '@/pages/ResetPasswordPage';
 import DashboardPage from '@/pages/DashboardPage';
 import UploadPage from '@/pages/UploadPage';
 import DocumentsPage from '@/pages/DocumentsPage';
+import DocumentDetailPage from '@/pages/DocumentDetailPage';
 import PlansPage from '@/pages/PlansPage';
 import CommunityPage from '@/pages/CommunityPage';
 import ProfilePage from '@/pages/ProfilePage';
@@ -61,6 +62,13 @@ function App() {
                   <ProtectedRoute>
                     <AppLayout>
                       <DocumentsPage />
+                    </AppLayout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/documents/:id" element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <DocumentDetailPage />
                     </AppLayout>
                   </ProtectedRoute>
                 } />
