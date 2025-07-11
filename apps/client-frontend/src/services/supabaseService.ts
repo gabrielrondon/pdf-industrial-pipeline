@@ -325,28 +325,105 @@ export class SupabaseService {
     console.log('🔍 === FIM DEBUG ===');
   }
 
-  // Get user documents
+  // Get user documents - AGORA BUSCA NA RAILWAY API
   static async getUserDocuments(userId: string): Promise<DocumentAnalysis[]> {
-    console.log('📋 Buscando documentos para usuário:', userId);
+    console.log('🚂 === BUSCANDO DOCUMENTOS NA RAILWAY API ===');
+    console.log('👤 User ID:', userId);
     
-    // Execute debug completo primeiro
-    await this.debugDatabase(userId);
+    try {
+      // Import Railway API service
+      const { railwayApi } = await import('@/services/railwayApiService');
+      
+      // Buscar jobs/documentos na Railway API
+      console.log('📡 Chamando railwayApi.getJobs()...');
+      const railwayJobs = await railwayApi.getJobs();
+      
+      console.log('📄 Jobs encontrados na Railway:', railwayJobs?.length || 0);
+      console.log('📋 Jobs da Railway:', railwayJobs);
+
+      if (!railwayJobs || railwayJobs.length === 0) {
+        console.log('⚠️ Nenhum job encontrado na Railway API');
+        return [];
+      }
+
+      // Transformar jobs da Railway para formato DocumentAnalysis
+      const documents: DocumentAnalysis[] = railwayJobs
+        .filter((job: any) => job.user_id === userId) // Filtrar por usuário
+        .map((job: any) => ({
+          id: job.id || job.job_id,
+          userId: job.user_id || userId,
+          fileName: job.filename || job.original_filename || job.file_name || 'Documento',
+          fileUrl: job.file_url || job.download_url || job.result_url || '',
+          type: this.determineDocumentType(job.filename || job.file_name || ''),
+          uploadedAt: job.created_at || new Date().toISOString(),
+          analyzedAt: job.completed_at || job.updated_at || job.created_at || new Date().toISOString(),
+          isPrivate: false, // Railway API default
+          points: this.extractAnalysisPoints(job)
+        }));
+
+      console.log('✅ Documentos processados da Railway:', documents.length);
+      console.log('📋 Documentos finais:', documents);
+      
+      return documents;
+
+    } catch (error) {
+      console.error('❌ Erro ao buscar na Railway API:', error);
+      
+      // Fallback para Supabase apenas em caso de erro
+      console.log('🔄 Fallback: tentando Supabase...');
+      return await this.getUserDocumentsFromSupabase(userId);
+    }
+  }
+
+  // Método auxiliar para determinar tipo do documento
+  private static determineDocumentType(filename: string): 'edital' | 'processo' | 'laudo' | 'outro' {
+    const name = filename.toLowerCase();
+    if (name.includes('edital')) return 'edital';
+    if (name.includes('processo')) return 'processo'; 
+    if (name.includes('laudo')) return 'laudo';
+    return 'outro';
+  }
+
+  // Método auxiliar para extrair pontos de análise do job da Railway
+  private static extractAnalysisPoints(job: any): any[] {
+    // Tentar diferentes formatos de resultado da Railway API
+    if (job.analysis_results?.points) return job.analysis_results.points;
+    if (job.results?.points) return job.results.points;
+    if (job.points) return job.points;
+    if (job.analysis_points) return job.analysis_points;
+    
+    // Se não tem pontos específicos, criar um ponto genérico baseado no status
+    if (job.status === 'completed') {
+      return [{
+        id: 'railway-1',
+        title: 'Análise concluída via Railway API',
+        comment: 'Documento processado com sucesso pelo pipeline',
+        status: 'confirmado'
+      }];
+    }
+    
+    return [];
+  }
+
+  // Fallback para Supabase (mantido para compatibilidade)
+  private static async getUserDocumentsFromSupabase(userId: string): Promise<DocumentAnalysis[]> {
+    console.log('📋 Fallback: Buscando no Supabase...');
     
     const { data: documents, error: docError } = await supabase
       .from('documents')
       .select('*')
       .eq('user_id', userId)
-      .order('created_at', { ascending: false }); // Mudado para created_at como fallback
+      .order('created_at', { ascending: false });
     
     if (docError) {
-      console.error('❌ Erro ao buscar documentos:', docError);
+      console.error('❌ Erro no Supabase:', docError);
       return [];
     }
 
-    console.log('📄 Documentos encontrados:', documents?.length || 0);
+    console.log('📄 Documentos encontrados no Supabase:', documents?.length || 0);
 
     if (!documents || documents.length === 0) {
-      console.log('⚠️ Nenhum documento encontrado para o usuário');
+      console.log('⚠️ Nenhum documento no Supabase também');
       return [];
     }
 
@@ -383,31 +460,55 @@ export class SupabaseService {
     return documentsWithPoints;
   }
 
-  // Get dashboard stats - usando dados reais do Supabase
+  // Get dashboard stats - usando dados da RAILWAY API
   static async getDashboardStats(): Promise<DashboardStats> {
+    console.log('📊 === DASHBOARD STATS VIA RAILWAY API ===');
+    
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
-      // Buscar dados do perfil para créditos
+      console.log('👤 Usuário para stats:', user.id);
+
+      // Buscar dados do perfil para créditos (mantém Supabase para isso)
       const { data: profile } = await supabase
         .from('profiles')
         .select('credits')
         .eq('id', user.id)
         .single();
 
-      // Buscar documentos do usuário
-      const { data: documents, error: docsError } = await supabase
-        .from('documents')
-        .select('id, type')
-        .eq('user_id', user.id);
+      console.log('💰 Créditos do perfil:', profile?.credits || 100);
 
-      if (docsError) {
-        console.error('Error fetching documents:', docsError);
-        return this.getDefaultStats(profile?.credits || 100);
+      // NOVO: Buscar documentos da Railway API
+      let documents: any[] = [];
+      
+      try {
+        const { railwayApi } = await import('@/services/railwayApiService');
+        
+        console.log('📡 Buscando jobs na Railway para stats...');
+        const railwayJobs = await railwayApi.getJobs();
+        
+        console.log('📄 Total jobs na Railway:', railwayJobs?.length || 0);
+        
+        // Filtrar jobs do usuário atual
+        documents = railwayJobs?.filter((job: any) => job.user_id === user.id) || [];
+        
+        console.log('👤 Jobs do usuário atual:', documents.length);
+        
+      } catch (railwayError) {
+        console.error('❌ Erro na Railway API para stats:', railwayError);
+        // Fallback para Supabase se Railway falhar
+        const { data: supabaseDocs } = await supabase
+          .from('documents')
+          .select('id, type')
+          .eq('user_id', user.id);
+        
+        documents = supabaseDocs || [];
+        console.log('🔄 Fallback Supabase - documentos:', documents.length);
       }
 
       const totalAnalyses = documents?.length || 0;
+      console.log('📊 Total de análises:', totalAnalyses);
 
       // Distribuição de tipos de documento
       const documentTypes = documents?.reduce((acc: any[], doc) => {
