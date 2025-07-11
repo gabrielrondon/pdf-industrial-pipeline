@@ -46,9 +46,14 @@ class RailwayApiService {
   /**
    * Faz upload de um arquivo PDF para nossa API Railway
    */
-  async uploadDocument(file: File): Promise<UploadResponse> {
+  async uploadDocument(file: File, userId?: string): Promise<UploadResponse> {
     const formData = new FormData();
     formData.append('file', file);
+    
+    // Add user ID if provided
+    if (userId) {
+      formData.append('user_id', userId);
+    }
     
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/upload`, {

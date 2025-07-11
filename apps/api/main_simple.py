@@ -542,7 +542,7 @@ def perform_comprehensive_analysis(text: str, page_texts: dict, filename: str) -
     return results
 
 @app.post("/api/v1/upload")
-async def upload_file(file: UploadFile = File(...)):
+async def upload_file(file: UploadFile = File(...), user_id: str = None):
     """Upload PDF file for processing"""
     try:
         logger.info(f"🚀 Starting upload for file: {file.filename}")
@@ -561,6 +561,20 @@ async def upload_file(file: UploadFile = File(...)):
         # Generate job ID
         job_id = str(uuid.uuid4())
         logger.info(f"🆔 Generated job ID: {job_id}")
+        
+        # Validate user ID
+        if not user_id:
+            logger.warning("⚠️ No user_id provided, using job_id as fallback")
+            user_id = job_id
+        else:
+            # Basic UUID validation for Supabase user IDs
+            import re
+            uuid_pattern = r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+            if re.match(uuid_pattern, user_id, re.IGNORECASE):
+                logger.info(f"✅ Valid user_id provided: {user_id}")
+            else:
+                logger.warning(f"⚠️ Invalid user_id format: {user_id}, using job_id as fallback")
+                user_id = job_id
         
         # Save file temporarily (in production, save to proper storage)
         with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:
@@ -591,7 +605,7 @@ async def upload_file(file: UploadFile = File(...)):
                 # Create Job record
                 job_record = Job(
                     id=job_id,
-                    user_id=job_id,  # Temporary: usar job_id como user_id
+                    user_id=user_id,  # Now using real user_id from frontend
                     filename=file.filename,
                     file_size=len(content),
                     status="completed",

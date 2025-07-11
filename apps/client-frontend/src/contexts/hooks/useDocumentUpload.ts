@@ -20,8 +20,8 @@ export function useDocumentUpload() {
     try {
       console.log('🚂 Uploading document via Railway API...');
       
-      // Upload and process via Railway API
-      const uploadResult = await railwayApi.uploadDocument(file);
+      // Upload and process via Railway API with user ID
+      const uploadResult = await railwayApi.uploadDocument(file, user.id);
       
       if (!uploadResult.success) {
         throw new Error(uploadResult.error || 'Upload failed');

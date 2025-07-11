@@ -235,10 +235,18 @@ export class SupabaseService {
         return [];
       }
 
-      // Transformar jobs da Railway para formato DocumentAnalysis  
-      // TEMPORÁRIO: Não filtrar por user_id pois Railway API usa job_id como user_id
-      console.log('⚠️ TEMPORÁRIO: Mostrando todos os jobs (Railway API não tem user management ainda)');
-      const documents: DocumentAnalysis[] = railwayJobs
+      // Transformar jobs da Railway para formato DocumentAnalysis
+      // Filter by user ID (now that we pass real user IDs)
+      console.log('👤 Filtrando jobs por user_id:', userId);
+      
+      const filteredJobs = railwayJobs.filter((job: any) => {
+        console.log('🔍 Job user_id:', job.user_id, 'vs current user:', userId);
+        return job.user_id === userId;
+      });
+      
+      console.log('📋 Jobs filtrados para o usuário:', filteredJobs.length);
+      
+      const documents: DocumentAnalysis[] = filteredJobs
         .map((job: any) => ({
           id: job.id || job.job_id,
           userId: job.user_id || userId,
@@ -380,11 +388,14 @@ export class SupabaseService {
         
         console.log('📄 Total jobs na Railway:', railwayJobs?.length || 0);
         
-        // TEMPORÁRIO: Não filtrar por user_id (Railway API não tem user management)
-        console.log('⚠️ TEMPORÁRIO: Usando todos os jobs para stats (Railway API não tem user management)');
-        documents = railwayJobs || [];
+        // Filtrar jobs do usuário atual (agora com user management adequado)
+        console.log('👤 Filtrando jobs para stats por user_id:', user.id);
+        documents = railwayJobs?.filter((job: any) => {
+          console.log('🔍 Stats job user_id:', job.user_id, 'vs user:', user.id);
+          return job.user_id === user.id;
+        }) || [];
         
-        console.log('📊 Jobs totais para stats:', documents.length);
+        console.log('📊 Jobs do usuário para stats:', documents.length);
         
       } catch (railwayError) {
         console.error('❌ Erro na Railway API para stats:', railwayError);
