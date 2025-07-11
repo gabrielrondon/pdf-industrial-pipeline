@@ -1,0 +1,53 @@
+@startuml
+!theme aws-orange
+title PDF Industrial Pipeline - Fluxo de Sequência de Alto Nível
+
+actor "Usuário" as user
+participant "React Frontend" as frontend
+participant "Supabase" as supabase
+participant "Railway API" as railway
+participant "Edge Functions" as functions
+
+== Autenticação ==
+user -> frontend: Acesso à plataforma
+frontend -> supabase: Login/Signup
+supabase -> frontend: JWT Token
+frontend -> user: Dashboard autenticado
+
+== Upload e Análise de Documento ==
+user -> frontend: Upload PDF
+frontend -> supabase: Salvar arquivo (Storage)
+frontend -> functions: Iniciar análise (analyze-document)
+functions -> railway: Processar PDF (7-stage pipeline)
+railway -> functions: Resultados da análise
+functions -> supabase: Salvar análise (DB)
+supabase -> frontend: Documento processado
+frontend -> user: Exibir análise completa
+
+== Visualização e Gestão ==
+user -> frontend: Visualizar "Meus Documentos"
+frontend -> supabase: Buscar documentos do usuário
+supabase -> frontend: Lista de documentos + pontos
+frontend -> user: Exibir lista com estatísticas
+
+user -> frontend: Acessar "Estatísticas"
+frontend -> supabase: Buscar dados agregados
+supabase -> frontend: Métricas e gráficos
+frontend -> user: Dashboard de estatísticas
+
+== Funcionalidades Avançadas ==
+user -> frontend: Busca semântica
+frontend -> functions: semantic-search
+functions -> supabase: Consultar embeddings
+supabase -> functions: Resultados relevantes
+functions -> frontend: Resultados ranqueados
+frontend -> user: Exibir resultados
+
+user -> frontend: Gerenciar privacidade
+frontend -> functions: toggle-document-privacy
+functions -> supabase: Atualizar status + créditos
+supabase -> functions: Confirmação
+functions -> frontend: Status atualizado
+frontend -> user: Feedback visual
+
+@enduml

@@ -1,0 +1,154 @@
+@startuml
+!theme aws-orange
+title PDF Industrial Pipeline - Fluxo de Sequência Detalhado
+
+actor "Usuário" as user
+participant "React App" as react
+participant "AuthContext" as auth
+participant "DocumentContext" as docContext
+participant "SupabaseService" as service
+participant "Supabase Auth" as supabaseAuth
+participant "Supabase Storage" as storage
+participant "Supabase DB" as db
+participant "Edge Function\nanalyze-document" as analyzeFunc
+participant "Railway API\nPipeline" as railway
+participant "Edge Function\nsemantic-search" as searchFunc
+participant "Edge Function\ntoggle-privacy" as privacyFunc
+
+== Autenticação Detalhada ==
+user -> react: Acesso à aplicação
+react -> auth: Verificar estado de autenticação
+auth -> supabaseAuth: getSession()
+supabaseAuth -> auth: Session data ou null
+auth -> react: Estado de autenticação
+
+alt Usuário não autenticado
+    react -> user: Redirecionar para login
+    user -> react: Submeter credenciais
+    react -> auth: signIn(email, password)
+    auth -> supabaseAuth: signInWithPassword()
+    supabaseAuth -> auth: Session + User data
+    auth -> react: Usuário autenticado
+    react -> user: Redirecionar para dashboard
+end
+
+== Upload e Processamento Detalhado ==
+user -> react: Selecionar arquivo PDF
+react -> docContext: uploadDocument(file, model)
+docContext -> service: uploadDocument(file, userId)
+
+service -> storage: upload(fileName, file)
+storage -> service: publicUrl
+
+service -> analyzeFunc: invoke('analyze-document', formData)
+note right: FormData contém:\n- file (PDF)\n- model (native/openai/claude)\n- documentType (edital/processo/laudo)
+
+analyzeFunc -> railway: POST /api/v1/jobs/upload
+note right: Railway 7-Stage Pipeline:\n1. Ingestion (validation)\n2. Chunking (page segmentation)\n3. OCR (text extraction)\n4. NLP (entity recognition)\n5. ML (lead scoring)\n6. Judicial Analysis (CPC compliance)\n7. Delivery (results formatting)
+
+railway -> analyzeFunc: Analysis results
+note left: Retorna:\n- points[] (leads identificados)\n- metadata (estatísticas)\n- processing_info
+
+analyzeFunc -> service: Analysis complete
+
+service -> db: INSERT INTO documents
+note right: Campos salvos:\n- user_id, file_name, file_url\n- type, is_private\n- uploaded_at, analyzed_at, created_at
+
+db -> service: document_id
+
+service -> db: INSERT INTO analysis_points
+note right: Para cada ponto:\n- document_id, title, comment\n- status, category, priority\n- page_reference, raw_value
+
+db -> service: Points saved
+
+service -> docContext: DocumentAnalysis object
+docContext -> react: Upload successful
+react -> user: Mostrar análise completa
+
+== Recuperação de Documentos Detalhada ==
+user -> react: Navegar para "Meus Documentos"
+react -> docContext: useEffect[] trigger
+docContext -> service: getUserDocuments(userId)
+
+service -> db: SELECT * FROM documents WHERE user_id = ?
+db -> service: documents[]
+
+loop Para cada documento
+    service -> db: SELECT * FROM analysis_points WHERE document_id = ?
+    db -> service: points[]
+end
+
+service -> docContext: documentsWithPoints[]
+docContext -> react: documents state updated
+react -> user: Exibir lista de documentos
+
+== Visualização de Página Detalhada ==
+user -> react: Clicar "Ver Página X"
+react -> react: handleViewPage(pageNum)
+react -> react: setModalOpen(true)
+
+react -> railway: GET /api/v1/jobs/{jobId}/page/{pageNum}
+railway -> react: pageData {page_content, filename, total_pages}
+react -> user: Exibir modal profissional
+
+user -> react: Clicar "Copiar"
+react -> react: navigator.clipboard.writeText()
+react -> user: Toast "Conteúdo copiado!"
+
+== Busca Semântica Detalhada ==
+user -> react: Inserir query de busca
+react -> docContext: semanticSearch(query, documentIds)
+docContext -> service: semanticSearch(query, documentIds, limit, threshold)
+
+service -> searchFunc: invoke('semantic-search', body)
+searchFunc -> db: SELECT FROM document_embeddings
+note right: Usa OpenAI embeddings +\ncosine similarity para\nranking de relevância
+
+db -> searchFunc: ranked_results[]
+searchFunc -> service: Search results
+service -> docContext: Results with relevance scores
+docContext -> react: Filtered and ranked results
+react -> user: Exibir resultados de busca
+
+== Gestão de Privacidade Detalhada ==
+user -> react: Toggle privacidade
+react -> docContext: toggleDocumentPrivacy(documentId)
+docContext -> service: toggleDocumentPrivacy(documentId)
+
+service -> privacyFunc: invoke('toggle-document-privacy', {documentId})
+privacyFunc -> db: UPDATE documents SET is_private = !is_private
+db -> privacyFunc: Updated document
+
+alt Documento tornou-se público
+    privacyFunc -> db: UPDATE profiles SET credits = credits + 5
+    note right: Recompensa por compartilhamento
+    db -> privacyFunc: Credits updated
+end
+
+privacyFunc -> service: {success, isPrivate, creditsEarned}
+service -> docContext: Updated document state
+docContext -> react: Privacy state updated
+react -> user: Feedback visual + toast
+
+== Estatísticas Detalhadas ==
+user -> react: Navegar para "Estatísticas"
+react -> docContext: getStats()
+docContext -> service: getDashboardStats()
+
+service -> db: SELECT FROM profiles WHERE id = userId
+db -> service: user_profile {credits, plan}
+
+service -> db: SELECT FROM documents WHERE user_id = userId
+db -> service: user_documents[]
+
+service -> db: SELECT FROM analysis_points WHERE document_id IN (...)
+db -> service: analysis_points[]
+
+service -> service: Calcular métricas
+note right: Processa:\n- totalAnalyses\n- validLeads (status='confirmado')\n- documentTypes distribution\n- statusDistribution\n- commonIssues
+
+service -> docContext: DashboardStats object
+docContext -> react: Stats data
+react -> user: Exibir dashboard de estatísticas
+
+@enduml

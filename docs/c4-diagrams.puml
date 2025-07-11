@@ -1,0 +1,157 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title PDF Industrial Pipeline - Diagrama C1 (Context)
+
+Person(user, "Usuário", "Investidor/Analista que precisa analisar documentos de leilões judiciais brasileiros")
+Person(admin, "Administrador", "Usuário com acesso a dashboard administrativo e métricas do sistema")
+
+System(pdfPipeline, "PDF Industrial Pipeline", "Plataforma completa para análise automatizada de documentos de leilões judiciais brasileiros com IA/ML")
+
+System_Ext(openai, "OpenAI API", "Serviço de IA para análise de documentos e embeddings semânticos")
+System_Ext(stripe, "Stripe", "Gateway de pagamento para planos Pro e Premium")
+System_Ext(email, "Serviço de Email", "Notificações e confirmações por email")
+System_Ext(external_legal, "APIs Jurídicas Externas", "Consulta a dados de processos e validações legais")
+
+Rel(user, pdfPipeline, "Faz upload de PDFs, visualiza análises, gerencia documentos", "HTTPS/WebSocket")
+Rel(admin, pdfPipeline, "Monitora sistema, gerencia usuários, visualiza métricas", "HTTPS")
+
+Rel(pdfPipeline, openai, "Processa documentos com IA, gera embeddings", "HTTPS/API")
+Rel(pdfPipeline, stripe, "Processa pagamentos, gerencia assinaturas", "HTTPS/Webhook")
+Rel(pdfPipeline, email, "Envia notificações e confirmações", "SMTP")
+Rel(pdfPipeline, external_legal, "Valida dados jurídicos, consulta processos", "HTTPS/API")
+
+@enduml
+
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title PDF Industrial Pipeline - Diagrama C2 (Container)
+
+Person(user, "Usuário")
+Person(admin, "Administrador")
+
+System_Boundary(pdfPipeline, "PDF Industrial Pipeline") {
+    Container(clientApp, "Client Frontend", "React/TypeScript/Vite", "Interface principal para usuários finais - upload, análise e gestão de documentos")
+    Container(adminApp, "Admin Frontend", "React/TypeScript/Vite", "Dashboard administrativo para monitoramento e gestão do sistema")
+    Container(apiGateway, "Railway API", "Python/FastAPI", "API principal com pipeline de 7 estágios para processamento de PDFs")
+    Container(edgeFunctions, "Edge Functions", "TypeScript/Deno", "Funções serverless para lógica de negócio e integrações")
+    Container(database, "Database", "PostgreSQL", "Armazena dados de usuários, documentos, análises e embeddings")
+    Container(storage, "File Storage", "Supabase Storage", "Armazenamento de arquivos PDF e assets")
+    Container(auth, "Authentication", "Supabase Auth", "Gestão de autenticação e autorização")
+    Container(cache, "Cache & Queue", "Redis", "Cache de resultados e fila de processamento em background")
+}
+
+System_Ext(openai, "OpenAI API")
+System_Ext(stripe, "Stripe")
+System_Ext(monitoring, "Monitoring", "Prometheus/Grafana")
+
+Rel(user, clientApp, "Usa", "HTTPS")
+Rel(admin, adminApp, "Usa", "HTTPS")
+
+Rel(clientApp, auth, "Autentica", "HTTPS")
+Rel(clientApp, edgeFunctions, "Invoca funções", "HTTPS")
+Rel(clientApp, storage, "Upload/Download", "HTTPS")
+
+Rel(adminApp, database, "Consulta métricas", "SQL")
+Rel(adminApp, monitoring, "Visualiza dashboards", "HTTPS")
+
+Rel(edgeFunctions, apiGateway, "Processa PDFs", "HTTPS")
+Rel(edgeFunctions, database, "CRUD operations", "SQL")
+Rel(edgeFunctions, openai, "Análise com IA", "HTTPS")
+Rel(edgeFunctions, stripe, "Pagamentos", "HTTPS")
+
+Rel(apiGateway, cache, "Cache/Queue", "Redis Protocol")
+Rel(apiGateway, storage, "Acessa PDFs", "HTTPS")
+
+@enduml
+
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title PDF Industrial Pipeline - Diagrama C3 (Component) - Client Frontend
+
+Container(clientApp, "Client Frontend", "React/TypeScript")
+
+Container_Boundary(clientApp, "Client Frontend") {
+    Component(authContext, "AuthContext", "React Context", "Gerencia estado de autenticação e usuário")
+    Component(docContext, "DocumentContext", "React Context", "Gerencia estado de documentos e operações")
+    Component(planContext, "PlanContext", "React Context", "Gerencia planos e créditos do usuário")
+    
+    Component(uploadPage, "Upload Page", "React Component", "Interface para upload e seleção de modelo de análise")
+    Component(documentsPage, "Documents Page", "React Component", "Lista e gerencia documentos do usuário")
+    Component(statsPage, "Stats Page", "React Component", "Dashboard de estatísticas e métricas")
+    Component(analysisResult, "Analysis Result", "React Component", "Exibe resultados detalhados da análise")
+    
+    Component(modalViewer, "Page Viewer Modal", "React Component", "Modal profissional para visualização de páginas")
+    Component(documentList, "Document List", "React Component", "Lista documentos com filtros e busca")
+    Component(dashboardStats, "Dashboard Stats", "React Component", "Componente de estatísticas reutilizável")
+    
+    Component(supabaseService, "Supabase Service", "TypeScript Class", "Camada de acesso a dados e APIs")
+    Component(hooks, "Custom Hooks", "React Hooks", "Hooks para operações de documento, upload e estado")
+    
+    Component(uiComponents, "UI Components", "shadcn/ui", "Biblioteca de componentes de interface")
+}
+
+Container_Ext(supabase, "Supabase Backend")
+Container_Ext(railway, "Railway API")
+
+Rel(uploadPage, docContext, "Usa")
+Rel(documentsPage, docContext, "Usa")
+Rel(statsPage, docContext, "Usa")
+Rel(analysisResult, modalViewer, "Abre modal")
+
+Rel(docContext, hooks, "Usa")
+Rel(hooks, supabaseService, "Chama")
+Rel(supabaseService, supabase, "API calls")
+Rel(modalViewer, railway, "Busca conteúdo da página")
+
+Rel(authContext, supabase, "Autenticação")
+Rel(planContext, supabase, "Dados de plano")
+
+@enduml
+
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title PDF Industrial Pipeline - Diagrama C4 (Component) - Railway API Pipeline
+
+Container(railwayAPI, "Railway API", "Python/FastAPI")
+
+Container_Boundary(railwayAPI, "Railway API - 7-Stage Pipeline") {
+    Component(ingestion, "Stage 1: Ingestion", "Python/FastAPI", "Validação, upload streaming e verificação de vírus")
+    Component(chunking, "Stage 2: Chunking", "Python/PyMuPDF", "Segmentação inteligente de páginas com sobreposição")
+    Component(ocr, "Stage 3: OCR", "Python/Tesseract", "Extração de texto multi-engine com detecção de idioma")
+    Component(nlp, "Stage 4: NLP", "Python/NLTK", "Análise de texto avançada com reconhecimento de entidades")
+    Component(ml, "Stage 5: ML", "Python/scikit-learn", "Modelos ensemble para scoring e classificação de leads")
+    Component(judicial, "Stage 6: Judicial Analysis", "Python/Custom", "Verificação de conformidade CPC Art. 889 - Leilões brasileiros")
+    Component(delivery, "Stage 7: Delivery", "Python/FastAPI", "Formatação de resultados em tempo real com notificações")
+    
+    Component(database_models, "Database Models", "SQLAlchemy", "Modelos ORM para Job, JobChunk, MLPrediction, JudicialAnalysis")
+    Component(ml_engine, "ML Engine", "ONNX/MLflow", "Engine otimizado para inferência 10x mais rápida")
+    Component(text_engine, "Text Engine", "Python/Regex", "Processamento especializado para documentos jurídicos brasileiros")
+    Component(storage_manager, "Storage Manager", "S3/MinIO", "Gestão de arquivos e chunks com backup")
+}
+
+Container_Ext(postgresql, "PostgreSQL")
+Container_Ext(redis, "Redis")
+Container_Ext(s3storage, "S3 Storage")
+
+Rel(ingestion, chunking, "PDF validado")
+Rel(chunking, ocr, "Chunks de páginas")
+Rel(ocr, nlp, "Texto extraído")
+Rel(nlp, ml, "Entidades identificadas")
+Rel(ml, judicial, "Features engenheiradas")
+Rel(judicial, delivery, "Análise jurídica completa")
+
+Rel(chunking, storage_manager, "Salva chunks")
+Rel(ml, ml_engine, "Executa modelos")
+Rel(nlp, text_engine, "Processa texto jurídico")
+
+Rel(database_models, postgresql, "Persiste dados")
+Rel(ml_engine, redis, "Cache de modelos")
+Rel(storage_manager, s3storage, "Armazena arquivos")
+
+@enduml
