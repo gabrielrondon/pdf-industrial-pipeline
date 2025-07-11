@@ -19,6 +19,7 @@ import DocumentDetailPage from '@/pages/DocumentDetailPage';
 import PlansPage from '@/pages/PlansPage';
 import CommunityPage from '@/pages/CommunityPage';
 import ProfilePage from '@/pages/ProfilePage';
+import StatsPage from '@/pages/StatsPage';
 import NotFound from '@/pages/NotFound';
 
 // Components
@@ -90,6 +91,13 @@ function App() {
                   <ProtectedRoute>
                     <AppLayout>
                       <ProfilePage />
+                    </AppLayout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/stats" element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <StatsPage />
                     </AppLayout>
                   </ProtectedRoute>
                 } />

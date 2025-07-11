@@ -83,6 +83,10 @@ export class SupabaseService {
     documentType: 'edital' | 'processo' | 'laudo' | 'outro',
     isPrivate: boolean = false
   ): Promise<string> {
+    console.log('💾 Salvando documento:', { userId, fileName, documentType, isPrivate });
+    
+    const now = new Date().toISOString();
+    
     const { data, error } = await supabase
       .from('documents')
       .insert({
@@ -90,26 +94,37 @@ export class SupabaseService {
         file_name: fileName,
         file_url: fileUrl,
         type: documentType,
-        is_private: isPrivate
+        is_private: isPrivate,
+        uploaded_at: now,
+        analyzed_at: now,
+        created_at: now
       } as any)
       .select('id')
       .single();
     
     if (error) {
-      console.error('Error saving document:', error);
+      console.error('❌ Erro ao salvar documento:', error);
       throw new Error(`Erro ao salvar documento: ${error.message}`);
     }
     
+    console.log('✅ Documento salvo com ID:', data?.id);
     return data?.id;
   }
 
   // Save analysis points
   static async saveAnalysisPoints(documentId: string, points: any[]): Promise<void> {
+    console.log('📊 Salvando pontos de análise:', { documentId, count: points.length });
+    
+    if (!points || points.length === 0) {
+      console.log('⚠️ Nenhum ponto de análise para salvar');
+      return;
+    }
+    
     const analysisPoints = points.map(point => ({
       document_id: documentId,
-      title: point.title,
-      comment: point.comment,
-      status: point.status
+      title: point.title || 'Sem título',
+      comment: point.comment || 'Sem comentário',
+      status: point.status || 'não identificado'
     }));
 
     const { error } = await supabase
@@ -117,9 +132,11 @@ export class SupabaseService {
       .insert(analysisPoints as any);
     
     if (error) {
-      console.error('Error saving analysis points:', error);
+      console.error('❌ Erro ao salvar pontos de análise:', error);
       throw new Error(`Erro ao salvar pontos de análise: ${error.message}`);
     }
+    
+    console.log('✅ Pontos de análise salvos com sucesso');
   }
 
   // Get document chunks using direct fetch to avoid type issues
@@ -257,23 +274,40 @@ export class SupabaseService {
 
   // Get user documents
   static async getUserDocuments(userId: string): Promise<DocumentAnalysis[]> {
+    console.log('📋 Buscando documentos para usuário:', userId);
+    
     const { data: documents, error: docError } = await supabase
       .from('documents')
       .select('*')
       .eq('user_id', userId)
-      .order('analyzed_at', { ascending: false });
+      .order('created_at', { ascending: false }); // Mudado para created_at como fallback
     
     if (docError) {
-      console.error('Error fetching documents:', docError);
+      console.error('❌ Erro ao buscar documentos:', docError);
+      return [];
+    }
+
+    console.log('📄 Documentos encontrados:', documents?.length || 0);
+
+    if (!documents || documents.length === 0) {
+      console.log('⚠️ Nenhum documento encontrado para o usuário');
       return [];
     }
 
     const documentsWithPoints = await Promise.all(
-      (documents || []).map(async (doc) => {
-        const { data: points } = await supabase
+      documents.map(async (doc) => {
+        console.log('🔍 Processando documento:', doc.id, doc.file_name);
+        
+        const { data: points, error: pointsError } = await supabase
           .from('analysis_points')
           .select('*')
           .eq('document_id', doc.id);
+        
+        if (pointsError) {
+          console.error('❌ Erro ao buscar pontos para documento', doc.id, ':', pointsError);
+        }
+
+        console.log('📊 Pontos encontrados para documento', doc.id, ':', points?.length || 0);
         
         return {
           id: doc.id,
@@ -281,14 +315,15 @@ export class SupabaseService {
           fileName: doc.file_name,
           fileUrl: doc.file_url,
           type: doc.type,
-          uploadedAt: doc.uploaded_at,
-          analyzedAt: doc.analyzed_at,
-          isPrivate: doc.is_private,
+          uploadedAt: doc.uploaded_at || doc.created_at,
+          analyzedAt: doc.analyzed_at || doc.created_at || new Date().toISOString(),
+          isPrivate: doc.is_private || false,
           points: points || []
         };
       })
     );
 
+    console.log('✅ Documentos processados com sucesso:', documentsWithPoints.length);
     return documentsWithPoints;
   }
 

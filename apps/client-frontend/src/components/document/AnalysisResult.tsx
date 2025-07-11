@@ -10,6 +10,7 @@ import { FileText, Download, Share2, Lock, Eye, TrendingUp, AlertTriangle, Dolla
 import { useAuth } from '@/contexts/AuthContext';
 import { useDocuments } from '@/contexts/DocumentContext';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { PageViewerModal } from '@/components/ui/page-viewer-modal';
 import { cn } from '@/lib/utils';
 
 interface AnalysisResultProps {
@@ -23,6 +24,8 @@ export function AnalysisResult({ analysis }: AnalysisResultProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  const [modalPageNumber, setModalPageNumber] = useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   
   const getDocumentTypeLabel = (type: string): string => {
     const types: Record<string, string> = {
@@ -113,32 +116,14 @@ export function AnalysisResult({ analysis }: AnalysisResultProps) {
     setExpandedItems(newExpanded);
   };
 
-  const handleViewPage = async (pageNum: number, jobId?: string) => {
-    if (!jobId) {
-      alert(`📄 Página ${pageNum}\n\n❌ ID do job não encontrado.\n\n💡 Esta funcionalidade precisa do ID do processamento para acessar o conteúdo da página.`);
-      return;
-    }
+  const handleViewPage = (pageNum: number) => {
+    setModalPageNumber(pageNum);
+    setIsModalOpen(true);
+  };
 
-    try {
-      // Call Railway API to get page content
-      const response = await fetch(`https://pdf-industrial-pipeline-production.up.railway.app/api/v1/jobs/${jobId}/page/${pageNum}`);
-      
-      if (!response.ok) {
-        throw new Error(`Erro ${response.status}: ${response.statusText}`);
-      }
-      
-      const pageData = await response.json();
-      
-      // Show page content in a clean modal-like alert
-      const content = pageData.page_content;
-      const truncatedContent = content.length > 500 ? content.substring(0, 500) + '...' : content;
-      
-      alert(`📄 PÁGINA ${pageNum} - ${pageData.filename}\n\n📖 CONTEÚDO:\n\n${truncatedContent}\n\n📊 Total de páginas: ${pageData.total_pages}\n\n💡 Dica: Este é o texto extraído exatamente desta página do documento original!`);
-      
-    } catch (error) {
-      console.error('Erro ao buscar conteúdo da página:', error);
-      alert(`📄 Página ${pageNum}\n\n❌ Não foi possível carregar o conteúdo da página.\n\nErro: ${error instanceof Error ? error.message : 'Erro desconhecido'}\n\n💡 Verifique sua conexão ou tente novamente mais tarde.`);
-    }
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setModalPageNumber(null);
   };
 
   const getDetailedExplanation = (point: any) => {
@@ -388,7 +373,7 @@ export function AnalysisResult({ analysis }: AnalysisResultProps) {
                                       size="sm" 
                                       onClick={(e) => {
                                         e.stopPropagation(); // Prevent triggering the collapsible
-                                        handleViewPage(pointAny.page_reference, analysis.id);
+                                        handleViewPage(pointAny.page_reference);
                                       }}
                                       className="h-7 text-xs bg-blue-100 hover:bg-blue-200 border-blue-300"
                                     >
@@ -496,6 +481,14 @@ export function AnalysisResult({ analysis }: AnalysisResultProps) {
           </Button>
         </div>
       </CardFooter>
+
+      <PageViewerModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        pageNumber={modalPageNumber || 1}
+        jobId={analysis.id}
+        documentName={analysis.fileName}
+      />
     </Card>
   );
 }

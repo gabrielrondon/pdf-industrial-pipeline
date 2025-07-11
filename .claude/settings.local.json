@@ -32,7 +32,9 @@
       "Bash(curl:*)",
       "Bash(railway projects:*)",
       "Bash(railway:*)",
-      "WebFetch(domain:pdf-industrial-pipeline-production.up.railway.app)"
+      "WebFetch(domain:pdf-industrial-pipeline-production.up.railway.app)",
+      "Bash(python:*)",
+      "Bash(npm run:*)"
     ],
     "deny": []
   }

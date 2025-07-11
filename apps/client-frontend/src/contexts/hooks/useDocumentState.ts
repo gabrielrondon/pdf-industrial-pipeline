@@ -17,14 +17,19 @@ export function useDocumentState() {
   }, [user?.id]);
 
   const refreshDocuments = async () => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      console.log('❌ Usuário não autenticado, não é possível carregar documentos');
+      return;
+    }
     
+    console.log('🔄 Iniciando carregamento de documentos para usuário:', user.id);
     setIsLoading(true);
     try {
       const userDocuments = await SupabaseService.getUserDocuments(user.id);
+      console.log('📋 Documentos carregados no contexto:', userDocuments.length);
       setDocuments(userDocuments);
     } catch (error) {
-      console.error('Error loading documents:', error);
+      console.error('❌ Erro no contexto ao carregar documentos:', error);
     } finally {
       setIsLoading(false);
     }
