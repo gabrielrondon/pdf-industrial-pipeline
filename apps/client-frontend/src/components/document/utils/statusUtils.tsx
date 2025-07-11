@@ -42,13 +42,39 @@ export const getStatusText = (status: string) => {
   }
 };
 
+// Mensagens divertidas estilo Discord para aliviar a ansiedade do usuário
+const funnyMessages = [
+  'Arremate360 está trabalhando... 🔍',
+  'Mais um pouco, ok? ⏰',
+  'Analisando cada vírgula... 📋',
+  'Procurando as melhores oportunidades... 💎',
+  'Quase terminando... prometo! 🤞',
+  'Descobrindo tesouros escondidos... 🏆',
+  'Verificando se vale a pena... 💰',
+  'Mais alguns segundos... ☕',
+  'Garimpando informações valiosas... ⛏️',
+  'Paciência, estamos quase lá! 🚀',
+  'Processando com amor e carinho... ❤️',
+  'Conectando os pontos... 🔗',
+  'Fazendo a mágica acontecer... ✨',
+  'Checando os detalhes importantes... 🔎',
+  'Quase pronto para te surpreender! 🎉'
+];
+
+let messageIndex = 0;
+
 export const getProgressText = (progress: number, status: string) => {
-  if (status === 'completed') return 'Documento processado com sucesso!';
-  if (status === 'failed') return 'Erro durante o processamento';
-  if (progress <= 10) return 'Preparando para processamento...';
-  if (progress <= 30) return 'Baixando e validando arquivo...';
-  if (progress <= 50) return 'Extraindo texto das páginas...';
-  if (progress <= 70) return 'Dividindo texto em blocos...';
-  if (progress <= 90) return 'Gerando representações vetoriais...';
-  return 'Finalizando processamento...';
+  if (status === 'completed') return 'Documento processado com sucesso! 🎯';
+  if (status === 'failed') return 'Ops! Algo deu errado... 😅';
+  
+  // Cycle through funny messages
+  const message = funnyMessages[messageIndex % funnyMessages.length];
+  messageIndex++;
+  
+  if (progress <= 15) return message;
+  if (progress <= 35) return message;
+  if (progress <= 55) return message;
+  if (progress <= 75) return message;
+  if (progress <= 95) return message;
+  return 'Últimos ajustes... quase pronto! 🏁';
 };
