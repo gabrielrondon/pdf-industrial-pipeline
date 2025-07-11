@@ -3,7 +3,7 @@
  * Em vez de Supabase diretamente (que causa problemas de RLS)
  */
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
@@ -20,15 +20,72 @@ interface SimpleDocumentUploaderProps {
   onAnalysisComplete?: (results: any) => void;
 }
 
+// Mensagens divertidas estilo Discord para aliviar a ansiedade do usuário
+const funnyMessages = [
+  'Arremate360 está trabalhando... 🔍',
+  'Mais um pouco, ok? ⏰',
+  'Analisando cada vírgula... 📋',
+  'Procurando as melhores oportunidades... 💎',
+  'Quase terminando... prometo! 🤞',
+  'Descobrindo tesouros escondidos... 🏆',
+  'Verificando se vale a pena... 💰',
+  'Mais alguns segundos... ☕',
+  'Garimpando informações valiosas... ⛏️',
+  'Paciência, estamos quase lá! 🚀',
+  'Processando com amor e carinho... ❤️',
+  'Conectando os pontos... 🔗',
+  'Fazendo a mágica acontecer... ✨',
+  'Checando os detalhes importantes... 🔎',
+  'Quase pronto para te surpreender! 🎉'
+];
+
+let messageIndex = 0;
+
 export function SimpleDocumentUploader({ onAnalysisComplete }: SimpleDocumentUploaderProps) {
   const { user } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [progress, setProgress] = useState(0);
+  const [displayProgress, setDisplayProgress] = useState(0);
+  const [currentMessage, setCurrentMessage] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [currentJobId, setCurrentJobId] = useState<string | null>(null);
   const [jobStatus, setJobStatus] = useState<JobStatus | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Smooth progress animation
+  useEffect(() => {
+    if (!isUploading) return;
+    
+    const smoothProgressUpdate = () => {
+      setDisplayProgress(prev => {
+        if (prev < progress) {
+          // Incrementally increase by 1-2% every 200ms
+          const increment = Math.min(Math.random() * 2 + 0.5, progress - prev);
+          return Math.min(prev + increment, progress);
+        }
+        return prev;
+      });
+    };
+
+    const progressInterval = setInterval(smoothProgressUpdate, 200);
+    return () => clearInterval(progressInterval);
+  }, [progress, isUploading]);
+
+  // Update message every 2-3 seconds
+  useEffect(() => {
+    if (!isUploading) return;
+    
+    const updateMessage = () => {
+      const message = funnyMessages[messageIndex % funnyMessages.length];
+      messageIndex++;
+      setCurrentMessage(message);
+    };
+
+    updateMessage(); // Initial message
+    const messageInterval = setInterval(updateMessage, 2500);
+    return () => clearInterval(messageInterval);
+  }, [isUploading]);
 
   // Verificar se o arquivo é válido
   const validateFile = (file: File): string | null => {
@@ -68,6 +125,8 @@ export function SimpleDocumentUploader({ onAnalysisComplete }: SimpleDocumentUpl
     setIsUploading(true);
     setError(null);
     setProgress(10);
+    setDisplayProgress(0);
+    setCurrentMessage('');
 
     try {
       toast({
@@ -181,17 +240,19 @@ export function SimpleDocumentUploader({ onAnalysisComplete }: SimpleDocumentUpl
   };
 
   const getStatusMessage = () => {
-    if (!jobStatus) return null;
+    if (!jobStatus) {
+      return isUploading && currentMessage ? currentMessage : null;
+    }
     
     switch (jobStatus.status) {
       case 'pending':
-        return 'Aguardando processamento...';
+        return currentMessage || 'Aguardando processamento...';
       case 'processing':
-        return 'Processando documento...';
+        return currentMessage || 'Processando documento...';
       case 'completed':
-        return 'Processamento concluído!';
+        return 'Documento processado com sucesso! 🎯';
       case 'failed':
-        return 'Erro no processamento';
+        return 'Ops! Algo deu errado... 😅';
       default:
         return 'Status desconhecido';
     }
@@ -230,9 +291,21 @@ export function SimpleDocumentUploader({ onAnalysisComplete }: SimpleDocumentUpl
         {/* Progress */}
         {isUploading && (
           <div className="space-y-2">
-            <Progress value={progress} className="w-full" />
-            <div className="text-sm text-center text-muted-foreground">
-              {getStatusMessage() || `${progress}% concluído`}
+            <Progress value={displayProgress} className="w-full h-3 transition-all duration-300 ease-out" />
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-blue-600 font-medium animate-pulse">
+                  {getStatusMessage()}
+                </span>
+                <span className="font-mono text-blue-700">
+                  {Math.floor(displayProgress)}%
+                </span>
+              </div>
+              {isUploading && (
+                <div className="text-xs text-gray-500 text-center">
+                  💡 Dica: Enquanto isso, que tal preparar seus documentos para o próximo leilão?
+                </div>
+              )}
             </div>
             {currentJobId && (
               <div className="text-xs text-center text-muted-foreground">
