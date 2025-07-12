@@ -18,11 +18,8 @@ export function useDocumentOperations() {
       // Get the privacy toggle result
       const result = await SupabaseService.toggleDocumentPrivacy(id);
 
-      // Track privacy change
-      await SupabaseService.trackEvent(user.id, 'document_privacy_changed', {
-        documentId: id,
-        isPrivate: result.isPrivate
-      });
+      // Track privacy change - DEPRECATED: trackEvent now handled by Railway
+      console.log('🔄 Document privacy changed:', { documentId: id, isPrivate: result.isPrivate });
       
       // Since we need to return a DocumentAnalysis, we need to fetch the updated document
       // For now, we'll create a minimal DocumentAnalysis with the updated privacy state
@@ -57,11 +54,8 @@ export function useDocumentOperations() {
     try {
       const stats = await SupabaseService.getDashboardStats();
       
-      // Track stats view
-      await SupabaseService.trackEvent(user.id, 'dashboard_stats_viewed', {
-        totalAnalyses: stats.totalAnalyses,
-        validLeads: stats.validLeads
-      });
+      // Track stats view - DEPRECATED: trackEvent now handled by Railway
+      console.log('📊 Dashboard stats viewed:', { totalAnalyses: stats.totalAnalyses, validLeads: stats.validLeads });
       
       return stats;
     } catch (error) {
@@ -85,10 +79,8 @@ export function useDocumentOperations() {
     try {
       const communityLeads = await SupabaseService.getCommunityLeads();
       
-      // Track community access
-      await SupabaseService.trackEvent(user.id, 'community_leads_accessed', {
-        leadsCount: communityLeads.length
-      });
+      // Track community access - DEPRECATED: trackEvent now handled by Railway
+      console.log('👥 Community leads accessed:', { leadsCount: communityLeads.length });
       
       return communityLeads;
     } catch (error) {

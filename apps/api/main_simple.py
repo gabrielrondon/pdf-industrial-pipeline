@@ -64,7 +64,7 @@ async def debug_environment():
         # Safe environment variables to show
         safe_vars = [
             "ENVIRONMENT", "PORT", "PYTHONPATH", "SECRET_KEY", 
-            "DEBUG", "API_VERSION"
+            "DEBUG", "API_VERSION", "STORAGE_BACKEND"
         ]
         
         for var in safe_vars:
@@ -87,9 +87,27 @@ async def debug_environment():
         if redis_url:
             env_vars["REDIS_URL_PREFIX"] = redis_url[:30] + "..."
             
+        # S3 Configuration Check
+        s3_bucket = os.getenv("S3_BUCKET")
+        aws_access_key = os.getenv("AWS_ACCESS_KEY_ID")
+        aws_secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
+        s3_region = os.getenv("S3_REGION")
+        
+        env_vars["S3_CONFIGURED"] = all([s3_bucket, aws_access_key, aws_secret_key])
+        env_vars["S3_BUCKET"] = s3_bucket
+        env_vars["S3_REGION"] = s3_region or "us-east-1"
+        env_vars["AWS_ACCESS_KEY_ID"] = aws_access_key[:8] + "..." if aws_access_key else None
+        env_vars["AWS_SECRET_ACCESS_KEY"] = "***" if aws_secret_key else None
+            
         # Show all environment variables that start with common prefixes
         all_env = dict(os.environ)
-        railway_vars = {k: v for k, v in all_env.items() if k.startswith(('RAILWAY_', 'DATABASE_', 'REDIS_', 'POSTGRES'))}
+        railway_vars = {k: v for k, v in all_env.items() if k.startswith(('RAILWAY_', 'DATABASE_', 'REDIS_', 'POSTGRES', 'S3_', 'AWS_'))}
+        
+        # Hide sensitive values
+        for key in railway_vars:
+            if 'SECRET' in key or 'PASSWORD' in key or 'KEY' in key:
+                if railway_vars[key]:
+                    railway_vars[key] = railway_vars[key][:8] + "..." if len(railway_vars[key]) > 8 else "***"
         
         return {
             "configured_vars": env_vars,

@@ -52,6 +52,8 @@ export const DocumentProvider = ({ children }: { children: ReactNode }) => {
         isLoading,
         uploadDocument,
         getDocumentById,
+        addDocument,  // Missing! This is why addDocument was undefined
+        updateDocument, // Also missing
         toggleDocumentPrivacy,
         getStats,
         getCommunityLeads,

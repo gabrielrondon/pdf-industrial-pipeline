@@ -7,6 +7,8 @@ export interface DocumentContextType {
   isLoading: boolean;
   uploadDocument: (file: File, analysisModel?: AIModel) => Promise<DocumentAnalysis>;
   getDocumentById: (id: string) => DocumentAnalysis | undefined;
+  addDocument: (document: DocumentAnalysis) => void;
+  updateDocument: (id: string, updates: Partial<DocumentAnalysis>) => void;
   toggleDocumentPrivacy: (id: string) => Promise<DocumentAnalysis>;
   getStats: () => Promise<DashboardStats>;
   getCommunityLeads: () => Promise<DocumentAnalysis[]>;
