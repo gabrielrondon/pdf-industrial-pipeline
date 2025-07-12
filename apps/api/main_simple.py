@@ -696,6 +696,7 @@ async def upload_file(file: UploadFile = File(...), user_id: str = None):
             
             if settings.storage_backend == "s3" and settings.s3_bucket:
                 logger.info(f"☁️ S3 storage enabled, attempting upload...")
+                logger.info(f"🔑 AWS credentials present: access_key={bool(settings.aws_access_key_id)}, secret_key={bool(settings.aws_secret_access_key)}")
                 
                 # Auto-detect region if not set or default
                 actual_region = settings.s3_region
@@ -708,6 +709,7 @@ async def upload_file(file: UploadFile = File(...), user_id: str = None):
                 
                 try:
                     # Save to S3 for compliance/re-processing (Option 2)
+                    logger.info(f"📦 Attempting to import S3Backend...")
                     from storage_backends.s3_backend import S3Backend
                     logger.info(f"✅ S3Backend imported successfully")
                     
