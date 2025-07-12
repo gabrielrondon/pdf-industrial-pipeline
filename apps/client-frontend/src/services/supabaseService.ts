@@ -377,16 +377,12 @@ export class SupabaseService {
         const { railwayApi } = await import('@/services/railwayApiService');
         
         console.log('📡 Buscando jobs na Railway para stats...');
-        const railwayJobs = await railwayApi.getJobs();
+        const railwayJobs = await railwayApi.getJobs(user.id);
         
-        console.log('📄 Total jobs na Railway:', railwayJobs?.length || 0);
+        console.log('📄 Jobs na Railway para usuário:', railwayJobs?.length || 0);
         
-        // Filtrar jobs do usuário atual (agora com user management adequado)
-        console.log('👤 Filtrando jobs para stats por user_id:', user.id);
-        documents = railwayJobs?.filter((job: any) => {
-          console.log('🔍 Stats job user_id:', job.user_id, 'vs user:', user.id);
-          return job.user_id === user.id;
-        }) || [];
+        // Já vem filtrado da API
+        documents = railwayJobs || [];
         
         console.log('📊 Jobs do usuário para stats:', documents.length);
         

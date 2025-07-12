@@ -17,6 +17,8 @@ import { cn } from '@/lib/utils';
 export function DocumentList() {
   const { documents, toggleDocumentPrivacy, isLoading } = useDocuments();
   const { user } = useAuth();
+  
+  console.log('📋 DocumentList render - documents:', documents.length, 'isLoading:', isLoading);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [isSaving, setIsSaving] = useState(false);

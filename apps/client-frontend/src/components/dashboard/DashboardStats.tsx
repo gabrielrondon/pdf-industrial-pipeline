@@ -28,15 +28,38 @@ export function DashboardStats() {
   
   useEffect(() => {
     const loadStats = async () => {
-      if (!user?.id) return;
+      if (!user?.id) {
+        console.log('👤 DashboardStats: aguardando user.id...');
+        return;
+      }
+      
+      console.log('📊 DashboardStats: carregando stats para user:', user.id);
       
       try {
         const data = await getStats();
+        console.log('📊 DashboardStats: stats carregadas:', data);
         setStats(data);
         setError(null);
       } catch (err) {
+        console.error('❌ DashboardStats: erro ao carregar stats:', err);
         setError('Não foi possível carregar as estatísticas.');
-        console.error(err);
+        
+        // Fallback para stats mínimas para não deixar vazio
+        setStats({
+          totalAnalyses: 0,
+          validLeads: 0,
+          sharedLeads: 0,
+          credits: 100,
+          documentTypes: [],
+          statusDistribution: [],
+          commonIssues: [],
+          monthlyAnalyses: [],
+          successRate: 0,
+          averageProcessingTime: 0,
+          totalFileSize: 0,
+          averageConfidence: 0,
+          topPerformingDocumentType: 'edital'
+        });
       }
     };
     
