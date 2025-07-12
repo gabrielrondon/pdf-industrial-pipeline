@@ -55,6 +55,49 @@ async def test_database():
     except Exception as e:
         return {"error": str(e), "status": "error"}
 
+@app.get("/debug-s3")
+async def debug_s3_config():
+    """Debug S3 configuration and test connection"""
+    try:
+        from config.settings import get_settings
+        settings = get_settings()
+        
+        # Check S3 configuration
+        s3_status = {
+            "storage_backend": settings.storage_backend,
+            "s3_bucket": settings.s3_bucket,
+            "s3_region": settings.s3_region,
+            "aws_access_key_present": bool(settings.aws_access_key_id),
+            "aws_secret_key_present": bool(settings.aws_secret_access_key),
+            "s3_configured": settings.storage_backend == "s3" and bool(settings.s3_bucket),
+        }
+        
+        # Try to import S3Backend
+        try:
+            from storage_backends.s3_backend import S3Backend
+            s3_status["s3_backend_import"] = "success"
+            
+            # Try to create S3Backend instance
+            try:
+                s3_backend = S3Backend(
+                    bucket=settings.s3_bucket,
+                    region=settings.s3_region,
+                    access_key=settings.aws_access_key_id,
+                    secret_key=settings.aws_secret_access_key,
+                    endpoint_url=settings.s3_endpoint_url
+                )
+                s3_status["s3_backend_creation"] = "success"
+            except Exception as creation_error:
+                s3_status["s3_backend_creation"] = f"failed: {str(creation_error)}"
+                
+        except Exception as import_error:
+            s3_status["s3_backend_import"] = f"failed: {str(import_error)}"
+        
+        return s3_status
+        
+    except Exception as e:
+        return {"error": str(e), "status": "error"}
+
 @app.get("/debug-env")
 async def debug_environment():
     """Debug endpoint to show environment variables (safe info only)"""
