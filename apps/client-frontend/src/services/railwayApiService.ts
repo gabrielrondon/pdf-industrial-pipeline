@@ -89,8 +89,9 @@ class RailwayApiService {
   /**
    * Lista todos os jobs/documentos do usuário
    */
-  async getJobs(): Promise<any[]> {
-    return this.makeRequest('/api/v1/jobs');
+  async getJobs(userId?: string): Promise<any[]> {
+    const endpoint = userId ? `/api/v1/jobs?user_id=${encodeURIComponent(userId)}` : '/api/v1/jobs';
+    return this.makeRequest(endpoint);
   }
 
   /**

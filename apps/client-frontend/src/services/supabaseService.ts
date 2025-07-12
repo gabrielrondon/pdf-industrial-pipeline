@@ -224,8 +224,8 @@ export class SupabaseService {
       const { railwayApi } = await import('@/services/railwayApiService');
       
       // Buscar jobs/documentos na Railway API
-      console.log('📡 Chamando railwayApi.getJobs()...');
-      const railwayJobs = await railwayApi.getJobs();
+      console.log('📡 Chamando railwayApi.getJobs() com user_id:', userId);
+      const railwayJobs = await railwayApi.getJobs(userId);
       
       console.log('📄 Jobs encontrados na Railway:', railwayJobs?.length || 0);
       console.log('📋 Jobs da Railway:', railwayJobs);
@@ -236,17 +236,10 @@ export class SupabaseService {
       }
 
       // Transformar jobs da Railway para formato DocumentAnalysis
-      // Filter by user ID (now that we pass real user IDs)
-      console.log('👤 Filtrando jobs por user_id:', userId);
+      // Jobs já estão filtrados pelo servidor por user_id
+      console.log('📋 Jobs já filtrados pelo servidor para user_id:', userId);
       
-      const filteredJobs = railwayJobs.filter((job: any) => {
-        console.log('🔍 Job user_id:', job.user_id, 'vs current user:', userId);
-        return job.user_id === userId;
-      });
-      
-      console.log('📋 Jobs filtrados para o usuário:', filteredJobs.length);
-      
-      const documents: DocumentAnalysis[] = filteredJobs
+      const documents: DocumentAnalysis[] = railwayJobs
         .map((job: any) => ({
           id: job.id || job.job_id,
           userId: job.user_id || userId,

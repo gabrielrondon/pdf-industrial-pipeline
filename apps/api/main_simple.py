@@ -121,6 +121,47 @@ async def debug_s3_config():
     except Exception as e:
         return {"error": str(e), "status": "error"}
 
+@app.get("/api/v1/jobs")
+async def get_jobs(user_id: str = None):
+    """Get jobs, optionally filtered by user_id"""
+    try:
+        if not DATABASE_AVAILABLE:
+            logger.warning("⚠️ Database not available for jobs endpoint")
+            return []
+
+        with get_db() as db_session:
+            query = db_session.query(Job)
+            
+            # Filter by user_id if provided
+            if user_id:
+                logger.info(f"🔍 Filtering jobs by user_id: {user_id}")
+                query = query.filter(Job.user_id == user_id)
+            else:
+                logger.info("📋 Fetching all jobs (no user_id filter)")
+            
+            jobs = query.order_by(Job.created_at.desc()).limit(100).all()
+            
+            logger.info(f"📄 Found {len(jobs)} jobs")
+            
+            # Convert to dict format
+            jobs_data = []
+            for job in jobs:
+                jobs_data.append({
+                    "id": str(job.id),
+                    "user_id": str(job.user_id),
+                    "filename": job.filename,
+                    "status": job.status,
+                    "created_at": job.created_at.isoformat() if job.created_at else None,
+                    "page_count": job.page_count,
+                    "file_size": job.file_size
+                })
+            
+            return jobs_data
+            
+    except Exception as e:
+        logger.error(f"❌ Error fetching jobs: {str(e)}")
+        return []
+
 @app.get("/debug-env")
 async def debug_environment():
     """Debug endpoint to show environment variables (safe info only)"""
