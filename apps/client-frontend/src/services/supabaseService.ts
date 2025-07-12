@@ -243,7 +243,7 @@ export class SupabaseService {
         .map((job: any) => ({
           id: job.id || job.job_id,
           userId: job.user_id || userId,
-          fileName: job.filename || job.original_filename || job.file_name || 'Documento',
+          fileName: job.title || job.filename || job.original_filename || job.file_name || 'Documento',
           fileUrl: job.file_url || job.download_url || job.result_url || '',
           type: this.determineDocumentType(job.filename || job.file_name || ''),
           uploadedAt: job.created_at || new Date().toISOString(),

@@ -1055,12 +1055,14 @@ async def get_job(job_id: str):
                 return {
                     "job_id": str(job.id),
                     "filename": job.filename,
+                    "title": getattr(job, 'title', None) or job.filename,  # Fallback for old records
                     "file_size": job.file_size,
                     "status": job.status,
                     "total_pages": job.page_count,
                     "results": ml_prediction.predictions if ml_prediction else {},
                     "lead_score": ml_prediction.lead_score if ml_prediction else 0.5,
-                    "confidence": ml_prediction.confidence if ml_prediction else 0.5
+                    "confidence": ml_prediction.confidence if ml_prediction else 0.5,
+                    "user_id": str(job.user_id)
                 }
             
         except Exception as e:
@@ -1091,6 +1093,7 @@ async def list_jobs():
                     results.append({
                         "job_id": str(job.id),
                         "filename": job.filename,
+                        "title": getattr(job, 'title', None) or job.filename,  # Fallback for old records
                         "file_size": job.file_size,
                         "status": job.status,
                         "created_at": job.created_at.isoformat(),
@@ -1213,9 +1216,22 @@ def cleanup_old_files():
     return total_cleaned, total_size_freed
 
 @app.on_event("startup")
-async def startup_cleanup():
-    """Run cleanup on server startup"""
-    logger.info("🚀 Server starting - running storage cleanup...")
+async def startup_initialization():
+    """Initialize database and run cleanup on server startup"""
+    logger.info("🚀 Server starting...")
+    
+    # Initialize database tables if using PostgreSQL
+    if DATABASE_AVAILABLE:
+        try:
+            from database.connection import init_db
+            init_db()
+            logger.info("✅ Database tables initialized successfully")
+        except Exception as e:
+            logger.error(f"❌ Database initialization failed: {e}")
+            # Don't fail startup, fall back to memory storage
+    
+    # Run storage cleanup
+    logger.info("🧹 Running storage cleanup...")
     cleanup_old_files()
 
 @app.get("/api/v1/cleanup")

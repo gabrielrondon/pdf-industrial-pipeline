@@ -119,10 +119,39 @@ async def get_async_db_dependency() -> AsyncGenerator[AsyncSession, None]:
 
 
 def init_db():
-    """Initialize database tables"""
+    """Initialize database tables and run migrations"""
     from database.models import Base
+    import os
+    import glob
+    from sqlalchemy import text
+    
+    # Create all tables from models
     Base.metadata.create_all(bind=engine)
     logger.info("Database tables created successfully")
+    
+    # Run SQL migrations
+    migrations_dir = os.path.join(os.path.dirname(__file__), 'migrations')
+    if os.path.exists(migrations_dir):
+        migration_files = sorted(glob.glob(os.path.join(migrations_dir, '*.sql')))
+        
+        with engine.connect() as conn:
+            for migration_file in migration_files:
+                try:
+                    logger.info(f"Running migration: {os.path.basename(migration_file)}")
+                    with open(migration_file, 'r') as f:
+                        migration_sql = f.read()
+                    
+                    # Execute migration SQL
+                    conn.execute(text(migration_sql))
+                    conn.commit()
+                    logger.info(f"✅ Migration completed: {os.path.basename(migration_file)}")
+                    
+                except Exception as e:
+                    logger.error(f"❌ Migration failed: {os.path.basename(migration_file)} - {e}")
+                    # Continue with other migrations
+                    continue
+    
+    logger.info("Database initialization and migrations completed")
 
 
 async def init_async_db():
