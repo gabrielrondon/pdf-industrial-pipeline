@@ -665,7 +665,57 @@ async def upload_file(file: UploadFile = File(...), user_id: str = None):
         
         logger.info(f"File uploaded successfully: {file.filename} ({len(content)} bytes)")
         
-        # CLEANUP: Delete temporary file after processing (Option 1 strategy)
+        # STORAGE: Handle file storage based on configuration
+        storage_info = {"strategy": "process_and_delete", "location": "none"}
+        
+        try:
+            from config.settings import get_settings
+            settings = get_settings()
+            
+            # Check if S3 storage is configured
+            if settings.storage_backend == "s3" and settings.s3_bucket:
+                try:
+                    # Save to S3 for compliance/re-processing (Option 2)
+                    from storage_backends.s3_backend import S3Backend
+                    
+                    s3_backend = S3Backend(
+                        bucket=settings.s3_bucket,
+                        region=settings.s3_region,
+                        access_key=settings.aws_access_key_id,
+                        secret_key=settings.aws_secret_access_key,
+                        endpoint_url=settings.s3_endpoint_url
+                    )
+                    
+                    # Upload to S3
+                    s3_key = f"documents/{user_id}/{job_id}/{file.filename}"
+                    with open(file_path, 'rb') as f:
+                        upload_result = await s3_backend.upload_file(
+                            file_obj=f,
+                            key=s3_key,
+                            metadata={
+                                "job_id": job_id,
+                                "user_id": user_id,
+                                "original_filename": file.filename,
+                                "upload_date": datetime.utcnow().isoformat(),
+                                "content_type": "application/pdf"
+                            }
+                        )
+                    
+                    storage_info = {
+                        "strategy": "s3_storage", 
+                        "location": f"s3://{settings.s3_bucket}/{s3_key}",
+                        "s3_url": upload_result.url if hasattr(upload_result, 'url') else None
+                    }
+                    logger.info(f"☁️ File saved to S3: {s3_key}")
+                    
+                except Exception as s3_error:
+                    logger.warning(f"⚠️ S3 upload failed, falling back to delete: {s3_error}")
+                    storage_info = {"strategy": "process_and_delete_s3_failed", "location": "none"}
+            
+        except Exception as storage_error:
+            logger.warning(f"⚠️ Storage backend check failed: {storage_error}")
+        
+        # CLEANUP: Delete temporary file (always cleanup local temp)
         try:
             import os
             if os.path.exists(file_path):
@@ -677,9 +727,9 @@ async def upload_file(file: UploadFile = File(...), user_id: str = None):
         return {
             "success": True,
             "job_id": job_id,
-            "message": f"Arquivo {file.filename} processado com sucesso (original removido)",
+            "message": f"Arquivo {file.filename} processado com sucesso",
             "file_size": len(content),
-            "storage_strategy": "process_and_delete"
+            "storage": storage_info
         }
         
     except HTTPException:
