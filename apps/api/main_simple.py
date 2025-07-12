@@ -87,6 +87,29 @@ async def debug_s3_config():
                     endpoint_url=settings.s3_endpoint_url
                 )
                 s3_status["s3_backend_creation"] = "success"
+                
+                # Try to test bucket access
+                try:
+                    import tempfile
+                    from io import BytesIO
+                    
+                    # Create a small test file
+                    test_content = b"Test file from Railway API"
+                    test_key = "test/debug-upload.txt"
+                    
+                    # Try to upload
+                    test_file = BytesIO(test_content)
+                    upload_result = await s3_backend.upload_file(
+                        file_obj=test_file,
+                        key=test_key,
+                        metadata={"test": "true", "timestamp": "2025-07-12"}
+                    )
+                    s3_status["s3_test_upload"] = "success"
+                    s3_status["test_file_key"] = test_key
+                    
+                except Exception as upload_error:
+                    s3_status["s3_test_upload"] = f"failed: {str(upload_error)}"
+                    
             except Exception as creation_error:
                 s3_status["s3_backend_creation"] = f"failed: {str(creation_error)}"
                 
