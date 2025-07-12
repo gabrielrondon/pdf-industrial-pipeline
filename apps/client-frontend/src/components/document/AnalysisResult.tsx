@@ -6,11 +6,16 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { FileText, Download, Share2, Lock, Eye, TrendingUp, AlertTriangle, DollarSign, Calendar, ChevronDown, ChevronRight, ExternalLink, BookOpen } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { FileText, Download, Share2, Lock, Eye, TrendingUp, AlertTriangle, DollarSign, Calendar, ChevronDown, ChevronRight, ExternalLink, BookOpen, Edit, Check, X, Trash2, MoreVertical } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDocuments } from '@/contexts/DocumentContext';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { PageViewerModal } from '@/components/ui/page-viewer-modal';
+import { railwayApi } from '@/services/railwayApiService';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 interface AnalysisResultProps {
@@ -26,6 +31,15 @@ export function AnalysisResult({ analysis }: AnalysisResultProps) {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [modalPageNumber, setModalPageNumber] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Title editing state
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editedTitle, setEditedTitle] = useState(analysis.fileName);
+  const [isSavingTitle, setIsSavingTitle] = useState(false);
+  
+  // Delete confirmation state
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   const getDocumentTypeLabel = (type: string): string => {
     const types: Record<string, string> = {
@@ -189,6 +203,77 @@ export function AnalysisResult({ analysis }: AnalysisResultProps) {
     };
   };
   
+  // Title editing functions
+  const handleTitleEdit = () => {
+    setIsEditingTitle(true);
+    setEditedTitle(analysis.fileName);
+  };
+  
+  const handleTitleSave = async () => {
+    if (!editedTitle.trim()) {
+      toast.error('O título não pode estar vazio');
+      return;
+    }
+    
+    setIsSavingTitle(true);
+    try {
+      await railwayApi.updateJobTitle(analysis.id, editedTitle.trim());
+      
+      // Update local state
+      analysis.fileName = editedTitle.trim();
+      
+      setIsEditingTitle(false);
+      toast.success('Título atualizado com sucesso!');
+    } catch (error) {
+      console.error('Error updating title:', error);
+      toast.error('Erro ao atualizar título. Tente novamente.');
+    } finally {
+      setIsSavingTitle(false);
+    }
+  };
+  
+  const handleTitleCancel = () => {
+    setEditedTitle(analysis.fileName);
+    setIsEditingTitle(false);
+  };
+  
+  const handleTitleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleTitleSave();
+    } else if (e.key === 'Escape') {
+      handleTitleCancel();
+    }
+  };
+  
+  // Delete functions
+  const handleDeleteClick = () => {
+    setShowDeleteDialog(true);
+  };
+  
+  const handleDeleteConfirm = async () => {
+    setIsDeleting(true);
+    try {
+      await railwayApi.deleteJob(analysis.id);
+      
+      toast.success('Documento removido com sucesso!');
+      
+      // Refresh the document list by navigating back or triggering a refresh
+      // This will depend on how the parent component handles state
+      window.location.href = '/dashboard'; // Simple navigation back to dashboard
+      
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      toast.error('Erro ao remover documento. Tente novamente.');
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
+    }
+  };
+  
+  const handleDeleteCancel = () => {
+    setShowDeleteDialog(false);
+  };
+  
   // Agrupar leads por categoria - with null safety
   const leadsByCategory = (analysis.points || []).reduce((acc, point) => {
     const category = (point as any).category || 'geral';
@@ -208,25 +293,100 @@ export function AnalysisResult({ analysis }: AnalysisResultProps) {
     <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
         <div className="flex justify-between items-start">
-          <div>
+          <div className="flex-1">
             <Badge className="mb-2">{getDocumentTypeLabel(analysis.type)}</Badge>
-            <CardTitle className="text-2xl">{analysis.fileName}</CardTitle>
+            
+            {/* Editable Title */}
+            <div className="flex items-center gap-2 mb-2">
+              {isEditingTitle ? (
+                <div className="flex items-center gap-2 flex-1">
+                  <Input
+                    value={editedTitle}
+                    onChange={(e) => setEditedTitle(e.target.value)}
+                    onKeyDown={handleTitleKeyPress}
+                    className="text-2xl font-semibold h-auto py-1 border-2 border-primary"
+                    placeholder="Título do documento"
+                    autoFocus
+                    disabled={isSavingTitle}
+                  />
+                  <Button
+                    size="sm"
+                    onClick={handleTitleSave}
+                    disabled={isSavingTitle || !editedTitle.trim()}
+                    className="shrink-0"
+                  >
+                    {isSavingTitle ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Check className="h-4 w-4" />
+                    )}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleTitleCancel}
+                    disabled={isSavingTitle}
+                    className="shrink-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 flex-1 group">
+                  <CardTitle className="text-2xl flex-1">{analysis.fileName}</CardTitle>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={handleTitleEdit}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </div>
+            
             <CardDescription>
               Analisado em {new Date(analysis.analyzedAt).toLocaleString('pt-BR')}
             </CardDescription>
           </div>
-          <div className="flex items-center space-x-1 text-sm">
-            {isPrivate ? (
-              <>
-                <Lock className="h-4 w-4 text-secondary" />
-                <span className="text-secondary font-medium">Privado</span>
-              </>
-            ) : (
-              <>
-                <Share2 className="h-4 w-4 text-accent" />
-                <span className="text-accent font-medium">Compartilhado</span>
-              </>
-            )}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center space-x-1 text-sm">
+              {isPrivate ? (
+                <>
+                  <Lock className="h-4 w-4 text-secondary" />
+                  <span className="text-secondary font-medium">Privado</span>
+                </>
+              ) : (
+                <>
+                  <Share2 className="h-4 w-4 text-accent" />
+                  <span className="text-accent font-medium">Compartilhado</span>
+                </>
+              )}
+            </div>
+            
+            {/* Actions Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleTitleEdit}>
+                  <Edit className="h-4 w-4 mr-2" />
+                  Editar título
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  onClick={handleDeleteClick}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Excluir documento
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </CardHeader>
@@ -489,6 +649,48 @@ export function AnalysisResult({ analysis }: AnalysisResultProps) {
         jobId={analysis.id}
         documentName={analysis.fileName}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Trash2 className="h-5 w-5 text-destructive" />
+              Excluir Documento
+            </DialogTitle>
+            <DialogDescription>
+              Você tem certeza que deseja excluir permanentemente o documento "{analysis.fileName}"?
+              Esta ação não pode ser desfeita e todos os dados de análise serão perdidos.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={handleDeleteCancel}
+              disabled={isDeleting}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleDeleteConfirm}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                  Excluindo...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Excluir Permanentemente
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

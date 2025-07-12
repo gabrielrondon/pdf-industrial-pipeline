@@ -226,11 +226,16 @@ async def debug_environment():
 
 # Include basic API routes
 from fastapi import File, UploadFile, HTTPException
+from pydantic import BaseModel
 import uuid
 import tempfile
 import re
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
+
+# Pydantic models for API requests
+class UpdateTitleRequest(BaseModel):
+    title: str
 
 # Database import for PostgreSQL storage
 DATABASE_AVAILABLE = False
@@ -1290,6 +1295,94 @@ async def get_storage_stats():
     except Exception as e:
         logger.error(f"Storage stats error: {e}")
         raise HTTPException(status_code=500, detail=f"Storage stats failed: {str(e)}")
+
+@app.patch("/api/v1/jobs/{job_id}/title")
+async def update_job_title(job_id: str, request: UpdateTitleRequest):
+    """Update the title of a job/document"""
+    if DATABASE_AVAILABLE:
+        try:
+            with get_db() as db_session:
+                # Find the job
+                job = db_session.query(Job).filter(Job.id == job_id).first()
+                if not job:
+                    raise HTTPException(status_code=404, detail="Job not found")
+                
+                # Update the title
+                job.title = request.title
+                db_session.commit()
+                
+                logger.info(f"✅ Job title updated: {job_id} -> '{request.title}'")
+                
+                return {
+                    "success": True,
+                    "job_id": str(job.id),
+                    "filename": job.filename,
+                    "title": job.title,
+                    "updated_at": job.updated_at.isoformat()
+                }
+                
+        except Exception as e:
+            logger.error(f"Database error updating title: {e}")
+            raise HTTPException(status_code=500, detail=f"Failed to update title: {str(e)}")
+    
+    # Fallback to memory storage
+    if job_id not in jobs_storage:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    # Update title in memory storage
+    jobs_storage[job_id]["title"] = request.title
+    logger.info(f"✅ Job title updated in memory: {job_id} -> '{request.title}'")
+    
+    return {
+        "success": True,
+        "job_id": job_id,
+        "filename": jobs_storage[job_id].get("filename", ""),
+        "title": request.title,
+        "updated_at": datetime.now().isoformat()
+    }
+
+@app.delete("/api/v1/jobs/{job_id}")
+async def delete_job(job_id: str):
+    """Delete a job/document and all related data"""
+    if DATABASE_AVAILABLE:
+        try:
+            with get_db() as db_session:
+                # Find the job
+                job = db_session.query(Job).filter(Job.id == job_id).first()
+                if not job:
+                    raise HTTPException(status_code=404, detail="Job not found")
+                
+                # The CASCADE delete will handle related records automatically
+                # (JobChunk, TextAnalysis, MLPrediction, JudicialAnalysis, etc.)
+                job_filename = job.filename
+                db_session.delete(job)
+                db_session.commit()
+                
+                logger.info(f"✅ Job deleted: {job_id} ({job_filename})")
+                
+                return {
+                    "success": True,
+                    "job_id": job_id,
+                    "message": f"Documento '{job_filename}' foi removido com sucesso"
+                }
+                
+        except Exception as e:
+            logger.error(f"Database error deleting job: {e}")
+            raise HTTPException(status_code=500, detail=f"Failed to delete job: {str(e)}")
+    
+    # Fallback to memory storage
+    if job_id not in jobs_storage:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    # Delete from memory storage
+    deleted_job = jobs_storage.pop(job_id)
+    logger.info(f"✅ Job deleted from memory: {job_id}")
+    
+    return {
+        "success": True,
+        "job_id": job_id,
+        "message": f"Documento '{deleted_job.get('filename', 'Documento')}' foi removido com sucesso"
+    }
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))

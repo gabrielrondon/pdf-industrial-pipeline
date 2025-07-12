@@ -95,6 +95,25 @@ class RailwayApiService {
   }
 
   /**
+   * Atualiza o título de um job/documento
+   */
+  async updateJobTitle(jobId: string, title: string): Promise<any> {
+    return this.makeRequest(`/api/v1/jobs/${jobId}/title`, {
+      method: 'PATCH',
+      body: JSON.stringify({ title }),
+    });
+  }
+
+  /**
+   * Deleta um job/documento
+   */
+  async deleteJob(jobId: string): Promise<any> {
+    return this.makeRequest(`/api/v1/jobs/${jobId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  /**
    * Testa conectividade com a API
    */
   async healthCheck(): Promise<any> {

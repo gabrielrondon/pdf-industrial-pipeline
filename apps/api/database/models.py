@@ -68,6 +68,7 @@ class Job(Base, TimestampMixin):
     
     # File information
     filename = Column(String(255), nullable=False)
+    title = Column(String(500), nullable=True)  # User-editable title
     file_size = Column(Integer, nullable=False)
     file_hash = Column(String(64))
     mime_type = Column(String(100))
