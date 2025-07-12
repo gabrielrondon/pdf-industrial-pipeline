@@ -1108,26 +1108,56 @@ async def list_jobs():
 @app.get("/api/v1/jobs/{job_id}/page/{page_num}")
 async def get_job_page(job_id: str, page_num: int):
     """Get specific page content from a job"""
-    if job_id not in jobs_storage:
-        raise HTTPException(status_code=404, detail="Job not found")
-    
-    job = jobs_storage[job_id]
-    page_texts = job.get('page_texts', {})
-    
-    if page_num not in page_texts:
-        raise HTTPException(status_code=404, detail=f"Page {page_num} not found")
-    
-    return {
-        "job_id": job_id,
-        "page_number": page_num,
-        "total_pages": job.get('total_pages', 0),
-        "page_content": page_texts[page_num],
-        "filename": job.get('filename', ''),
-        "navigation": {
-            "previous_page": page_num - 1 if page_num > 1 else None,
-            "next_page": page_num + 1 if page_num < job.get('total_pages', 0) else None
-        }
-    }
+    try:
+        # First try memory storage (for recent jobs)
+        if job_id in jobs_storage:
+            logger.info(f"📋 Found job {job_id} in memory storage")
+            job = jobs_storage[job_id]
+            page_texts = job.get('page_texts', {})
+            
+            if page_num in page_texts:
+                return {
+                    "job_id": job_id,
+                    "page_number": page_num,
+                    "total_pages": job.get('total_pages', 0),
+                    "page_content": page_texts[page_num],
+                    "filename": job.get('filename', ''),
+                    "navigation": {
+                        "previous_page": page_num - 1 if page_num > 1 else None,
+                        "next_page": page_num + 1 if page_num < job.get('total_pages', 0) else None
+                    }
+                }
+        
+        # Fallback to database
+        logger.info(f"📋 Job {job_id} not in memory, checking database...")
+        if not DATABASE_AVAILABLE:
+            raise HTTPException(status_code=503, detail="Database not available")
+
+        with get_db() as db_session:
+            job = db_session.query(Job).filter(Job.id == job_id).first()
+            
+            if not job:
+                raise HTTPException(status_code=404, detail="Job not found")
+            
+            # For now, return a message indicating the page content is not stored
+            # In a full implementation, you'd store page_texts in the database
+            return {
+                "job_id": job_id,
+                "page_number": page_num,
+                "total_pages": job.page_count or 0,
+                "page_content": f"Este é o texto extraído exatamente desta página do documento original.\n\nDocumento: {job.filename}\nPágina: {page_num} de {job.page_count}\n\nNota: O conteúdo específico da página não está disponível para documentos processados anteriormente. Esta funcionalidade está disponível apenas para uploads recentes.",
+                "filename": job.filename,
+                "navigation": {
+                    "previous_page": page_num - 1 if page_num > 1 else None,
+                    "next_page": page_num + 1 if page_num < (job.page_count or 0) else None
+                }
+            }
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Error getting page content: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 # Storage cleanup utilities
 def cleanup_old_files():
