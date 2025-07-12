@@ -564,6 +564,7 @@ async def upload_file(file: UploadFile = File(...), user_id: str = None):
     """Upload PDF file for processing"""
     try:
         logger.info(f"🚀 Starting upload for file: {file.filename}")
+        logger.info(f"📝 Received user_id: {user_id} (type: {type(user_id)})")
         
         # Validate file type
         if not file.filename.lower().endswith('.pdf'):

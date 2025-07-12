@@ -137,7 +137,7 @@ export function SimpleDocumentUploader({ onAnalysisComplete }: SimpleDocumentUpl
       });
 
       // Upload do arquivo para nossa API Railway
-      const uploadResult = await railwayApi.uploadDocument(file);
+      const uploadResult = await railwayApi.uploadDocument(file, user.id);
       
       if (!uploadResult.success) {
         throw new Error(uploadResult.error || 'Erro no upload');
