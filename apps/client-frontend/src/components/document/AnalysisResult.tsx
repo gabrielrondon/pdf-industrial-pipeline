@@ -555,177 +555,176 @@ export function AnalysisResult({ analysis }: AnalysisResultProps) {
           </div>
         </div>
 
-        {/* Leads por Categoria */}
-        <div className="space-y-6">
-          <h3 className="font-medium text-lg flex items-center">
-            <FileText className="h-5 w-5 mr-2 text-primary" />
-            Leads e Oportunidades Identificadas
-          </h3>
-          
-          {Object.entries(leadsByCategory).map(([category, leads]) => (
-            <div key={category} className="space-y-3">
-              <div className="flex items-center gap-2">
-                {getCategoryIcon(category)}
-                <h4 className="font-medium capitalize">{category}</h4>
-                <Badge variant="outline" className={getCategoryColor(category)}>
-                  {leads.length} {leads.length === 1 ? 'lead' : 'leads'}
-                </Badge>
-              </div>
-              
-              <div className="space-y-3 pl-6">
-                {leads.map((point) => {
-                  const pointAny = point as any;
-                  const isExpanded = expandedItems.has(point.id);
-                  const hasDetails = pointAny.details || pointAny.page_reference;
-                  
-                  return (
-                    <Collapsible key={point.id} open={isExpanded} onOpenChange={() => toggleExpanded(point.id)}>
-                      <CollapsibleTrigger asChild>
-                        <div 
-                          className={cn(
-                            "p-4 rounded-md border-l-4 cursor-pointer hover:bg-gray-50 transition-colors",
-                            getPriorityColor(pointAny.priority || 'medium'),
-                            getStatusColor(point.status)
-                          )}
-                        >
-                          <div className="flex justify-between items-start">
-                            <div className="font-medium flex items-center gap-2">
-                              {point.title}
-                              {pointAny.value && (
-                                <Badge variant="outline" className="text-green-700 bg-green-50">
-                                  {pointAny.value}
-                                </Badge>
-                              )}
-                              {pointAny.page_reference && (
-                                <Badge variant="outline" className="text-blue-700 bg-blue-50">
-                                  <BookOpen className="h-3 w-3 mr-1" />
-                                  Pág. {pointAny.page_reference}
-                                </Badge>
-                              )}
-                            </div>
-                            <div className="flex gap-2 items-center">
-                              <Badge variant="outline" className={getCategoryColor(category)}>
-                                {category}
-                              </Badge>
-                              <Badge variant="outline">
-                                {point.status}
-                              </Badge>
-                              {pointAny.priority && (
-                                <Badge 
-                                  variant="outline" 
-                                  className={
-                                    pointAny.priority === 'high' ? 'border-red-500 text-red-700' :
-                                    pointAny.priority === 'medium' ? 'border-yellow-500 text-yellow-700' :
-                                    'border-green-500 text-green-700'
-                                  }
-                                >
-                                  {pointAny.priority}
-                                </Badge>
-                              )}
-                              {hasDetails && (
-                                <div className="h-6 w-6 flex items-center justify-center">
-                                  {isExpanded ? (
-                                    <ChevronDown className="h-4 w-4" />
-                                  ) : (
-                                    <ChevronRight className="h-4 w-4" />
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          
-                          <p className="mt-2 text-sm">{point.comment}</p>
-                        </div>
-                      </CollapsibleTrigger>
+              {/* Leads por Categoria */}
+              <div className="space-y-6">
+                <h3 className="font-medium text-lg flex items-center">
+                  <FileText className="h-5 w-5 mr-2 text-primary" />
+                  Leads e Oportunidades Identificadas
+                </h3>
+                
+                {Object.entries(leadsByCategory).map(([category, leads]) => (
+                  <div key={category} className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      {getCategoryIcon(category)}
+                      <h4 className="font-medium capitalize">{category}</h4>
+                      <Badge variant="outline" className={getCategoryColor(category)}>
+                        {leads.length} {leads.length === 1 ? 'lead' : 'leads'}
+                      </Badge>
+                    </div>
+                    
+                    <div className="space-y-3 pl-6">
+                      {leads.map((point) => {
+                        const pointAny = point as any;
+                        const isExpanded = expandedItems.has(point.id);
+                        const hasDetails = pointAny.details || pointAny.page_reference;
                         
-                        {hasDetails && (
-                          <CollapsibleContent className="mt-3">
-                            <div className="bg-gray-50 p-4 rounded-md border space-y-3">
-                              <h5 className="font-medium text-sm mb-2 flex items-center">
-                                <Eye className="h-4 w-4 mr-1" />
-                                Detalhes Específicos
-                              </h5>
-                              
-                              {pointAny.page_reference && (
-                                <div className="bg-blue-50 p-3 rounded border-l-4 border-blue-400">
-                                  <div className="flex items-center justify-between mb-2">
-                                    <span className="text-sm font-medium text-blue-800">
-                                      📄 Localização no Documento
-                                    </span>
-                                    <Button 
-                                      variant="outline" 
-                                      size="sm" 
-                                      onClick={(e) => {
-                                        e.stopPropagation(); // Prevent triggering the collapsible
-                                        handleViewPage(pointAny.page_reference);
-                                      }}
-                                      className="h-7 text-xs bg-blue-100 hover:bg-blue-200 border-blue-300"
-                                    >
-                                      <ExternalLink className="h-3 w-3 mr-1" />
-                                      Ver Página {pointAny.page_reference}
-                                    </Button>
+                        return (
+                          <Collapsible key={point.id} open={isExpanded} onOpenChange={() => toggleExpanded(point.id)}>
+                            <CollapsibleTrigger asChild>
+                              <div 
+                                className={cn(
+                                  "p-4 rounded-md border-l-4 cursor-pointer hover:bg-gray-50 transition-colors",
+                                  getPriorityColor(pointAny.priority || 'medium'),
+                                  getStatusColor(point.status)
+                                )}
+                              >
+                                <div className="flex justify-between items-start">
+                                  <div className="font-medium flex items-center gap-2">
+                                    {point.title}
+                                    {pointAny.value && (
+                                      <Badge variant="outline" className="text-green-700 bg-green-50">
+                                        {pointAny.value}
+                                      </Badge>
+                                    )}
+                                    {pointAny.page_reference && (
+                                      <Badge variant="outline" className="text-blue-700 bg-blue-50">
+                                        <BookOpen className="h-3 w-3 mr-1" />
+                                        Pág. {pointAny.page_reference}
+                                      </Badge>
+                                    )}
                                   </div>
-                                  <span className="text-xs text-blue-600">
-                                    Esta informação foi encontrada na página {pointAny.page_reference} do documento original
-                                  </span>
-                                </div>
-                              )}
-                              
-                              {pointAny.details && (
-                                <div className="bg-white p-3 rounded border">
-                                  <h6 className="font-medium text-xs text-gray-700 mb-2">INFORMAÇÕES TÉCNICAS</h6>
-                                  <div className="space-y-2">
-                                    {Object.entries(pointAny.details).map(([key, value]) => (
-                                      <div key={key} className="flex justify-between text-sm">
-                                        <span className="text-gray-600 capitalize">
-                                          {key.replace(/_/g, ' ')}:
-                                        </span>
-                                        <span className="font-medium text-gray-900">{String(value)}</span>
+                                  <div className="flex gap-2 items-center">
+                                    <Badge variant="outline" className={getCategoryColor(category)}>
+                                      {category}
+                                    </Badge>
+                                    <Badge variant="outline">
+                                      {point.status}
+                                    </Badge>
+                                    {pointAny.priority && (
+                                      <Badge 
+                                        variant="outline" 
+                                        className={
+                                          pointAny.priority === 'high' ? 'border-red-500 text-red-700' :
+                                          pointAny.priority === 'medium' ? 'border-yellow-500 text-yellow-700' :
+                                          'border-green-500 text-green-700'
+                                        }
+                                      >
+                                        {pointAny.priority}
+                                      </Badge>
+                                    )}
+                                    {hasDetails && (
+                                      <div className="h-6 w-6 flex items-center justify-center">
+                                        {isExpanded ? (
+                                          <ChevronDown className="h-4 w-4" />
+                                        ) : (
+                                          <ChevronRight className="h-4 w-4" />
+                                        )}
                                       </div>
-                                    ))}
+                                    )}
                                   </div>
                                 </div>
-                              )}
+                                
+                                <p className="mt-2 text-sm">{point.comment}</p>
+                              </div>
+                            </CollapsibleTrigger>
                               
-                              {pointAny.raw_value && (
-                                <div className="bg-yellow-50 p-2 rounded border-l-4 border-yellow-400">
-                                  <div className="text-xs font-medium text-yellow-800 mb-1">TEXTO ORIGINAL</div>
-                                  <div className="text-xs text-yellow-700 italic">
-                                    "{pointAny.raw_value}"
-                                  </div>
-                                </div>
-                              )}
+                            {hasDetails && (
+                              <CollapsibleContent className="mt-3">
+                                <div className="bg-gray-50 p-4 rounded-md border space-y-3">
+                                  <h5 className="font-medium text-sm mb-2 flex items-center">
+                                    <Eye className="h-4 w-4 mr-1" />
+                                    Detalhes Específicos
+                                  </h5>
+                                  
+                                  {pointAny.page_reference && (
+                                    <div className="bg-blue-50 p-3 rounded border-l-4 border-blue-400">
+                                      <div className="flex items-center justify-between mb-2">
+                                        <span className="text-sm font-medium text-blue-800">
+                                          📄 Localização no Documento
+                                        </span>
+                                        <Button 
+                                          variant="outline" 
+                                          size="sm" 
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleViewPage(pointAny.page_reference);
+                                          }}
+                                          className="h-7 text-xs bg-blue-100 hover:bg-blue-200 border-blue-300"
+                                        >
+                                          <ExternalLink className="h-3 w-3 mr-1" />
+                                          Ver Página {pointAny.page_reference}
+                                        </Button>
+                                      </div>
+                                      <span className="text-xs text-blue-600">
+                                        Esta informação foi encontrada na página {pointAny.page_reference} do documento original
+                                      </span>
+                                    </div>
+                                  )}
+                                  
+                                  {pointAny.details && (
+                                    <div className="bg-white p-3 rounded border">
+                                      <h6 className="font-medium text-xs text-gray-700 mb-2">INFORMAÇÕES TÉCNICAS</h6>
+                                      <div className="space-y-2">
+                                        {Object.entries(pointAny.details).map(([key, value]) => (
+                                          <div key={key} className="flex justify-between text-sm">
+                                            <span className="text-gray-600 capitalize">
+                                              {key.replace(/_/g, ' ')}:
+                                            </span>
+                                            <span className="font-medium text-gray-900">{String(value)}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                  
+                                  {pointAny.raw_value && (
+                                    <div className="bg-yellow-50 p-2 rounded border-l-4 border-yellow-400">
+                                      <div className="text-xs font-medium text-yellow-800 mb-1">TEXTO ORIGINAL</div>
+                                      <div className="text-xs text-yellow-700 italic">
+                                        "{pointAny.raw_value}"
+                                      </div>
+                                    </div>
+                                  )}
 
-                              {(() => {
-                                const explanation = getDetailedExplanation(pointAny);
-                                return (
-                                  <div className="bg-green-50 p-3 rounded border-l-4 border-green-400">
-                                    <h6 className="font-medium text-sm text-green-800 mb-2 flex items-center">
-                                      <span className="mr-1">{explanation.icon}</span>
-                                      DICAS PARA AÇÃO
-                                    </h6>
-                                    <ul className="space-y-1">
-                                      {explanation.tips.map((tip, index) => (
-                                        <li key={index} className="text-xs text-green-700 flex items-start">
-                                          <span className="text-green-500 mr-1 mt-0.5">▸</span>
-                                          {tip}
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                );
-                              })()}
-                            </div>
-                          </CollapsibleContent>
-                        )}
-                    </Collapsible>
-                  );
-                })}
+                                  {(() => {
+                                    const explanation = getDetailedExplanation(pointAny);
+                                    return (
+                                      <div className="bg-green-50 p-3 rounded border-l-4 border-green-400">
+                                        <h6 className="font-medium text-sm text-green-800 mb-2 flex items-center">
+                                          <span className="mr-1">{explanation.icon}</span>
+                                          DICAS PARA AÇÃO
+                                        </h6>
+                                        <ul className="space-y-1">
+                                          {explanation.tips.map((tip, index) => (
+                                            <li key={index} className="text-xs text-green-700 flex items-start">
+                                              <span className="text-green-500 mr-1 mt-0.5">▸</span>
+                                              {tip}
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    );
+                                  })()}
+                                </div>
+                              </CollapsibleContent>
+                            )}
+                          </Collapsible>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-          ))}
-            </div>
-          </div>
         </CardContent>
         
         <CardFooter className="flex justify-between items-center border-t p-6">
