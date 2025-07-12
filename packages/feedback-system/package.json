@@ -1,0 +1,54 @@
+{
+  "name": "@pdf-pipeline/feedback-system",
+  "version": "1.0.0",
+  "description": "Enhanced ML feedback and user engagement system for PDF Industrial Pipeline",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "feedback",
+    "machine-learning",
+    "user-engagement",
+    "credits",
+    "gamification"
+  ],
+  "author": "PDF Industrial Pipeline Team",
+  "license": "MIT",
+  "dependencies": {
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.3",
+    "@types/node": "^22.5.5"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./types": {
+      "types": "./dist/types/index.d.ts",
+      "default": "./dist/types/index.js"
+    },
+    "./services": {
+      "types": "./dist/services/index.d.ts",
+      "default": "./dist/services/index.js"
+    },
+    "./components": {
+      "types": "./dist/components/index.d.ts",
+      "default": "./dist/components/index.js"
+    },
+    "./hooks": {
+      "types": "./dist/hooks/index.d.ts",
+      "default": "./dist/hooks/index.js"
+    }
+  }
+}

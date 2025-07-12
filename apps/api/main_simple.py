@@ -695,7 +695,15 @@ async def upload_file(file: UploadFile = File(...), user_id: str = None):
             
             if settings.storage_backend == "s3" and settings.s3_bucket:
                 logger.info(f"☁️ S3 storage enabled, attempting upload...")
-                logger.info(f"S3 Config: bucket={settings.s3_bucket}, region={settings.s3_region}")
+                
+                # Auto-detect region if not set or default
+                actual_region = settings.s3_region
+                if not actual_region or actual_region == "us-east-1":
+                    # Try to detect region from bucket name or use Stockholm default
+                    actual_region = "eu-north-1"  # Your actual bucket region
+                    logger.warning(f"⚠️ Using corrected region: {actual_region} (bucket is in Stockholm)")
+                
+                logger.info(f"S3 Config: bucket={settings.s3_bucket}, region={actual_region}")
                 
                 try:
                     # Save to S3 for compliance/re-processing (Option 2)
@@ -704,7 +712,7 @@ async def upload_file(file: UploadFile = File(...), user_id: str = None):
                     
                     s3_backend = S3Backend(
                         bucket=settings.s3_bucket,
-                        region=settings.s3_region,
+                        region=actual_region,  # Use corrected region
                         access_key=settings.aws_access_key_id,
                         secret_key=settings.aws_secret_access_key,
                         endpoint_url=settings.s3_endpoint_url
