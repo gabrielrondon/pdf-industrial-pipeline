@@ -71,6 +71,16 @@ async def assess_document_quality_endpoint(
         logger.error(f"Error in quality assessment: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.post("/compliance/check")
+async def check_compliance_endpoint(
+    request_data: Dict[str, Any],
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Check document compliance - alias for compatibility
+    """
+    return await check_document_compliance_endpoint(request_data, current_user)
+
 @router.post("/compliance")
 async def check_document_compliance_endpoint(
     request_data: Dict[str, Any],
@@ -124,6 +134,16 @@ async def check_document_compliance_endpoint(
     except Exception as e:
         logger.error(f"Error in compliance check: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/recommendations/generate")
+async def generate_recommendations_endpoint(
+    request_data: Dict[str, Any],
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Generate recommendations - alias for compatibility
+    """
+    return await generate_document_recommendations_endpoint(request_data, current_user)
 
 @router.post("/recommendations")
 async def generate_document_recommendations_endpoint(
@@ -376,6 +396,33 @@ async def comprehensive_quality_analysis(
         raise
     except Exception as e:
         logger.error(f"Error in comprehensive analysis: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/recommendations/{recommendation_id}/complete")
+async def mark_recommendation_complete(
+    recommendation_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Mark a recommendation as completed
+    """
+    try:
+        # For now, just acknowledge the completion
+        # In the future, this could store completion status in database
+        logger.info(f"User {current_user.id} completed recommendation {recommendation_id}")
+        
+        return {
+            "success": True,
+            "data": {
+                "recommendation_id": recommendation_id,
+                "completed_at": datetime.utcnow().isoformat(),
+                "completed_by": current_user.id,
+                "status": "completed"
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Error marking recommendation complete: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/status")

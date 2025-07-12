@@ -24,6 +24,7 @@ from api.v1.jobs import router as jobs_router
 from api.v1.analysis import router as analysis_router
 from api.v1.search import router as search_router
 from api.v1.admin import router as admin_router
+from api.v1.quality import router as quality_router
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -312,6 +313,12 @@ app.include_router(
     admin_router,
     prefix=f"{settings.api_prefix}/admin",
     tags=["Administration"]
+)
+
+app.include_router(
+    quality_router,
+    prefix=f"{settings.api_prefix}/quality",
+    tags=["Quality Assessment"]
 )
 
 
