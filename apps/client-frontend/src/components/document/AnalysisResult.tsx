@@ -9,7 +9,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { FileText, Download, Share2, Lock, Eye, TrendingUp, AlertTriangle, DollarSign, Calendar, ChevronDown, ChevronRight, ExternalLink, BookOpen, Edit, Check, X, Trash2, MoreVertical } from 'lucide-react';
+import { FileText, Download, Share2, Lock, Eye, TrendingUp, AlertTriangle, DollarSign, Calendar, ChevronDown, ChevronRight, ExternalLink, BookOpen, Edit, Check, X, Trash2, MoreVertical, Sparkles } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDocuments } from '@/contexts/DocumentContext';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -17,6 +17,11 @@ import { PageViewerModal } from '@/components/ui/page-viewer-modal';
 import { railwayApi } from '@/services/railwayApiService';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { QualityDashboard } from '@/components/quality/QualityDashboard';
+import { useQualityAssessment } from '@/hooks/useQualityAssessment';
+import { useComplianceCheck } from '@/hooks/useComplianceCheck';
+import { useRecommendations } from '@/hooks/useRecommendations';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface AnalysisResultProps {
   analysis: DocumentAnalysis;
@@ -40,6 +45,14 @@ export function AnalysisResult({ analysis }: AnalysisResultProps) {
   // Delete confirmation state
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Quality hooks - Week 4 Integration
+  const qualityAssessment = useQualityAssessment();
+  const complianceCheck = useComplianceCheck();
+  const recommendations = useRecommendations();
+  const [activeTab, setActiveTab] = useState("leads");
+  const [qualityData, setQualityData] = useState<any>(null);
+  const [isLoadingQuality, setIsLoadingQuality] = useState(false);
   
   const getDocumentTypeLabel = (type: string): string => {
     const types: Record<string, string> = {
@@ -274,6 +287,83 @@ export function AnalysisResult({ analysis }: AnalysisResultProps) {
     setShowDeleteDialog(false);
   };
   
+  // Quality assessment functions - Week 4 Integration
+  const generateQualityAssessment = async () => {
+    if (!analysis.points || analysis.points.length === 0) {
+      toast.error('Nenhuma análise disponível para avaliação de qualidade');
+      return;
+    }
+    
+    setIsLoadingQuality(true);
+    try {
+      // Combine analysis text from all points
+      const analysisText = analysis.points
+        .map(point => `${point.title}: ${point.comment}`)
+        .join('\n');
+      
+      // Run quality assessment
+      const qualityResult = await qualityAssessment.assessQuality(
+        analysisText, 
+        analysis.id
+      );
+      
+      if (!qualityResult) return;
+      
+      // Run compliance check
+      const complianceResult = await complianceCheck.checkCompliance(
+        analysisText,
+        analysis.id,
+        analysis.type
+      );
+      
+      if (!complianceResult) return;
+      
+      // Generate recommendations
+      const recommendationsResult = await recommendations.generateRecommendations(
+        analysisText,
+        analysis.id,
+        qualityResult.quality_metrics,
+        complianceResult.compliance_result
+      );
+      
+      if (!recommendationsResult) return;
+      
+      // Combine all data for the quality dashboard
+      const combinedQualityData = {
+        quality_metrics: qualityResult.quality_metrics,
+        compliance_result: complianceResult.compliance_result,
+        recommendations: recommendationsResult.recommendations
+      };
+      
+      setQualityData(combinedQualityData);
+      
+      toast.success('Análise de qualidade inteligente concluída!');
+      
+    } catch (error) {
+      console.error('Error generating quality assessment:', error);
+      toast.error('Erro ao gerar análise de qualidade');
+    } finally {
+      setIsLoadingQuality(false);
+    }
+  };
+  
+  const handleRecommendationComplete = async (recommendationId: string) => {
+    const success = await recommendations.markRecommendationComplete(recommendationId);
+    if (success) {
+      // Update local state if needed
+      console.log('Recommendation completed:', recommendationId);
+    }
+  };
+  
+  const handleRefreshQuality = () => {
+    generateQualityAssessment();
+  };
+  
+  const handleExportReport = () => {
+    // TODO: Implement export functionality
+    toast.info('Funcionalidade de exportação em desenvolvimento');
+  };
+  
   // Agrupar leads por categoria - with null safety
   const leadsByCategory = (analysis.points || []).reduce((acc, point) => {
     const category = (point as any).category || 'geral';
@@ -290,11 +380,12 @@ export function AnalysisResult({ analysis }: AnalysisResultProps) {
   const categories = Object.keys(leadsByCategory);
   
   return (
-    <Card className="w-full max-w-4xl mx-auto">
-      <CardHeader>
-        <div className="flex justify-between items-start">
-          <div className="flex-1">
-            <Badge className="mb-2">{getDocumentTypeLabel(analysis.type)}</Badge>
+    <div className="w-full max-w-6xl mx-auto space-y-6">
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-start">
+            <div className="flex-1">
+              <Badge className="mb-2">{getDocumentTypeLabel(analysis.type)}</Badge>
             
             {/* Editable Title */}
             <div className="flex items-center gap-2 mb-2">
@@ -390,13 +481,46 @@ export function AnalysisResult({ analysis }: AnalysisResultProps) {
           </div>
         </div>
       </CardHeader>
-      
-      <CardContent className="space-y-6">
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
+      </Card>
+
+      {/* Main Content with Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <div className="flex items-center justify-between">
+          <TabsList className="grid w-auto grid-cols-2">
+            <TabsTrigger value="leads" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Leads e Oportunidades
+            </TabsTrigger>
+            <TabsTrigger value="quality" className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4" />
+              Análise Inteligente
+            </TabsTrigger>
+          </TabsList>
+          
+          {activeTab === "quality" && (
+            <Button 
+              onClick={generateQualityAssessment}
+              disabled={isLoadingQuality}
+              className="flex items-center gap-2"
+            >
+              {isLoadingQuality ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Sparkles className="h-4 w-4" />
+              )}
+              {qualityData ? 'Atualizar Análise' : 'Gerar Análise Inteligente'}
+            </Button>
+          )}
+        </div>
+
+        <TabsContent value="leads" className="space-y-6">
+          <Card>
+            <CardContent className="space-y-6 pt-6">
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
         
         {/* Estatísticas dos Leads */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -600,97 +724,153 @@ export function AnalysisResult({ analysis }: AnalysisResultProps) {
               </div>
             </div>
           ))}
-        </div>
-      </CardContent>
-      
-      <CardFooter className="flex justify-between items-center border-t p-6">
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <Switch 
-              id="privacy-toggle"
-              checked={isPrivate}
-              onCheckedChange={handleTogglePrivacy}
-              disabled={!canTogglePrivacy || isSaving || isLoading}
-            />
-            <label 
-              htmlFor="privacy-toggle" 
-              className={cn(
-                "text-sm cursor-pointer", 
-                canTogglePrivacy ? "" : "text-muted-foreground"
-              )}
-            >
-              Manter privado
-            </label>
+            </div>
+          </div>
+        </CardContent>
+        
+        <CardFooter className="flex justify-between items-center border-t p-6">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <Switch 
+                id="privacy-toggle"
+                checked={isPrivate}
+                onCheckedChange={handleTogglePrivacy}
+                disabled={!canTogglePrivacy || isSaving || isLoading}
+              />
+              <label 
+                htmlFor="privacy-toggle" 
+                className={cn(
+                  "text-sm cursor-pointer", 
+                  canTogglePrivacy ? "" : "text-muted-foreground"
+                )}
+              >
+                Manter privado
+              </label>
+            </div>
+            
+            {!canTogglePrivacy && (
+              <div className="text-xs text-muted-foreground">
+                Disponível nos planos Pro e Premium
+              </div>
+            )}
           </div>
           
-          {!canTogglePrivacy && (
-            <div className="text-xs text-muted-foreground">
-              Disponível nos planos Pro e Premium
+          <div className="flex space-x-2">
+            <Button variant="outline" size="sm">
+              <Eye className="h-4 w-4 mr-1" />
+              <span>Abrir</span>
+            </Button>
+            <Button variant="outline" size="sm">
+              <Download className="h-4 w-4 mr-1" />
+              <span>Exportar Leads</span>
+            </Button>
+          </div>
+        </CardFooter>
+      </Card>
+    </TabsContent>
+
+    <TabsContent value="quality" className="space-y-6">
+      {qualityData ? (
+        <QualityDashboard
+          data={qualityData}
+          isLoading={isLoadingQuality}
+          onRefresh={handleRefreshQuality}
+          onRecommendationComplete={handleRecommendationComplete}
+          onExportReport={handleExportReport}
+        />
+      ) : (
+        <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+          <CardContent className="text-center py-12">
+            <Sparkles className="h-16 w-16 text-blue-500 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Análise Inteligente Disponível
+            </h3>
+            <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+              Obtenha insights automáticos sobre qualidade, conformidade legal e recomendações 
+              inteligentes usando nossa IA especializada em documentos judiciais brasileiros.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto mb-6">
+              <div className="bg-white p-4 rounded-lg border">
+                <div className="text-blue-600 font-medium mb-1">Qualidade 0-100</div>
+                <div className="text-sm text-gray-600">50+ critérios avançados</div>
+              </div>
+              <div className="bg-white p-4 rounded-lg border">
+                <div className="text-green-600 font-medium mb-1">CPC Art. 889</div>
+                <div className="text-sm text-gray-600">Conformidade automática</div>
+              </div>
+              <div className="bg-white p-4 rounded-lg border">
+                <div className="text-purple-600 font-medium mb-1">Recomendações</div>
+                <div className="text-sm text-gray-600">Ações priorizadas</div>
+              </div>
             </div>
-          )}
-        </div>
-        
-        <div className="flex space-x-2">
-          <Button variant="outline" size="sm">
-            <Eye className="h-4 w-4 mr-1" />
-            <span>Abrir</span>
-          </Button>
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-1" />
-            <span>Exportar Leads</span>
-          </Button>
-        </div>
-      </CardFooter>
-
-      <PageViewerModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        pageNumber={modalPageNumber || 1}
-        jobId={analysis.id}
-        documentName={analysis.fileName}
-      />
-
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Trash2 className="h-5 w-5 text-destructive" />
-              Excluir Documento
-            </DialogTitle>
-            <DialogDescription>
-              Você tem certeza que deseja excluir permanentemente o documento "{analysis.fileName}"?
-              Esta ação não pode ser desfeita e todos os dados de análise serão perdidos.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
             <Button 
-              variant="outline" 
-              onClick={handleDeleteCancel}
-              disabled={isDeleting}
+              onClick={generateQualityAssessment}
+              disabled={isLoadingQuality}
+              size="lg"
+              className="flex items-center gap-2"
             >
-              Cancelar
-            </Button>
-            <Button 
-              variant="destructive" 
-              onClick={handleDeleteConfirm}
-              disabled={isDeleting}
-            >
-              {isDeleting ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                  Excluindo...
-                </>
+              {isLoadingQuality ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
-                <>
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Excluir Permanentemente
-                </>
+                <Sparkles className="h-5 w-5" />
               )}
+              Gerar Análise Inteligente
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </Card>
+          </CardContent>
+        </Card>
+      )}
+    </TabsContent>
+  </Tabs>
+
+  <PageViewerModal
+    isOpen={isModalOpen}
+    onClose={handleCloseModal}
+    pageNumber={modalPageNumber || 1}
+    jobId={analysis.id}
+    documentName={analysis.fileName}
+  />
+
+  {/* Delete Confirmation Dialog */}
+  <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle className="flex items-center gap-2">
+          <Trash2 className="h-5 w-5 text-destructive" />
+          Excluir Documento
+        </DialogTitle>
+        <DialogDescription>
+          Você tem certeza que deseja excluir permanentemente o documento "{analysis.fileName}"?
+          Esta ação não pode ser desfeita e todos os dados de análise serão perdidos.
+        </DialogDescription>
+      </DialogHeader>
+      <DialogFooter>
+        <Button 
+          variant="outline" 
+          onClick={handleDeleteCancel}
+          disabled={isDeleting}
+        >
+          Cancelar
+        </Button>
+        <Button 
+          variant="destructive" 
+          onClick={handleDeleteConfirm}
+          disabled={isDeleting}
+        >
+          {isDeleting ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+              Excluindo...
+            </>
+          ) : (
+            <>
+              <Trash2 className="h-4 w-4 mr-2" />
+              Excluir Permanentemente
+            </>
+          )}
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+</div>
   );
 }

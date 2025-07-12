@@ -64,6 +64,7 @@ export function CreditHistory() {
   const getTransactionIcon = (type: string) => {
     switch (type) {
       case 'earned':
+      case 'feedback_earned':
         return <TrendingUp className="h-4 w-4 text-green-600" />;
       case 'spent':
         return <TrendingDown className="h-4 w-4 text-red-600" />;
@@ -77,6 +78,7 @@ export function CreditHistory() {
   const getTransactionColor = (type: string) => {
     switch (type) {
       case 'earned':
+      case 'feedback_earned':
         return 'bg-green-100 text-green-800';
       case 'spent':
         return 'bg-red-100 text-red-800';

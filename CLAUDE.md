@@ -260,3 +260,27 @@ The system is deployed on Railway **Hobby Plan** ($5/month):
 - Automated health checks
 - Zero-downtime deployments
 - Comprehensive logging and monitoring
+
+## 🚀 Active Development Projects
+
+### Intelligence Enhancement Project (2024-2025)
+**STATUS**: In Development  
+**GOAL**: Transform the system from document processor to intelligent investment advisor  
+**DOCUMENTATION**: `docs/projects/intelligence-enhancement/`  
+
+**Current Phase**: Phase 1 - Foundation Intelligence (0-3 months)  
+**Next Phases**: Core Intelligence (3-6 months), Advanced Features (6-12 months)  
+
+The Intelligence Enhancement Project aims to significantly improve analysis quality, decision-making support, and competitive positioning through advanced ML/AI capabilities, legal reasoning engines, and market intelligence integration.
+
+### Zero-Cost Improvements Initiative (2024)
+**STATUS**: 🟢 Ready to Implement  
+**GOAL**: Improve system intelligence without additional investment  
+**DOCUMENTATION**: `docs/projects/zero-cost-improvements/`  
+
+**Immediate Impact**: 15-20% accuracy improvement, 40% better UX  
+**Implementation**: 4 weeks of development using existing resources  
+
+Zero-cost improvements focus on better feature engineering, intelligent post-processing, automated quality scoring, and enhanced user experience using only open-source tools and existing infrastructure.
+
+For detailed information, see the complete project documentation in the dedicated project folders.

@@ -34,7 +34,8 @@
       "Bash(railway:*)",
       "WebFetch(domain:pdf-industrial-pipeline-production.up.railway.app)",
       "Bash(python:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(git fetch:*)"
     ],
     "deny": []
   }
