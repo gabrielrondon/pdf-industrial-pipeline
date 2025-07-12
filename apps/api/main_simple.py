@@ -99,9 +99,9 @@ async def debug_s3_config():
                     
                     # Try to upload
                     test_file = BytesIO(test_content)
-                    upload_result = await s3_backend.upload_file(
-                        file_obj=test_file,
+                    upload_result = await s3_backend.upload(
                         key=test_key,
+                        file_obj=test_file,
                         metadata={"test": "true", "timestamp": "2025-07-12"}
                     )
                     s3_status["s3_test_upload"] = "success"
@@ -793,16 +793,17 @@ async def upload_file(file: UploadFile = File(...), user_id: str = None):
                     logger.info(f"📤 Starting S3 upload to key: {s3_key}")
                     
                     with open(file_path, 'rb') as f:
-                        upload_result = await s3_backend.upload_file(
-                            file_obj=f,
+                        upload_result = await s3_backend.upload(
                             key=s3_key,
+                            file_obj=f,
                             metadata={
                                 "job_id": job_id,
                                 "user_id": user_id,
                                 "original_filename": file.filename,
                                 "upload_date": datetime.utcnow().isoformat(),
                                 "content_type": "application/pdf"
-                            }
+                            },
+                            content_type="application/pdf"
                         )
                     
                     storage_info = {
