@@ -208,15 +208,34 @@ export function SimpleDocumentUploader({ onAnalysisComplete }: SimpleDocumentUpl
               
               // Save document to context so it appears in "Meus Documentos"
               try {
-                await addDocument(documentAnalysis);
+                console.log('📝 Salvando documento no contexto...', documentAnalysis.id);
+                addDocument(documentAnalysis);
                 console.log('✅ Documento salvo na lista "Meus Documentos"');
               } catch (error) {
                 console.error('❌ Erro ao salvar documento:', error);
+                console.error('❌ Detalhes do erro:', {
+                  message: error.message,
+                  stack: error.stack,
+                  addDocumentType: typeof addDocument
+                });
               }
               
               // Notify parent component
-              if (onAnalysisComplete) {
-                onAnalysisComplete(documentAnalysis);
+              try {
+                if (onAnalysisComplete && typeof onAnalysisComplete === 'function') {
+                  console.log('📢 Notificando componente pai sobre conclusão da análise...');
+                  onAnalysisComplete(documentAnalysis);
+                  console.log('✅ Componente pai notificado com sucesso');
+                } else {
+                  console.warn('⚠️ onAnalysisComplete não é uma função válida:', typeof onAnalysisComplete);
+                }
+              } catch (error) {
+                console.error('❌ Erro ao notificar componente pai:', error);
+                console.error('❌ Detalhes do callback error:', {
+                  message: error.message,
+                  stack: error.stack,
+                  callbackType: typeof onAnalysisComplete
+                });
               }
             }
             return; // Para o loop
