@@ -691,10 +691,16 @@ async def upload_file(file: UploadFile = File(...), user_id: str = None):
             settings = get_settings()
             
             # Check if S3 storage is configured
+            logger.info(f"🔍 Storage backend check: {settings.storage_backend}, S3 bucket: {settings.s3_bucket}")
+            
             if settings.storage_backend == "s3" and settings.s3_bucket:
+                logger.info(f"☁️ S3 storage enabled, attempting upload...")
+                logger.info(f"S3 Config: bucket={settings.s3_bucket}, region={settings.s3_region}")
+                
                 try:
                     # Save to S3 for compliance/re-processing (Option 2)
                     from storage_backends.s3_backend import S3Backend
+                    logger.info(f"✅ S3Backend imported successfully")
                     
                     s3_backend = S3Backend(
                         bucket=settings.s3_bucket,
@@ -703,9 +709,12 @@ async def upload_file(file: UploadFile = File(...), user_id: str = None):
                         secret_key=settings.aws_secret_access_key,
                         endpoint_url=settings.s3_endpoint_url
                     )
+                    logger.info(f"✅ S3Backend instance created")
                     
                     # Upload to S3
                     s3_key = f"documents/{user_id}/{job_id}/{file.filename}"
+                    logger.info(f"📤 Starting S3 upload to key: {s3_key}")
+                    
                     with open(file_path, 'rb') as f:
                         upload_result = await s3_backend.upload_file(
                             file_obj=f,
@@ -724,11 +733,16 @@ async def upload_file(file: UploadFile = File(...), user_id: str = None):
                         "location": f"s3://{settings.s3_bucket}/{s3_key}",
                         "s3_url": upload_result.url if hasattr(upload_result, 'url') else None
                     }
-                    logger.info(f"☁️ File saved to S3: {s3_key}")
+                    logger.info(f"✅ File successfully saved to S3: {s3_key}")
+                    logger.info(f"📍 S3 Location: s3://{settings.s3_bucket}/{s3_key}")
                     
                 except Exception as s3_error:
-                    logger.warning(f"⚠️ S3 upload failed, falling back to delete: {s3_error}")
-                    storage_info = {"strategy": "process_and_delete_s3_failed", "location": "none"}
+                    logger.error(f"❌ S3 upload failed: {type(s3_error).__name__}: {s3_error}")
+                    import traceback
+                    logger.error(f"S3 Error traceback: {traceback.format_exc()}")
+                    storage_info = {"strategy": "process_and_delete_s3_failed", "location": "none", "error": str(s3_error)}
+            else:
+                logger.info(f"⚠️ S3 storage not configured or disabled, using process-and-delete strategy")
             
         except Exception as storage_error:
             logger.warning(f"⚠️ Storage backend check failed: {storage_error}")
