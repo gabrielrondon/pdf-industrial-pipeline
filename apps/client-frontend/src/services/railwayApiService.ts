@@ -128,7 +128,11 @@ class RailwayApiService {
    */
   async getJobs(userId?: string): Promise<any[]> {
     try {
-      const response = await this.makeRequest('/api/v1/jobs');
+      // CRITICAL: Pass user_id as query parameter
+      const url = userId ? `/api/v1/jobs?user_id=${encodeURIComponent(userId)}` : '/api/v1/jobs';
+      console.log(`📡 Calling Railway API: ${url}`);
+      
+      const response = await this.makeRequest(url);
       console.log('📡 Railway API response for getJobs:', response);
       
       // The API returns { jobs: [...], total: number, skip: number, limit: number }
