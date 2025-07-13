@@ -282,3 +282,49 @@ class Tag(Base, TimestampMixin):
     
     # Many-to-many relationship
     jobs = relationship("Job", secondary=job_tags, backref="tags")
+
+
+class DashboardCache(Base, TimestampMixin):
+    """
+    Cache table for dashboard statistics to improve performance.
+    Statistics are pre-calculated and stored here instead of calculating on every request.
+    """
+    __tablename__ = "dashboard_cache"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=generate_uuid)
+    cache_key = Column(String(100), unique=True, nullable=False, index=True)  # e.g., "global_stats", "user_stats:{user_id}"
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)  # Null for global stats
+    
+    # Cached statistics (JSONB for flexible structure)
+    statistics = Column(JSONB, nullable=False, default=dict)
+    
+    # Cache metadata
+    expires_at = Column(DateTime(timezone=True), nullable=False)  # When cache expires
+    calculation_time_ms = Column(Integer, default=0)  # How long it took to calculate
+    record_count = Column(Integer, default=0)  # Number of records processed
+    
+    # Relationships
+    user = relationship("User", backref="dashboard_caches")
+    
+    __table_args__ = (
+        Index("idx_dashboard_cache_key_expires", "cache_key", "expires_at"),
+        Index("idx_dashboard_cache_user_expires", "user_id", "expires_at"),
+    )
+    
+    @classmethod
+    def get_cache_key(cls, cache_type: str, user_id: str = None) -> str:
+        """Generate consistent cache keys"""
+        if user_id:
+            return f"{cache_type}:user:{user_id}"
+        return f"{cache_type}:global"
+    
+    def is_expired(self) -> bool:
+        """Check if cache is expired"""
+        return datetime.utcnow() > self.expires_at
+    
+    def is_fresh(self, max_age_minutes: int = 5) -> bool:
+        """Check if cache is fresh (not expired and recently updated)"""
+        if self.is_expired():
+            return False
+        age_minutes = (datetime.utcnow() - self.updated_at).total_seconds() / 60
+        return age_minutes <= max_age_minutes

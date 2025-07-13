@@ -1,5 +1,7 @@
 import os
 import logging
+import time
+from datetime import datetime
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -1099,15 +1101,40 @@ async def get_job(job_id: str):
 
 @app.get("/api/v1/jobs/stats/dashboard")
 async def get_dashboard_stats():
-    """Get dashboard statistics"""
+    """Get dashboard statistics using high-performance caching"""
     try:
-        if DATABASE_AVAILABLE:
+        # Import the cache service
+        try:
+            from services.dashboard_cache_service import DashboardCacheService
+            CACHE_SERVICE_AVAILABLE = True
+        except ImportError:
+            logger.warning("⚠️ Dashboard cache service not available, using fallback")
+            CACHE_SERVICE_AVAILABLE = False
+
+        if DATABASE_AVAILABLE and CACHE_SERVICE_AVAILABLE:
             with get_db() as db_session:
-                # Get total jobs
+                logger.info("📊 Getting dashboard stats from cache service")
+                
+                # Use cache service for lightning-fast response
+                start_time = time.time()
+                statistics = DashboardCacheService.get_or_calculate_stats(db_session, user_id=None)
+                response_time = int((time.time() - start_time) * 1000)
+                
+                logger.info(f"⚡ Dashboard stats retrieved in {response_time}ms")
+                
+                # Add response metadata
+                statistics["responseTimeMs"] = response_time
+                statistics["fromCache"] = "cacheCalculatedAt" in statistics
+                
+                return statistics
+        
+        elif DATABASE_AVAILABLE:
+            # Fallback to direct calculation if cache service not available
+            logger.info("📊 Using direct calculation fallback")
+            with get_db() as db_session:
                 total_jobs = db_session.query(Job).count()
                 completed_jobs = db_session.query(Job).filter(Job.status == 'completed').count()
                 
-                # Basic stats
                 return {
                     "totalAnalyses": total_jobs,
                     "validLeads": completed_jobs,
@@ -1134,41 +1161,47 @@ async def get_dashboard_stats():
                     "averageProcessingTime": 2.3,
                     "totalFileSize": 0,
                     "averageConfidence": 0.87,
-                    "topPerformingDocumentType": "edital"
+                    "topPerformingDocumentType": "edital",
+                    "fromCache": False,
+                    "responseTimeMs": 0
                 }
         
-        # Fallback for memory storage
-        total_jobs = len(jobs_storage)
-        completed_jobs = sum(1 for job in jobs_storage.values() if job.get('status') == 'completed')
-        
-        return {
-            "totalAnalyses": total_jobs,
-            "validLeads": completed_jobs,
-            "sharedLeads": int(completed_jobs * 0.4),
-            "credits": 100,
-            "documentTypes": [{"type": "edital", "count": total_jobs}],
-            "statusDistribution": [
-                {"status": "confirmado", "count": completed_jobs},
-                {"status": "processando", "count": total_jobs - completed_jobs}
-            ],
-            "commonIssues": [],
-            "monthlyAnalyses": [
-                {"month": "Jan", "analyses": 0, "leads": 0},
-                {"month": "Fev", "analyses": 0, "leads": 0},
-                {"month": "Mar", "analyses": 0, "leads": 0},
-                {"month": "Abr", "analyses": 0, "leads": 0},
-                {"month": "Mai", "analyses": int(total_jobs * 0.6), "leads": int(completed_jobs * 0.6)},
-                {"month": "Jun", "analyses": int(total_jobs * 0.4), "leads": int(completed_jobs * 0.4)}
-            ],
-            "successRate": (completed_jobs / max(total_jobs, 1)) * 100,
-            "averageProcessingTime": 2.3,
-            "totalFileSize": 0,
-            "averageConfidence": 0.87,
-            "topPerformingDocumentType": "edital"
-        }
+        else:
+            # Memory storage fallback
+            logger.info("📊 Using memory storage fallback")
+            total_jobs = len(jobs_storage)
+            completed_jobs = sum(1 for job in jobs_storage.values() if job.get('status') == 'completed')
+            
+            return {
+                "totalAnalyses": total_jobs,
+                "validLeads": completed_jobs,
+                "sharedLeads": int(completed_jobs * 0.4),
+                "credits": 100,
+                "documentTypes": [{"type": "edital", "count": total_jobs}],
+                "statusDistribution": [
+                    {"status": "confirmado", "count": completed_jobs},
+                    {"status": "processando", "count": total_jobs - completed_jobs}
+                ],
+                "commonIssues": [],
+                "monthlyAnalyses": [
+                    {"month": "Jan", "analyses": 0, "leads": 0},
+                    {"month": "Fev", "analyses": 0, "leads": 0},
+                    {"month": "Mar", "analyses": 0, "leads": 0},
+                    {"month": "Abr", "analyses": 0, "leads": 0},
+                    {"month": "Mai", "analyses": int(total_jobs * 0.6), "leads": int(completed_jobs * 0.6)},
+                    {"month": "Jun", "analyses": int(total_jobs * 0.4), "leads": int(completed_jobs * 0.4)}
+                ],
+                "successRate": (completed_jobs / max(total_jobs, 1)) * 100,
+                "averageProcessingTime": 2.3,
+                "totalFileSize": 0,
+                "averageConfidence": 0.87,
+                "topPerformingDocumentType": "edital",
+                "fromCache": False,
+                "responseTimeMs": 0
+            }
         
     except Exception as e:
-        logger.error(f"Dashboard stats error: {e}")
+        logger.error(f"❌ Dashboard stats error: {e}")
         return {
             "totalAnalyses": 0,
             "validLeads": 0,
@@ -1182,7 +1215,10 @@ async def get_dashboard_stats():
             "averageProcessingTime": 0,
             "totalFileSize": 0,
             "averageConfidence": 0,
-            "topPerformingDocumentType": "edital"
+            "topPerformingDocumentType": "edital",
+            "fromCache": False,
+            "responseTimeMs": 0,
+            "error": "Failed to load statistics"
         }
 
 @app.get("/api/v1/jobs")
@@ -1412,6 +1448,84 @@ async def manual_cleanup():
     except Exception as e:
         logger.error(f"Cleanup error: {e}")
         raise HTTPException(status_code=500, detail=f"Cleanup failed: {str(e)}")
+
+@app.get("/api/v1/cache/refresh")
+async def refresh_cache_manual():
+    """Manually refresh dashboard cache for testing"""
+    try:
+        # Import cache service and tasks
+        try:
+            from services.dashboard_cache_service import DashboardCacheService
+            from tasks.dashboard_cache_tasks import refresh_dashboard_cache_sync
+            CACHE_AVAILABLE = True
+        except ImportError as e:
+            logger.error(f"Cache service not available: {e}")
+            return {"success": False, "error": "Cache service not available"}
+
+        if DATABASE_AVAILABLE and CACHE_AVAILABLE:
+            logger.info("🔄 Manual cache refresh triggered")
+            
+            # Run the cache refresh
+            result = refresh_dashboard_cache_sync()
+            
+            logger.info(f"✅ Manual cache refresh completed: {result}")
+            return result
+        else:
+            return {"success": False, "error": "Database not available"}
+            
+    except Exception as e:
+        logger.error(f"❌ Manual cache refresh error: {e}")
+        return {"success": False, "error": str(e)}
+
+@app.get("/api/v1/cache/status")
+async def get_cache_status():
+    """Get current cache status and statistics"""
+    try:
+        if not DATABASE_AVAILABLE:
+            return {"cache_available": False, "error": "Database not available"}
+
+        try:
+            from services.dashboard_cache_service import DashboardCacheService
+            from database.models import DashboardCache
+        except ImportError:
+            return {"cache_available": False, "error": "Cache service not available"}
+
+        with get_db() as db_session:
+            # Get cache statistics
+            total_cache_entries = db_session.query(DashboardCache).count()
+            fresh_cache_entries = db_session.query(DashboardCache).filter(
+                DashboardCache.expires_at > datetime.utcnow()
+            ).count()
+            
+            # Get recent cache entries
+            recent_entries = db_session.query(DashboardCache).order_by(
+                DashboardCache.updated_at.desc()
+            ).limit(5).all()
+            
+            recent_list = []
+            for entry in recent_entries:
+                recent_list.append({
+                    "cache_key": entry.cache_key,
+                    "user_id": str(entry.user_id) if entry.user_id else None,
+                    "updated_at": entry.updated_at.isoformat(),
+                    "expires_at": entry.expires_at.isoformat(),
+                    "is_fresh": entry.is_fresh(),
+                    "calculation_time_ms": entry.calculation_time_ms,
+                    "record_count": entry.record_count
+                })
+            
+            return {
+                "cache_available": True,
+                "total_entries": total_cache_entries,
+                "fresh_entries": fresh_cache_entries,
+                "expired_entries": total_cache_entries - fresh_cache_entries,
+                "recent_entries": recent_list,
+                "cache_hit_rate": f"{(fresh_cache_entries / max(total_cache_entries, 1)) * 100:.1f}%"
+            }
+            
+    except Exception as e:
+        logger.error(f"❌ Cache status error: {e}")
+        return {"cache_available": False, "error": str(e)}
 
 @app.get("/api/v1/storage-stats")
 async def get_storage_stats():
