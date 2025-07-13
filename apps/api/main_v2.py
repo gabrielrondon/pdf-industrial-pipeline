@@ -18,13 +18,20 @@ from core.exceptions import BaseAPIException
 from database.connection import init_async_db, close_async_db
 from auth.security import get_current_user_optional, RateLimiter
 
-# Import routers
-from api.v1.auth import router as auth_router
-from api.v1.jobs import router as jobs_router
-from api.v1.analysis import router as analysis_router
-from api.v1.search import router as search_router
-from api.v1.admin import router as admin_router
-from api.v1.quality import router as quality_router
+# Import routers that actually exist
+try:
+    from api.v1.jobs import router as jobs_router
+    JOBS_ROUTER_AVAILABLE = True
+except ImportError as e:
+    print(f"⚠️ Jobs router not available: {e}")
+    JOBS_ROUTER_AVAILABLE = False
+
+try:
+    from api.v1.quality import router as quality_router
+    QUALITY_ROUTER_AVAILABLE = True
+except ImportError as e:
+    print(f"⚠️ Quality router not available: {e}")
+    QUALITY_ROUTER_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -284,42 +291,22 @@ async def root():
     }
 
 
-# Include routers
-app.include_router(
-    auth_router,
-    prefix=f"{settings.api_prefix}/auth",
-    tags=["Authentication"]
-)
+# Include routers that are available
+if JOBS_ROUTER_AVAILABLE:
+    app.include_router(
+        jobs_router,
+        prefix=f"{settings.api_prefix}/jobs",
+        tags=["Jobs"]
+    )
+    print("✅ Jobs router included")
 
-app.include_router(
-    jobs_router,
-    prefix=f"{settings.api_prefix}/jobs",
-    tags=["Jobs"]
-)
-
-app.include_router(
-    analysis_router,
-    prefix=f"{settings.api_prefix}/analysis",
-    tags=["Analysis"]
-)
-
-app.include_router(
-    search_router,
-    prefix=f"{settings.api_prefix}/search",
-    tags=["Search"]
-)
-
-app.include_router(
-    admin_router,
-    prefix=f"{settings.api_prefix}/admin",
-    tags=["Administration"]
-)
-
-app.include_router(
-    quality_router,
-    prefix=f"{settings.api_prefix}/quality",
-    tags=["Quality Assessment"]
-)
+if QUALITY_ROUTER_AVAILABLE:
+    app.include_router(
+        quality_router,
+        prefix=f"{settings.api_prefix}/quality",
+        tags=["Quality Assessment"]
+    )
+    print("✅ Quality router included")
 
 
 if __name__ == "__main__":
