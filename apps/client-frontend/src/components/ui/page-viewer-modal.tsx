@@ -61,17 +61,29 @@ export function PageViewerModal({
     setError(null);
 
     try {
-      const response = await fetch(`https://pdf-industrial-pipeline-production.up.railway.app/api/v1/jobs/${jobId}/page/${pageNumber}`);
+      // Use the Railway API service instead of direct fetch
+      const { railwayApi } = await import('@/services/railwayApiService');
       
-      if (!response.ok) {
-        throw new Error(`Erro ${response.status}: ${response.statusText}`);
-      }
+      console.log(`📄 Fetching page ${pageNumber} for job ${jobId}`);
+      const data = await railwayApi.getPageContent(jobId, pageNumber);
       
-      const data = await response.json();
+      console.log('📄 Page data received:', data);
       setPageData(data);
     } catch (err) {
       console.error('Erro ao buscar conteúdo da página:', err);
-      setError(err instanceof Error ? err.message : 'Erro desconhecido ao carregar o conteúdo da página.');
+      
+      // More specific error handling
+      if (err instanceof Error) {
+        if (err.message.includes('404')) {
+          setError(`Página ${pageNumber} não encontrada neste documento. O documento pode não ter páginas suficientes ou o processamento ainda não foi concluído.`);
+        } else if (err.message.includes('401') || err.message.includes('403')) {
+          setError('Acesso negado. Você pode não ter permissão para visualizar este documento.');
+        } else {
+          setError(`Erro ao carregar conteúdo da página: ${err.message}`);
+        }
+      } else {
+        setError('Erro desconhecido ao carregar o conteúdo da página.');
+      }
     } finally {
       setIsLoading(false);
     }

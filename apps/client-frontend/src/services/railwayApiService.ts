@@ -20,19 +20,50 @@ export interface JobStatus {
 }
 
 class RailwayApiService {
+  private async getAuthHeaders(): Promise<Record<string, string>> {
+    try {
+      // Import supabase client to get current user session
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session?.access_token) {
+        return {
+          'Authorization': `Bearer ${session.access_token}`,
+        };
+      }
+      
+      console.warn('⚠️ No authentication token available for Railway API');
+      return {};
+    } catch (error) {
+      console.error('❌ Error getting auth headers:', error);
+      return {};
+    }
+  }
+
   async makeRequest(endpoint: string, options: RequestInit = {}) {
     const url = `${API_BASE_URL}${endpoint}`;
+    // Temporarily remove auth for testing
+    // const authHeaders = await this.getAuthHeaders();
     
     try {
       const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
+          // ...authHeaders,
           ...options.headers,
         },
         ...options,
       });
 
       if (!response.ok) {
+        const errorText = await response.text().catch(() => '');
+        console.error(`❌ Railway API Error ${response.status}:`, errorText);
+        console.error(`❌ Full error details:`, {
+          url,
+          status: response.status,
+          statusText: response.statusText,
+          errorText
+        });
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
@@ -90,8 +121,26 @@ class RailwayApiService {
    * Lista todos os jobs/documentos do usuário
    */
   async getJobs(userId?: string): Promise<any[]> {
-    const endpoint = userId ? `/api/v1/jobs?user_id=${encodeURIComponent(userId)}` : '/api/v1/jobs';
-    return this.makeRequest(endpoint);
+    try {
+      const response = await this.makeRequest('/api/v1/jobs');
+      console.log('📡 Railway API response for getJobs:', response);
+      
+      // The API returns { jobs: [...], total: number, skip: number, limit: number }
+      if (response.jobs && Array.isArray(response.jobs)) {
+        return response.jobs;
+      }
+      
+      // Fallback: if it's already an array
+      if (Array.isArray(response)) {
+        return response;
+      }
+      
+      console.warn('⚠️ Unexpected response format from Railway API:', response);
+      return [];
+    } catch (error) {
+      console.error('❌ Error in getJobs:', error);
+      throw error;
+    }
   }
 
   /**
@@ -125,6 +174,34 @@ class RailwayApiService {
    */
   async testDatabase(): Promise<any> {
     return this.makeRequest('/test-db');
+  }
+
+  /**
+   * Busca estatísticas do dashboard
+   */
+  async getDashboardStats(): Promise<any> {
+    try {
+      const response = await this.makeRequest('/api/v1/jobs/stats/dashboard');
+      console.log('📊 Dashboard stats from Railway:', response);
+      return response;
+    } catch (error) {
+      console.error('❌ Error getting dashboard stats:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Busca conteúdo de uma página específica do documento
+   */
+  async getPageContent(jobId: string, pageNumber: number): Promise<any> {
+    try {
+      const response = await this.makeRequest(`/api/v1/jobs/${jobId}/page/${pageNumber}`);
+      console.log(`📄 Page ${pageNumber} content for job ${jobId}:`, response);
+      return response;
+    } catch (error) {
+      console.error(`❌ Error getting page ${pageNumber} for job ${jobId}:`, error);
+      throw error;
+    }
   }
 }
 

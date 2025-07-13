@@ -40,13 +40,18 @@ cd apps/api
 # Development server
 python main_v2.py
 
-# Run tests (located in apps/api/)
-python test_pipeline.py            # Test PDF processing pipeline
-python test_judicial_analysis.py   # Test judicial analysis features
-python test_judicial_endpoint.py   # Test API endpoints
+# Run tests (located in apps/api/tests/)
+pytest tests/unit/test_pipeline.py            # Test PDF processing pipeline
+pytest tests/unit/test_judicial_analysis.py   # Test judicial analysis features
+pytest tests/integration/test_judicial_endpoint.py   # Test API endpoints
+pytest tests/unit/ -v                        # Run all unit tests
+pytest tests/integration/ -v                 # Run all integration tests
 
 # Performance testing (in docs/testing/)
 python docs/testing/test_stage6_performance.py
+
+# Install dependencies
+pip install -r requirements.txt
 ```
 
 ### Database and Background Tasks
@@ -66,8 +71,16 @@ redis-server
 
 ### Monorepo Structure
 - **apps/client-frontend**: Customer React app (port 8080) for document analysis
+  - Primary backend: Railway API for document processing
+  - Authentication: Supabase for user management and subscriptions
+  - Architecture: Hybrid Railway/Supabase integration
 - **apps/admin-frontend**: Administrative React app (port 3001) for system management  
+  - Backend: Direct Railway API integration only
+  - Purpose: System health, API testing, database management
 - **apps/api**: Python FastAPI backend (port 8000) with ML/AI processing
+  - Core: 7-stage PDF processing pipeline
+  - Database: PostgreSQL with SQLAlchemy ORM
+  - Features: ML/AI, judicial analysis, quality assessment
 - **packages/**: Shared utilities and types
 
 ### Technology Stack
@@ -88,10 +101,32 @@ redis-server
 - NLTK for text processing
 
 **Infrastructure**:
-- Docker containerization
-- Railway cloud deployment
-- Prometheus + Grafana monitoring
-- Nginx load balancing
+- Docker containerization with multi-stage builds
+- Railway cloud deployment with auto-scaling
+- Prometheus + Grafana monitoring and observability
+- Nginx load balancing for production
+- Celery + Redis for background job processing
+
+## Key Application Files
+
+### Main Entry Points
+- **apps/api/main_v2.py**: Primary FastAPI application with async context managers
+- **apps/client-frontend/src/main.tsx**: Client React application entry point
+- **apps/admin-frontend/src/main.tsx**: Admin React application entry point
+
+### Core Configuration
+- **apps/api/config/settings.py**: Environment-based configuration with Pydantic settings
+- **apps/api/core/logging_config.py**: Structured logging with request tracking
+- **apps/api/core/monitoring.py**: Metrics collection and health checks
+- **apps/api/database/connection.py**: Async database connection management
+
+### Processing Pipeline
+- **apps/api/core/pdf_processor.py**: Advanced PDF processing engine
+- **apps/api/ml_engine/**: Machine learning pipeline with enhanced features
+- **apps/api/judicial_analysis/**: Brazilian legal document analysis
+- **apps/api/quality_engine/**: Quality assessment and recommendation system
+- **apps/api/ocr_engine/**: OCR integration with text enhancement
+- **apps/api/tasks/**: Celery background tasks for async processing
 
 ## 7-Stage PDF Processing Pipeline
 
@@ -130,18 +165,23 @@ The system uses a sophisticated industrial pipeline for PDF processing:
 
 **Core Models** (apps/api/database/models.py):
 - `Job`: PDF processing jobs with status tracking
-- `JobChunk`: PDF page chunks for parallel processing
-- `User`: Authentication and user management
-- `TextAnalysis`: NLP analysis results
-- `MLPrediction`: Machine learning predictions
+- `JobChunk`: PDF page chunks for parallel processing  
+- `User`: Authentication and user management with API key support
+- `APIKey`: API key management with scoped permissions
+- `TextAnalysis`: NLP analysis results with JSONB metadata
+- `MLPrediction`: Machine learning predictions with confidence scores
 - `JudicialAnalysis`: Brazilian legal document analysis
 - `Embedding`: Vector embeddings for semantic search
+- `QualityAssessment`: Quality assessment results and recommendations
+- `UserFeedback`: User feedback integration for model improvement
 
 **Key Features**:
 - PostgreSQL with full-text search (TSVECTOR)
 - JSONB columns for flexible metadata storage
 - UUID primary keys for scalability
 - Optimized indexing for performance queries
+- TimestampMixin for audit trails
+- Relationship mappings with cascade deletes
 
 ## API Endpoints
 
@@ -151,6 +191,9 @@ The system uses a sophisticated industrial pipeline for PDF processing:
 - `POST /api/v1/search/semantic`: AI-powered semantic search
 - `GET /api/v1/analysis/{job_id}/judicial`: Judicial analysis results
 - `POST /api/v1/auth/login`: JWT authentication
+- `POST /api/v1/quality/assess`: Quality assessment endpoints
+- `POST /api/v1/feedback/submit`: User feedback integration
+- `GET /api/v1/ml_intelligence/`: ML intelligence features
 
 **Interactive Documentation**: http://localhost:8000/docs
 
@@ -186,10 +229,18 @@ EMBEDDING_MODEL=sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
 ## Testing Strategy
 
 **Test Locations**:
-- Unit tests: `apps/api/test_*.py`
-- Performance tests: `docs/testing/test_stage6_performance.py`
+- Unit tests: `apps/api/tests/unit/`
+- Integration tests: `apps/api/tests/integration/`
+- Performance tests: `apps/api/tests/performance/` and `docs/testing/test_stage6_performance.py`
 - Frontend tests: `docs/testing/test_stage7_frontend.py`
-- Integration tests: `docs/testing/test_documentation.py`
+- End-to-end tests: `docs/testing/test_documentation.py`
+
+**Key Test Files**:
+- `apps/api/tests/unit/test_pipeline.py`: PDF processing pipeline validation
+- `apps/api/tests/unit/test_judicial_analysis.py`: Judicial analysis accuracy
+- `apps/api/tests/integration/test_judicial_endpoint.py`: API endpoint functionality
+- `apps/api/tests/unit/test_enhanced_features.py`: Enhanced ML features
+- `apps/api/tests/unit/test_quality_system.py`: Quality assessment system
 
 **Coverage Areas**:
 - PDF processing pipeline validation
@@ -197,6 +248,7 @@ EMBEDDING_MODEL=sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
 - API endpoint functionality
 - ML model performance
 - Authentication and security
+- Quality assessment and feedback systems
 
 ## Monitoring & Observability
 
@@ -223,7 +275,9 @@ EMBEDDING_MODEL=sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
 - Use React Context for global state (Auth, Document, Plan)
 - Implement proper loading states and error boundaries
 - Follow shadcn/ui component patterns
-- Use React Hook Form for complex forms
+- Use React Hook Form for complex forms with Zod validation
+- Client frontend: Uses Railway API as primary backend, Supabase for auth only
+- Admin frontend: Pure Railway API integration for system management
 
 ### Backend Patterns
 - Implement async/await for all I/O operations
@@ -236,6 +290,16 @@ EMBEDDING_MODEL=sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
 - Validate all inputs with Pydantic models
 - Use proper authentication middleware
 - Implement rate limiting for public endpoints
+
+### Important Development Notes
+- **Railway Deployment**: Uses optimized requirements.txt for Railway with minimal dependencies
+- **Database Migrations**: Use Alembic for schema changes (`apps/api/database/migrations/`)
+- **Background Jobs**: All heavy processing (PDF, OCR, ML) runs async via Celery
+- **Error Handling**: Custom exception system in `apps/api/core/exceptions.py`
+- **API Versioning**: Routes organized under `apps/api/api/v1/` for version management
+- **Testing**: Run tests with pytest from `apps/api/` directory
+- **File Storage**: Abstract storage backend supports S3 and local filesystem
+- **Monitoring**: Built-in Prometheus metrics and structured logging
 
 ## Capacity Planning & Infrastructure
 
