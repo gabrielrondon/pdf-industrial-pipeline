@@ -21,12 +21,12 @@ VITE_API_TIMEOUT = 30000
 ### Supabase Configuration (REQUIRED)
 ```
 VITE_SUPABASE_URL = https://rjbiyndpxqaallhjmbwm.supabase.co
-VITE_SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqYml5bmRweHFhYWxsaGptYndtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU2NjEwNzUsImV4cCI6MjA2MTIzNzA3NX0.h3hviSaTY6fJLUrRbl2X6LHfQlxAhHishQ-jVur09-A
+VITE_SUPABASE_ANON_KEY = your-supabase-anon-key-here
 ```
 
 ### Stripe Configuration (REQUIRED)
 ```
-VITE_STRIPE_PUBLISHABLE_KEY = pk_live_51QAYCjLXjImbfkQu56tHQkHauceF2ib61ePZEAYjgRA4aigN5sUD73BISZirOdaRSfbchhozqYVMYzW2iPFDgdKz00BQJjX01k
+VITE_STRIPE_PUBLISHABLE_KEY = pk_live_your-stripe-publishable-key-here
 ```
 
 ### App Configuration
