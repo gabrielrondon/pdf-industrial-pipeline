@@ -11,6 +11,6 @@ healthcheckTimeout = 300
 PORT = "8000"
 PYTHONPATH = "/app"
 ENVIRONMENT = "production"
-SECRET_KEY = "abca14e8ad3982ae93c07c42b01daf57886355ca0702a58b6d94717942f78d09"
+# SECRET_KEY should be set via Railway dashboard environment variables for security
 DEBUG = "false"
 API_VERSION = "v2"

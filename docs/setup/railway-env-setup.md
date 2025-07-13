@@ -31,7 +31,7 @@ railway variables set REDIS_URL=$REDIS_URL
 
 # Variáveis adicionais da nossa aplicação
 railway variables set ENVIRONMENT=production
-railway variables set SECRET_KEY="abca14e8ad3982ae93c07c42b01daf57886355ca0702a58b6d94717942f78d09"
+railway variables set SECRET_KEY="your-secret-key-here"  # Generate a new secure key
 railway variables set DEBUG=false
 railway variables set API_VERSION=v2
 ```
