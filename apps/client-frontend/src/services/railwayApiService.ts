@@ -42,18 +42,24 @@ class RailwayApiService {
 
   async makeRequest(endpoint: string, options: RequestInit = {}) {
     const url = `${API_BASE_URL}${endpoint}`;
-    // Temporarily remove auth for testing
-    // const authHeaders = await this.getAuthHeaders();
+    const authHeaders = await this.getAuthHeaders();
+    
+    console.log(`🚀 Making request to: ${url}`);
+    console.log(`🔐 Auth headers present:`, Object.keys(authHeaders));
     
     try {
+      const startTime = performance.now();
       const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
-          // ...authHeaders,
+          ...authHeaders,
           ...options.headers,
         },
         ...options,
       });
+      
+      const endTime = performance.now();
+      console.log(`⏱️ Request completed in ${(endTime - startTime).toFixed(2)}ms`);
 
       if (!response.ok) {
         const errorText = await response.text().catch(() => '');
