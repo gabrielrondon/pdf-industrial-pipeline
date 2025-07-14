@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { railwayApi } from '@/services/railwayApiService';
 
 interface PageViewerModalProps {
   isOpen: boolean;
@@ -62,7 +63,6 @@ export function PageViewerModal({
 
     try {
       // Use the Railway API service instead of direct fetch
-      const { railwayApi } = await import('@/services/railwayApiService');
       
       console.log(`📄 Fetching page ${pageNumber} for job ${jobId}`);
       const data = await railwayApi.getPageContent(jobId, pageNumber);

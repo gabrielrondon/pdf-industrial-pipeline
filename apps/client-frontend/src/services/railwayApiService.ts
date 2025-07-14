@@ -2,6 +2,8 @@
  * Service para usar nossa API Railway em vez do Supabase diretamente
  */
 
+import { supabase } from '@/integrations/supabase/client';
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://pdf-industrial-pipeline-production.up.railway.app';
 
 export interface UploadResponse {
@@ -22,8 +24,7 @@ export interface JobStatus {
 class RailwayApiService {
   private async getAuthHeaders(): Promise<Record<string, string>> {
     try {
-      // Import supabase client to get current user session
-      const { supabase } = await import('@/integrations/supabase/client');
+      // Get current user session
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session?.access_token) {

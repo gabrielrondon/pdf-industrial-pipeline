@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { DocumentAnalysis, DashboardStats } from '@/types';
+import { railwayApi } from '@/services/railwayApiService';
 
 export interface Lead {
   id: string;
@@ -231,8 +232,7 @@ export class SupabaseService {
     }
     
     try {
-      // Import Railway API service
-      const { railwayApi } = await import('@/services/railwayApiService');
+      // Use Railway API service
       
       // Buscar jobs/documentos na Railway API
       console.log('📡 Chamando railwayApi.getJobs() com user_id:', userId);
@@ -445,7 +445,7 @@ export class SupabaseService {
 
       // USAR O ENDPOINT DEDICADO DA RAILWAY API
       try {
-        const { railwayApi } = await import('@/services/railwayApiService');
+        // Use Railway API service
         
         console.log('📡 Chamando endpoint dedicado de dashboard stats...');
         const dashboardStats = await railwayApi.getDashboardStats();
@@ -471,7 +471,7 @@ export class SupabaseService {
   // Método de fallback usando documentos individuais
   private static async getDashboardStatsFallback(userId: string, credits: number): Promise<DashboardStats> {
     try {
-      const { railwayApi } = await import('@/services/railwayApiService');
+      // Use Railway API service
       
       console.log('🔄 Fallback: buscando jobs individuais...');
       const railwayJobs = await railwayApi.getJobs(userId);
