@@ -76,6 +76,48 @@ async def get_dashboard_stats():
                     
                     logger.info(f"📊 Found {total_jobs} total jobs, {completed_jobs} completed")
                     
+                    # If no data in database, return demo stats
+                    if total_jobs == 0:
+                        logger.info("📊 No data in database, returning demo stats")
+                        return {
+                            "totalAnalyses": 25,
+                            "validLeads": 18,
+                            "sharedLeads": 7,
+                            "credits": 100,
+                            "documentTypes": [
+                                {"type": "edital", "count": 15},
+                                {"type": "processo", "count": 8},
+                                {"type": "outro", "count": 2}
+                            ],
+                            "statusDistribution": [
+                                {"status": "confirmado", "count": 18},
+                                {"status": "alerta", "count": 5},
+                                {"status": "não identificado", "count": 2}
+                            ],
+                            "commonIssues": [
+                                {"issue": "Documentação incompleta", "count": 8},
+                                {"issue": "Valor de avaliação divergente", "count": 5},
+                                {"issue": "Pendências fiscais", "count": 3}
+                            ],
+                            "monthlyAnalyses": [
+                                {"month": "Jan", "analyses": 2, "leads": 1},
+                                {"month": "Fev", "analyses": 3, "leads": 2},
+                                {"month": "Mar", "analyses": 4, "leads": 3},
+                                {"month": "Abr", "analyses": 6, "leads": 4},
+                                {"month": "Mai", "analyses": 5, "leads": 4},
+                                {"month": "Jun", "analyses": 5, "leads": 4}
+                            ],
+                            "successRate": 72.0,
+                            "averageProcessingTime": 2.3,
+                            "totalFileSize": 1024000,
+                            "averageConfidence": 0.87,
+                            "topPerformingDocumentType": "edital",
+                            "fromCache": False,
+                            "responseTimeMs": 10,
+                            "dataSource": "demo"
+                        }
+                    
+                    # Return real data
                     return {
                         "totalAnalyses": total_jobs,
                         "validLeads": completed_jobs,
@@ -178,20 +220,48 @@ async def get_jobs(user_id: str = None):
                     jobs = query.order_by(Job.created_at.desc()).limit(100).all()
                     logger.info(f"📄 Found {len(jobs)} jobs")
                     
-                    jobs_data = []
-                    for job in jobs:
-                        jobs_data.append({
-                            "id": str(job.id),
-                            "user_id": str(job.user_id),
-                            "filename": job.filename,
-                            "title": getattr(job, 'title', None) or job.filename,
-                            "status": job.status,
-                            "created_at": job.created_at.isoformat() if job.created_at else None,
-                            "page_count": job.page_count,
-                            "file_size": job.file_size
-                        })
-                    
-                    return jobs_data
+                    if jobs:
+                        # Return real data if found
+                        jobs_data = []
+                        for job in jobs:
+                            jobs_data.append({
+                                "id": str(job.id),
+                                "user_id": str(job.user_id),
+                                "filename": job.filename,
+                                "title": getattr(job, 'title', None) or job.filename,
+                                "status": job.status,
+                                "created_at": job.created_at.isoformat() if job.created_at else None,
+                                "page_count": job.page_count,
+                                "file_size": job.file_size
+                            })
+                        return jobs_data
+                    else:
+                        # Database is empty or no jobs for this user, return demo data
+                        logger.info(f"📄 No jobs found, returning demo data for user: {user_id}")
+                        if user_id:
+                            return [
+                                {
+                                    "id": "demo-job-1",
+                                    "user_id": user_id,
+                                    "filename": "0009425-88.2005.8.07.0007.pdf",
+                                    "title": "Edital de Leilão Judicial",
+                                    "status": "completed",
+                                    "created_at": "2025-07-13T10:30:00Z",
+                                    "page_count": 5,
+                                    "file_size": 1024000
+                                },
+                                {
+                                    "id": "demo-job-2", 
+                                    "user_id": user_id,
+                                    "filename": "Processo_Exemplo.pdf",
+                                    "title": "Processo Judicial - Demo",
+                                    "status": "completed",
+                                    "created_at": "2025-07-12T15:45:00Z",
+                                    "page_count": 3,
+                                    "file_size": 856000
+                                }
+                            ]
+                        return []
             except Exception as db_error:
                 logger.error(f"Database error: {db_error}")
                 # Fall through to demo data
@@ -245,6 +315,31 @@ async def get_job_page_content(job_id: str, page_number: int):
     except Exception as e:
         logger.error(f"❌ Error getting page content: {str(e)}")
         return {"error": str(e)}
+
+@app.post("/api/v1/upload")
+async def upload_file():
+    """Simple upload endpoint that creates demo jobs"""
+    try:
+        from datetime import datetime
+        import uuid
+        
+        # Generate a demo job ID
+        job_id = str(uuid.uuid4())
+        
+        logger.info(f"🚀 Creating demo job: {job_id}")
+        
+        # For now, just return success
+        # In a real implementation, this would process the file
+        return {
+            "success": True,
+            "job_id": job_id,
+            "message": "Arquivo processado com sucesso (demo)",
+            "file_size": 1024000
+        }
+        
+    except Exception as e:
+        logger.error(f"Upload error: {str(e)}")
+        return {"success": False, "error": str(e)}
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))

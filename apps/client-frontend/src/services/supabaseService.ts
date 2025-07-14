@@ -218,6 +218,17 @@ export class SupabaseService {
   static async getUserDocuments(userId: string): Promise<DocumentAnalysis[]> {
     console.log('🚂 === BUSCANDO DOCUMENTOS NA RAILWAY API ===');
     console.log('👤 User ID:', userId);
+    console.log('👤 User ID type:', typeof userId);
+    console.log('👤 User ID length:', userId?.length);
+    
+    // Debug current session
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      console.log('👤 Current Supabase user:', user?.id);
+      console.log('👤 User IDs match:', user?.id === userId);
+    } catch (e) {
+      console.log('👤 Error getting current user:', e);
+    }
     
     try {
       // Import Railway API service
