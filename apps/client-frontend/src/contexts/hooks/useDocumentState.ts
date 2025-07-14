@@ -10,17 +10,6 @@ export function useDocumentState() {
   const [isLoading, setIsLoading] = useState(false);
   const loadingRef = useRef(false);
 
-  // Load user documents on mount and user change
-  useEffect(() => {
-    if (user?.id) {
-      console.log('📋 useDocumentState: user.id mudou para:', user.id);
-      refreshDocuments();
-    } else {
-      console.log('📋 useDocumentState: user.id é null, limpando documentos');
-      setDocuments([]);
-    }
-  }, [user?.id, refreshDocuments]);
-
   const refreshDocuments = useCallback(async () => {
     if (!user?.id) {
       console.log('❌ Usuário não autenticado, não é possível carregar documentos');
@@ -49,6 +38,17 @@ export function useDocumentState() {
       loadingRef.current = false;
     }
   }, [user?.id]);
+
+  // Load user documents on mount and user change
+  useEffect(() => {
+    if (user?.id) {
+      console.log('📋 useDocumentState: user.id mudou para:', user.id);
+      refreshDocuments();
+    } else {
+      console.log('📋 useDocumentState: user.id é null, limpando documentos');
+      setDocuments([]);
+    }
+  }, [user?.id, refreshDocuments]);
 
   const getDocumentById = useCallback((id: string): DocumentAnalysis | undefined => {
     return documents.find(doc => doc.id === id);
