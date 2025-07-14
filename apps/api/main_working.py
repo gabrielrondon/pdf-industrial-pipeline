@@ -2,7 +2,7 @@ import os
 import logging
 import time
 from datetime import datetime
-from fastapi import FastAPI, UploadFile, File, Form
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import uvicorn
@@ -324,6 +324,10 @@ async def upload_file(file: UploadFile = File(...), user_id: str = Form(...)):
         
         logger.info(f"🚀 Processing upload for user: {user_id}")
         logger.info(f"📄 File: {file.filename}, Size: {file.size if hasattr(file, 'size') else 'unknown'}")
+        
+        # Validate file type
+        if not file.filename or not file.filename.lower().endswith('.pdf'):
+            raise HTTPException(status_code=400, detail="Only PDF files are allowed")
         
         # Generate a job ID
         job_id = str(uuid.uuid4())
