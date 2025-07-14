@@ -1,6 +1,7 @@
 import os
+import uuid
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 # Create FastAPI app
@@ -53,6 +54,33 @@ async def get_jobs(user_id: str = None):
             }
         ]
     return []
+
+@app.post("/api/v1/upload")
+async def upload_file(file: UploadFile = File(...), user_id: str = Form(...)):
+    """Basic upload endpoint"""
+    try:
+        # Validate file type
+        if not file.filename or not file.filename.lower().endswith('.pdf'):
+            raise HTTPException(status_code=400, detail="Only PDF files are allowed")
+        
+        # Generate a job ID
+        job_id = str(uuid.uuid4())
+        
+        # Read file content for size
+        file_content = await file.read()
+        file_size = len(file_content)
+        
+        return {
+            "success": True,
+            "job_id": job_id,
+            "message": "Arquivo processado com sucesso",
+            "file_size": file_size,
+            "user_id": user_id,
+            "filename": file.filename
+        }
+        
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
