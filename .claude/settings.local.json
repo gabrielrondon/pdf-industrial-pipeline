@@ -35,7 +35,8 @@
       "WebFetch(domain:pdf-industrial-pipeline-production.up.railway.app)",
       "Bash(python:*)",
       "Bash(npm run:*)",
-      "Bash(git fetch:*)"
+      "Bash(git fetch:*)",
+      "Bash(before initialization\" runtime error.\n\nChanges:\n- Move refreshDocuments useCallback definition before useEffect that depends on it\n- Preserve all existing functionality and error handling\n- Fix initialization order to prevent circular reference\n\n🤖 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": []
   }
