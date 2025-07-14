@@ -36,4 +36,4 @@ ENV PORT=8000
 EXPOSE 8000
 
 # Start command  
-CMD ["python", "main_simple.py"]
+CMD ["python", "main_working.py"]
