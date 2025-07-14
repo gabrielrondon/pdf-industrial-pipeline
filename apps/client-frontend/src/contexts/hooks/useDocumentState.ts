@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { SupabaseService } from '@/services/supabaseService';
 import { DocumentAnalysis } from '@/types';
@@ -19,9 +19,9 @@ export function useDocumentState() {
       console.log('📋 useDocumentState: user.id é null, limpando documentos');
       setDocuments([]);
     }
-  }, [user?.id]);
+  }, [user?.id, refreshDocuments]);
 
-  const refreshDocuments = async () => {
+  const refreshDocuments = useCallback(async () => {
     if (!user?.id) {
       console.log('❌ Usuário não autenticado, não é possível carregar documentos');
       return;
@@ -48,21 +48,21 @@ export function useDocumentState() {
       setIsLoading(false);
       loadingRef.current = false;
     }
-  };
+  }, [user?.id]);
 
-  const getDocumentById = (id: string): DocumentAnalysis | undefined => {
+  const getDocumentById = useCallback((id: string): DocumentAnalysis | undefined => {
     return documents.find(doc => doc.id === id);
-  };
+  }, [documents]);
 
-  const addDocument = (document: DocumentAnalysis) => {
+  const addDocument = useCallback((document: DocumentAnalysis) => {
     setDocuments(prev => [document, ...prev]);
-  };
+  }, []);
 
-  const updateDocument = (id: string, updates: Partial<DocumentAnalysis>) => {
+  const updateDocument = useCallback((id: string, updates: Partial<DocumentAnalysis>) => {
     setDocuments(prev => prev.map(doc => 
       doc.id === id ? { ...doc, ...updates } : doc
     ));
-  };
+  }, []);
 
   return {
     documents,

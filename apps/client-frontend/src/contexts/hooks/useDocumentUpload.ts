@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { DocumentAnalysis, DocumentType } from '@/types';
 import { AIModel } from '@/components/document/ModelSelector';
@@ -10,7 +10,7 @@ export function useDocumentUpload() {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
-  const uploadDocument = async (file: File, analysisModel: AIModel = 'native'): Promise<DocumentAnalysis> => {
+  const uploadDocument = useCallback(async (file: File, analysisModel: AIModel = 'native'): Promise<DocumentAnalysis> => {
     if (!user?.id) {
       throw new Error('Usuário não autenticado');
     }
@@ -78,7 +78,7 @@ export function useDocumentUpload() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user?.id]);
 
   return { uploadDocument, isLoading };
 }

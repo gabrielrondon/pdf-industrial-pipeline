@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { SupabaseService } from '@/services/supabaseService';
 import { DocumentAnalysis, DashboardStats } from '@/types';
@@ -8,7 +8,7 @@ export function useDocumentOperations() {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
-  const toggleDocumentPrivacy = async (id: string): Promise<DocumentAnalysis> => {
+  const toggleDocumentPrivacy = useCallback(async (id: string): Promise<DocumentAnalysis> => {
     if (!user?.id) {
       throw new Error('Usuário não autenticado');
     }
@@ -43,9 +43,9 @@ export function useDocumentOperations() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user?.id]);
 
-  const getStats = async (): Promise<DashboardStats> => {
+  const getStats = useCallback(async (): Promise<DashboardStats> => {
     if (!user?.id) {
       throw new Error('Usuário não autenticado');
     }
@@ -64,9 +64,9 @@ export function useDocumentOperations() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user?.id]);
 
-  const getCommunityLeads = async (): Promise<DocumentAnalysis[]> => {
+  const getCommunityLeads = useCallback(async (): Promise<DocumentAnalysis[]> => {
     if (!user?.id) {
       throw new Error('Usuário não autenticado');
     }
@@ -89,7 +89,7 @@ export function useDocumentOperations() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user?.id, user?.plan]);
 
   return { 
     toggleDocumentPrivacy, 
