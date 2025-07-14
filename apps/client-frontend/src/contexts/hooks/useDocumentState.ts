@@ -41,14 +41,14 @@ export function useDocumentState() {
 
   // Load user documents on mount and user change
   useEffect(() => {
-    if (user?.id) {
+    if (user?.id && refreshDocuments) {
       console.log('📋 useDocumentState: user.id mudou para:', user.id);
       refreshDocuments();
-    } else {
+    } else if (!user?.id) {
       console.log('📋 useDocumentState: user.id é null, limpando documentos');
       setDocuments([]);
     }
-  }, [user?.id, refreshDocuments]);
+  }, [user?.id]); // Remove refreshDocuments from deps since it already depends on user?.id
 
   const getDocumentById = useCallback((id: string): DocumentAnalysis | undefined => {
     return documents.find(doc => doc.id === id);
