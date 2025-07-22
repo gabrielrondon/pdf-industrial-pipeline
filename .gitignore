@@ -91,3 +91,4 @@ VERCEL_DEPLOYMENT.md
 
 # Railway deployment files with sensitive data
 RAILWAY_ENV_VARS.md
+.vercel

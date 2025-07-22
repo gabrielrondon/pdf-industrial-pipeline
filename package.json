@@ -7,26 +7,31 @@
     "apps/*"
   ],
   "scripts": {
-    "dev": "npm run dev --workspaces --if-present",
+    "dev": "concurrently \"npm run dev:client\" \"npm run dev:admin\" \"npm run dev:api\" --names \"client,admin,api\" --prefix-colors \"cyan,magenta,yellow\"",
     "build": "npm run build --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "clean": "npm run clean --workspaces --if-present",
     "dev:client": "npm run dev --workspace=apps/client-frontend",
     "dev:admin": "npm run dev --workspace=apps/admin-frontend",
-    "dev:api": "cd apps/api && python main_v2.py",
+    "dev:api": "cd apps/api && PORT=9082 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/pdf_pipeline_dev python3 main.py",
     "build:client": "npm run build --workspace=apps/client-frontend",
     "build:admin": "npm run build --workspace=apps/admin-frontend",
-    "start:api": "cd apps/api && python main_v2.py",
+    "start:api": "cd apps/api && PORT=9082 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/pdf_pipeline_dev python3 main.py",
     "setup": "npm install && cd apps/api && pip install -r requirements.txt",
-    "start:all": "concurrently \"npm run dev:client\" \"npm run dev:admin\" \"npm run dev:api\"",
+    "start:all": "concurrently \"npm run dev:client\" \"npm run dev:admin\" \"npm run dev:api\" --names \"client,admin,api\" --prefix-colors \"cyan,magenta,yellow\"",
     "lint:architecture": "node scripts/architecture-lint.js",
-    "check:architecture": "npm run lint:architecture"
+    "check:architecture": "npm run lint:architecture",
+    "cleanup": "bash scripts/cleanup-dev.sh",
+    "reset": "npm run cleanup && npm run setup",
+    "test:setup": "bash ./scripts/test-setup.sh",
+    "railway:setup": "bash ./scripts/setup-railway-connection.sh",
+    "railway:vars": "railway variables"
   },
   "devDependencies": {
     "@types/node": "^22.5.5",
-    "typescript": "^5.5.3",
-    "concurrently": "^8.2.0"
+    "concurrently": "^8.2.2",
+    "typescript": "^5.5.3"
   },
   "engines": {
     "node": ">=18.0.0",
