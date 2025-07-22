@@ -44,7 +44,7 @@ export function CreditHistory() {
       }
 
       if (data) {
-        setTransactions(data.map(transaction => ({
+        setTransactions((data || []).map(transaction => ({
           id: transaction.id,
           user_id: transaction.user_id,
           type: transaction.type,
@@ -122,7 +122,7 @@ export function CreditHistory() {
           </p>
         ) : (
           <div className="space-y-3">
-            {transactions.map((transaction) => (
+            {(transactions || []).map((transaction) => (
               <div
                 key={transaction.id}
                 className="flex items-center justify-between p-3 border rounded-lg"

@@ -179,7 +179,7 @@ export function DocumentList() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {filteredDocuments.map((doc) => {
+          {(filteredDocuments || []).map((doc) => {
             const stats = getDocumentStats(doc);
             
             return (
@@ -268,7 +268,7 @@ export function DocumentList() {
                         Principais oportunidades:
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        {doc.points.slice(0, 3).map((point) => (
+                        {(doc.points || []).slice(0, 3).map((point) => (
                           <Badge 
                             key={point.id} 
                             variant="outline"
