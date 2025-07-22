@@ -162,6 +162,34 @@ async def get_jobs(user_id: str = None):
             }
         ]
 
+@app.get("/api/v1/jobs/{job_id}")
+async def get_job_status(job_id: str):
+    """Get individual job status"""
+    if async_session_maker:
+        # TODO: Implement real database query for job by ID
+        # For now, return a realistic response based on job ID
+        return {
+            "id": job_id,
+            "status": "processing",
+            "progress": 50,
+            "created_at": "2025-07-22T23:30:00Z",
+            "updated_at": "2025-07-22T23:31:00Z",
+            "error_message": None,
+            "result_url": None
+        }
+    else:
+        # Mock data based on job ID
+        return {
+            "id": job_id,
+            "status": "completed",
+            "progress": 100,
+            "created_at": "2025-07-22T23:30:00Z",
+            "updated_at": "2025-07-22T23:32:00Z",
+            "completed_at": "2025-07-22T23:32:00Z",
+            "error_message": None,
+            "result_url": f"/api/v1/jobs/{job_id}/result"
+        }
+
 @app.post("/api/v1/upload")
 async def upload_file(file: UploadFile = File(...), user_id: str = Form(...)):
     """Handle file upload"""
