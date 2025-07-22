@@ -238,10 +238,12 @@ export class SupabaseService {
       console.log('📡 Chamando railwayApi.getJobs() com user_id:', userId);
       const railwayJobs = await railwayApi.getJobs(userId);
       
-      console.log('📄 Jobs encontrados na Railway:', railwayJobs?.length || 0);
+      console.log('📄 Jobs encontrados na Railway:', Array.isArray(railwayJobs) ? railwayJobs.length : 'not an array');
+      console.log('📋 Jobs da Railway (type):', typeof railwayJobs);
+      console.log('📋 Jobs da Railway (isArray):', Array.isArray(railwayJobs));
       console.log('📋 Jobs da Railway:', railwayJobs);
 
-      if (!railwayJobs || railwayJobs.length === 0) {
+      if (!railwayJobs || !Array.isArray(railwayJobs) || railwayJobs.length === 0) {
         console.log('⚠️ Nenhum job encontrado na Railway API');
         return [];
       }
@@ -251,6 +253,7 @@ export class SupabaseService {
       console.log('📋 Jobs já filtrados pelo servidor para user_id:', userId);
       
       const documents: DocumentAnalysis[] = railwayJobs
+        .filter((job: any) => job && typeof job === 'object') // Safety filter
         .map((job: any) => ({
           id: job.id || job.job_id,
           userId: job.user_id || userId,
