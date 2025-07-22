@@ -106,7 +106,7 @@ async def health_check():
         "services": {
             "api": "running",
             "database": "connected" if async_session_maker else "disconnected",
-            "redis": "not_configured"
+            "redis": "connected" if os.getenv("REDIS_URL") else "not_configured"
         }
     }
     
