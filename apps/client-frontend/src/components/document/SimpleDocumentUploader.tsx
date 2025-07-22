@@ -13,6 +13,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { useDocuments } from '@/contexts/DocumentContext';
 import { railwayApi, JobStatus } from '@/services/railwayApiService';
 import { transformRailwayResultsToDocumentAnalysis } from '@/utils/dataTransformers';
@@ -45,6 +46,7 @@ let messageIndex = 0;
 export function SimpleDocumentUploader({ onAnalysisComplete }: SimpleDocumentUploaderProps) {
   const { user } = useAuth();
   const { addDocument } = useDocuments();
+  const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
   const [progress, setProgress] = useState(0);
   const [displayProgress, setDisplayProgress] = useState(0);
@@ -237,6 +239,12 @@ export function SimpleDocumentUploader({ onAnalysisComplete }: SimpleDocumentUpl
                   callbackType: typeof onAnalysisComplete
                 });
               }
+              
+              // Redirect to document detail page after successful completion
+              console.log('🚀 Redirecionando para página de análise...');
+              setTimeout(() => {
+                navigate(`/documents/${documentAnalysis.id}`);
+              }, 2000); // Wait 2 seconds to show success message
             }
             return; // Para o loop
           case 'failed':
