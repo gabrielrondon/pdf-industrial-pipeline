@@ -37,9 +37,9 @@ export function ApiTest() {
 
       setStatus({
         health: healthData.status === 'healthy',
-        database: dbData.database_configured || false,
-        redis: dbData.redis_configured || false,
-        environment: dbData.environment || 'unknown',
+        database: dbData.services?.database === 'connected' || false,
+        redis: dbData.services?.redis === 'connected' || false,
+        environment: 'production',
       });
 
     } catch (error: any) {

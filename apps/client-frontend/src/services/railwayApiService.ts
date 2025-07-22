@@ -185,7 +185,7 @@ class RailwayApiService {
    * Testa conexão com o banco de dados
    */
   async testDatabase(): Promise<any> {
-    return this.makeRequest('/test-db');
+    return this.makeRequest('/health');
   }
 
   /**
