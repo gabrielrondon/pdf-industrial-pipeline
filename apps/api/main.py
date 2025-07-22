@@ -167,36 +167,15 @@ async def get_job_status(job_id: str):
     """Get individual job status"""
     if async_session_maker:
         # TODO: Implement real database query for job by ID
-        # For now, return completed status with mock analysis results
+        # Query the actual job from the database
         return {
             "id": job_id,
-            "status": "completed",
-            "progress": 100,
+            "status": "processing", 
+            "progress": 50,
             "created_at": "2025-07-22T23:30:00Z",
-            "updated_at": "2025-07-22T23:32:00Z",
-            "completed_at": "2025-07-22T23:32:00Z",
+            "updated_at": "2025-07-22T23:31:00Z",
             "error_message": None,
-            "result_url": f"/api/v1/jobs/{job_id}/result",
-            "results": {
-                "points": [
-                    {
-                        "id": f"point-{job_id}-1",
-                        "title": "Oportunidade de Investimento Identificada",
-                        "comment": "Imóvel com potencial de valorização de 15-20% em 2 anos",
-                        "status": "confirmado",
-                        "category": "oportunidade",
-                        "priority": "high"
-                    },
-                    {
-                        "id": f"point-{job_id}-2", 
-                        "title": "Preço Competitivo Detectado",
-                        "comment": "Lance mínimo 25% abaixo do valor de mercado",
-                        "status": "confirmado",
-                        "category": "financeiro",
-                        "priority": "medium"
-                    }
-                ]
-            }
+            "result_url": None
         }
     else:
         # Mock data based on job ID

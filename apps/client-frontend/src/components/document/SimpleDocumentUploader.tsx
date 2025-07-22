@@ -197,55 +197,38 @@ export function SimpleDocumentUploader({ onAnalysisComplete }: SimpleDocumentUpl
           case 'completed':
             setProgress(100);
             toast({
-              title: "Processamento concluído!",
-              description: "Análise do documento finalizada.",
+              title: "Upload concluído!",
+              description: "Documento enviado com sucesso. Processamento em andamento...",
             });
-            if (status.results) {
-              // Transform Railway API results to DocumentAnalysis format
-              const documentAnalysis = transformRailwayResultsToDocumentAnalysis(
-                status.results,
-                jobId,
-                file?.name || 'documento.pdf'
-              );
-              
-              // Save document to context so it appears in "Meus Documentos"
-              try {
-                console.log('📝 Salvando documento no contexto...', documentAnalysis.id);
-                addDocument(documentAnalysis);
-                console.log('✅ Documento salvo na lista "Meus Documentos"');
-              } catch (error) {
-                console.error('❌ Erro ao salvar documento:', error);
-                console.error('❌ Detalhes do erro:', {
-                  message: error.message,
-                  stack: error.stack,
-                  addDocumentType: typeof addDocument
-                });
-              }
-              
-              // Notify parent component
-              try {
-                if (onAnalysisComplete && typeof onAnalysisComplete === 'function') {
-                  console.log('📢 Notificando componente pai sobre conclusão da análise...');
-                  onAnalysisComplete(documentAnalysis);
-                  console.log('✅ Componente pai notificado com sucesso');
-                } else {
-                  console.warn('⚠️ onAnalysisComplete não é uma função válida:', typeof onAnalysisComplete);
-                }
-              } catch (error) {
-                console.error('❌ Erro ao notificar componente pai:', error);
-                console.error('❌ Detalhes do callback error:', {
-                  message: error.message,
-                  stack: error.stack,
-                  callbackType: typeof onAnalysisComplete
-                });
-              }
-              
-              // Redirect to document detail page after successful completion
-              console.log('🚀 Redirecionando para página de análise...');
-              setTimeout(() => {
-                navigate(`/documents/${documentAnalysis.id}`);
-              }, 2000); // Wait 2 seconds to show success message
+            
+            // Create basic document entry for navigation
+            const documentAnalysis = {
+              id: jobId,
+              userId: user?.id || '',
+              fileName: file?.name || 'documento.pdf',
+              fileUrl: '',
+              type: 'edital' as const,
+              uploadedAt: new Date().toISOString(),
+              analyzedAt: new Date().toISOString(),
+              isPrivate: false,
+              points: []
+            };
+            
+            // Save document to context so it appears in "Meus Documentos"
+            try {
+              console.log('📝 Salvando documento no contexto...', documentAnalysis.id);
+              addDocument(documentAnalysis);
+              console.log('✅ Documento salvo na lista "Meus Documentos"');
+            } catch (error) {
+              console.error('❌ Erro ao salvar documento:', error);
             }
+            
+            // Redirect to document detail page after successful upload
+            console.log('🚀 Redirecionando para página de análise...');
+            setTimeout(() => {
+              navigate(`/documents/${documentAnalysis.id}`);
+            }, 2000); // Wait 2 seconds to show success message
+            
             return; // Para o loop
           case 'failed':
             throw new Error(status.error || 'Processamento falhou');
