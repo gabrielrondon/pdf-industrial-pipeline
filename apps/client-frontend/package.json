@@ -1,14 +1,19 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "pdf-pipeline-client",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "description": "PDF Industrial Pipeline - Client Frontend for Vercel",
+  "homepage": "https://pdf-pipeline.vercel.app",
   "scripts": {
     "dev": "npx vite",
     "build": "npx vite build",
     "build:dev": "npx vite build --mode development",
+    "build:vercel": "npm run build",
     "lint": "eslint .",
-    "preview": "npx vite preview"
+    "preview": "npx vite preview",
+    "start": "npx vite preview --port 3000",
+    "vercel-build": "npm run build"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

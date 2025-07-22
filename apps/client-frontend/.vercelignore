@@ -1,0 +1,46 @@
+# Vercel ignore file
+# Files and directories to ignore during deployment
+
+# Development files
+.env.development
+.env.local
+.env*.local
+
+# Documentation
+README.md
+CLAUDE.md
+*.md
+docs/
+
+# Test files
+**/*.test.*
+**/*.spec.*
+__tests__/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log
+
+# Cache directories
+.cache/
+.temp/
+
+# Source maps (in production)
+*.map
+
+# Node modules (handled by Vercel)
+node_modules/
+
+# Build artifacts
+dist/
+build/
+
+# Supabase local files
+supabase/.branches/
+supabase/.temp/

@@ -7,7 +7,7 @@ import { componentTagger } from "lovable-tagger";
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
-    port: 8080,
+    port: 9080,
   },
   plugins: [
     react(),
@@ -18,6 +18,11 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  // Vercel-specific optimizations
+  define: {
+    __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+    __VERSION__: JSON.stringify(process.env.npm_package_version || '1.0.0'),
   },
   build: {
     // Ativa cache-busting por padrão com hash nos nomes dos arquivos
@@ -38,13 +43,14 @@ export default defineConfig(({ mode }) => ({
         }
       }
     },
-    // Compressão e otimização
+    // Compressão e otimização para Vercel
     minify: 'esbuild',
     sourcemap: mode === 'development',
-    // Cache de dependências 
     target: 'esnext',
-    // Otimizar assets
     assetsInlineLimit: 4096,
+    // Vercel deployment optimizations
+    chunkSizeWarningLimit: 1000,
+    reportCompressedSize: false, // Faster builds
   },
   // Otimizações adicionais de cache
   optimizeDeps: {

@@ -4,7 +4,8 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://pdf-industrial-pipeline-production.up.railway.app';
+// Remove /api/v1 from VITE_API_BASE_URL as we'll add it per endpoint
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || 'https://pdf-industrial-pipeline-production.up.railway.app';
 
 export interface UploadResponse {
   success: boolean;
