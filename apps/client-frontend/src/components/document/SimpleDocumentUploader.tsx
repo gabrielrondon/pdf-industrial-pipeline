@@ -153,16 +153,57 @@ export function SimpleDocumentUploader({ onAnalysisComplete }: SimpleDocumentUpl
         description: "Processamento iniciado. Aguarde os resultados...",
       });
 
+      // Create document entry for immediate navigation
+      const documentAnalysis = {
+        id: uploadResult.job_id || `upload-${Date.now()}`,
+        userId: user?.id || '',
+        fileName: file?.name || 'documento.pdf',
+        fileUrl: '',
+        type: 'edital' as const,
+        uploadedAt: new Date().toISOString(),
+        analyzedAt: new Date().toISOString(),
+        isPrivate: false,
+        points: []
+      };
+
+      // Save document to context so it appears in "Meus Documentos"
+      try {
+        console.log('📝 Salvando documento no contexto...', documentAnalysis.id);
+        addDocument(documentAnalysis);
+        console.log('✅ Documento salvo na lista "Meus Documentos"');
+      } catch (error) {
+        console.error('❌ Erro ao salvar documento:', error);
+      }
+
       // Se temos um job_id, monitorar o progresso
       if (uploadResult.job_id) {
-        await monitorJob(uploadResult.job_id);
+        setCurrentJobId(uploadResult.job_id);
+        // Start monitoring but don't wait for it
+        monitorJob(uploadResult.job_id);
+        
+        // Redirect after showing success
+        setProgress(100);
+        toast({
+          title: "Upload concluído!",
+          description: "Redirecionando para análise...",
+        });
+        
+        setTimeout(() => {
+          console.log('🚀 Redirecionando para página de análise...');
+          navigate(`/documents/${documentAnalysis.id}`);
+        }, 2000);
       } else {
         // Upload simples sem job tracking
         setProgress(100);
         toast({
-          title: "Sucesso!",
-          description: "Arquivo processado com sucesso.",
+          title: "Upload concluído!",
+          description: "Redirecionando para análise...",
         });
+        
+        setTimeout(() => {
+          console.log('🚀 Redirecionando para página de análise...');
+          navigate(`/documents/${documentAnalysis.id}`);
+        }, 2000);
       }
 
     } catch (error: any) {
@@ -197,38 +238,9 @@ export function SimpleDocumentUploader({ onAnalysisComplete }: SimpleDocumentUpl
           case 'completed':
             setProgress(100);
             toast({
-              title: "Upload concluído!",
-              description: "Documento enviado com sucesso. Processamento em andamento...",
+              title: "Análise concluída!",
+              description: "Processamento finalizado com sucesso.",
             });
-            
-            // Create basic document entry for navigation
-            const documentAnalysis = {
-              id: jobId,
-              userId: user?.id || '',
-              fileName: file?.name || 'documento.pdf',
-              fileUrl: '',
-              type: 'edital' as const,
-              uploadedAt: new Date().toISOString(),
-              analyzedAt: new Date().toISOString(),
-              isPrivate: false,
-              points: []
-            };
-            
-            // Save document to context so it appears in "Meus Documentos"
-            try {
-              console.log('📝 Salvando documento no contexto...', documentAnalysis.id);
-              addDocument(documentAnalysis);
-              console.log('✅ Documento salvo na lista "Meus Documentos"');
-            } catch (error) {
-              console.error('❌ Erro ao salvar documento:', error);
-            }
-            
-            // Redirect to document detail page after successful upload
-            console.log('🚀 Redirecionando para página de análise...');
-            setTimeout(() => {
-              navigate(`/documents/${documentAnalysis.id}`);
-            }, 2000); // Wait 2 seconds to show success message
-            
             return; // Para o loop
           case 'failed':
             throw new Error(status.error || 'Processamento falhou');
