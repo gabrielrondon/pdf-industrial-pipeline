@@ -5,7 +5,15 @@ from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import text
 import uuid
+
+# Load environment variables from .env file if it exists
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # dotenv not installed, skip
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -42,7 +50,7 @@ async def lifespan(app: FastAPI):
             
             # Test connection
             async with engine.begin() as conn:
-                await conn.run_sync(lambda c: c.execute("SELECT 1"))
+                await conn.execute(text("SELECT 1"))
             
             # Create session maker
             async_session_maker = sessionmaker(
@@ -70,12 +78,13 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Configure CORS
+# Configure CORS with proper settings
+cors_origins = os.getenv("CORS_ORIGINS", "*").split(",") if os.getenv("CORS_ORIGINS") != "*" else ["*"]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=cors_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -190,5 +199,26 @@ async def upload_file(file: UploadFile = File(...), user_id: str = Form(...)):
 
 if __name__ == "__main__":
     import uvicorn
+    
+    # Railway and production configuration
     port = int(os.getenv("PORT", 8000))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    host = os.getenv("HOST", "0.0.0.0")
+    environment = os.getenv("ENVIRONMENT", "development")
+    
+    # Configure logging for Railway
+    log_level = "info" if environment == "production" else "debug"
+    
+    logger.info(f"🚀 Starting PDF Industrial Pipeline API")
+    logger.info(f"   Environment: {environment}")
+    logger.info(f"   Host: {host}")
+    logger.info(f"   Port: {port}")
+    logger.info(f"   Database: {'connected' if async_session_maker else 'mock mode'}")
+    
+    # Start the server
+    uvicorn.run(
+        app, 
+        host=host, 
+        port=port,
+        log_level=log_level,
+        access_log=True
+    )

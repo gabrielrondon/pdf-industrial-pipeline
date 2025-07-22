@@ -15,13 +15,13 @@ npm install
 cd apps/api && pip install -r requirements.txt && cd ../..
 
 # Start all applications in development
-npm run dev          # Start both frontends (client on 8080, admin on 3001)
-npm run dev:api      # Start Python API on port 8000 (separate terminal)
+npm run dev          # Start all three apps (client on 9080, admin on 9081, API on 9082)
+npm run dev:api      # Start Python API only on port 9082
 
 # Or start applications individually
-npm run dev:client   # Client frontend only (port 8080)
-npm run dev:admin    # Admin frontend only (port 3001)
-npm run start:api    # Python API only (port 8000)
+npm run dev:client   # Client frontend only (port 9080)
+npm run dev:admin    # Admin frontend only (port 9081)
+npm run start:api    # Python API only (port 9082)
 
 # Build applications
 npm run build        # Build all frontends
@@ -38,7 +38,7 @@ npm run test         # Run frontend tests
 cd apps/api
 
 # Development server
-python main_v2.py
+python main.py
 
 # Run tests (located in apps/api/tests/)
 pytest tests/unit/test_pipeline.py            # Test PDF processing pipeline
@@ -110,7 +110,7 @@ redis-server
 ## Key Application Files
 
 ### Main Entry Points
-- **apps/api/main_v2.py**: Primary FastAPI application with async context managers
+- **apps/api/main.py**: Primary FastAPI application with async context managers
 - **apps/client-frontend/src/main.tsx**: Client React application entry point
 - **apps/admin-frontend/src/main.tsx**: Admin React application entry point
 
