@@ -12,7 +12,7 @@ export default function DashboardPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   
-  const recentDocuments = documents.slice(0, 3);
+  const recentDocuments = (documents || []).slice(0, 3);
   
   return (
     <div className="container py-8">
@@ -85,7 +85,7 @@ export default function DashboardPage() {
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {recentDocuments.map((doc) => (
+              {(recentDocuments || []).map((doc) => (
                 <Card key={doc.id} className="overflow-hidden">
                   <CardHeader className="pb-2">
                     <div className="flex justify-between items-start">

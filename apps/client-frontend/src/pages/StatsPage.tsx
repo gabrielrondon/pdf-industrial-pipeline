@@ -302,7 +302,7 @@ export default function StatsPage() {
                     fill="#8884d8"
                     dataKey="count"
                   >
-                    {stats.statusDistribution.map((entry, index) => (
+                    {(stats.statusDistribution || []).map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
@@ -336,7 +336,7 @@ export default function StatsPage() {
           <CardContent>
             {stats?.commonIssues && stats.commonIssues.length > 0 ? (
               <div className="space-y-3">
-                {stats.commonIssues.slice(0, 5).map((issue, index) => (
+                {(stats.commonIssues || []).slice(0, 5).map((issue, index) => (
                   <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                     <div className="flex items-center space-x-3">
                       <Badge variant="outline">{index + 1}</Badge>

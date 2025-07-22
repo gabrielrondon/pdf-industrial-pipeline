@@ -455,10 +455,25 @@ export class SupabaseService {
         
         console.log('📊 Stats diretos da Railway:', dashboardStats);
         
-        // Adicionar créditos do Supabase
-        dashboardStats.credits = profile?.credits || 100;
+        // Transformar resposta simples da Railway para formato completo do DashboardStats
+        const completeStats: DashboardStats = {
+          totalAnalyses: dashboardStats.totalAnalyses || 0,
+          validLeads: dashboardStats.validLeads || 0,
+          sharedLeads: dashboardStats.sharedLeads || 0,
+          credits: profile?.credits || 100,
+          documentTypes: [], // Railway API não tem ainda, usar array vazio
+          statusDistribution: [], // Railway API não tem ainda, usar array vazio
+          commonIssues: [], // Railway API não tem ainda, usar array vazio
+          monthlyAnalyses: [], // Railway API não tem ainda, usar array vazio
+          successRate: dashboardStats.totalAnalyses > 0 ? (dashboardStats.validLeads / dashboardStats.totalAnalyses) * 100 : 0,
+          averageProcessingTime: 0, // Railway API não tem ainda
+          totalFileSize: 0, // Railway API não tem ainda
+          averageConfidence: 0, // Railway API não tem ainda
+          dataSource: dashboardStats.dataSource || 'database'
+        };
         
-        return dashboardStats;
+        console.log('✅ Stats transformados:', completeStats);
+        return completeStats;
         
       } catch (railwayError) {
         console.error('❌ Erro na Railway API para stats:', railwayError);

@@ -178,7 +178,7 @@ export default function CommunityPage() {
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredLeads.map((lead) => (
+            {(filteredLeads || []).map((lead) => (
               <Card key={lead.id} className="overflow-hidden">
                 <CardHeader className="pb-2">
                   <div className="flex justify-between">
@@ -206,7 +206,7 @@ export default function CommunityPage() {
                   <div className="space-y-2">
                     <div className="text-sm font-medium">Pontos identificados:</div>
                     <div className="flex flex-wrap gap-2">
-                      {lead.points.slice(0, 3).map((point) => (
+                      {(lead.points || []).slice(0, 3).map((point) => (
                         <Badge key={point.id} variant="outline">
                           {point.title}
                         </Badge>

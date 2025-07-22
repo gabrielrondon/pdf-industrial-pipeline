@@ -94,16 +94,16 @@ export function DashboardStats() {
     );
   }
   
-  // Format document type data for pie chart
-  const documentTypeData = stats.documentTypes.map(item => ({
+  // Format document type data for pie chart - with safety checks
+  const documentTypeData = (stats.documentTypes || []).map(item => ({
     name: item.type === 'edital' ? 'Editais' : 
           item.type === 'processo' ? 'Processos' : 
           item.type === 'laudo' ? 'Laudos' : 'Outros',
     value: item.count
   }));
   
-  // Format status data for bar chart
-  const statusData = stats.statusDistribution.map(item => ({
+  // Format status data for bar chart - with safety checks
+  const statusData = (stats.statusDistribution || []).map(item => ({
     name: item.status === 'confirmado' ? 'Confirmados' : 
           item.status === 'alerta' ? 'Alertas' : 'Não identificados',
     value: item.count
@@ -279,7 +279,7 @@ export function DashboardStats() {
       )}
       
       {/* Common issues - only show if there are issues */}
-      {stats.commonIssues.length > 0 && (
+      {(stats.commonIssues || []).length > 0 && (
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -294,7 +294,7 @@ export function DashboardStats() {
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              {stats.commonIssues.map((issue, index) => {
+              {(stats.commonIssues || []).map((issue, index) => {
                 const percentage = stats.totalAnalyses > 0 ? (issue.count / stats.totalAnalyses) * 100 : 0;
                 return (
                   <div key={index} className="space-y-2">
