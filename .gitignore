@@ -83,3 +83,11 @@ secrets/
 .env.production
 .env.staging
 docker-compose.override.yml
+
+# Vercel deployment files with sensitive data
+VERCEL_DEPLOYMENT.md
+.env.vercel
+.vercel/
+
+# Railway deployment files with sensitive data
+RAILWAY_ENV_VARS.md
