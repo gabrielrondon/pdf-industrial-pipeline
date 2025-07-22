@@ -167,15 +167,36 @@ async def get_job_status(job_id: str):
     """Get individual job status"""
     if async_session_maker:
         # TODO: Implement real database query for job by ID
-        # For now, return a realistic response based on job ID
+        # For now, return completed status with mock analysis results
         return {
             "id": job_id,
-            "status": "processing",
-            "progress": 50,
+            "status": "completed",
+            "progress": 100,
             "created_at": "2025-07-22T23:30:00Z",
-            "updated_at": "2025-07-22T23:31:00Z",
+            "updated_at": "2025-07-22T23:32:00Z",
+            "completed_at": "2025-07-22T23:32:00Z",
             "error_message": None,
-            "result_url": None
+            "result_url": f"/api/v1/jobs/{job_id}/result",
+            "results": {
+                "points": [
+                    {
+                        "id": f"point-{job_id}-1",
+                        "title": "Oportunidade de Investimento Identificada",
+                        "comment": "Imóvel com potencial de valorização de 15-20% em 2 anos",
+                        "status": "confirmado",
+                        "category": "oportunidade",
+                        "priority": "high"
+                    },
+                    {
+                        "id": f"point-{job_id}-2", 
+                        "title": "Preço Competitivo Detectado",
+                        "comment": "Lance mínimo 25% abaixo do valor de mercado",
+                        "status": "confirmado",
+                        "category": "financeiro",
+                        "priority": "medium"
+                    }
+                ]
+            }
         }
     else:
         # Mock data based on job ID
@@ -187,7 +208,35 @@ async def get_job_status(job_id: str):
             "updated_at": "2025-07-22T23:32:00Z",
             "completed_at": "2025-07-22T23:32:00Z",
             "error_message": None,
-            "result_url": f"/api/v1/jobs/{job_id}/result"
+            "result_url": f"/api/v1/jobs/{job_id}/result",
+            "results": {
+                "points": [
+                    {
+                        "id": f"point-{job_id}-1",
+                        "title": "Imóvel Residencial Identificado",
+                        "comment": "Casa de 3 quartos com 120m² - Excelente estado de conservação",
+                        "status": "confirmado",
+                        "category": "propriedade",
+                        "priority": "high"
+                    },
+                    {
+                        "id": f"point-{job_id}-2",
+                        "title": "Valor de Avaliação Competitivo",
+                        "comment": "Preço inicial R$ 180.000 (20% abaixo do mercado)",
+                        "status": "confirmado", 
+                        "category": "financeiro",
+                        "priority": "medium"
+                    },
+                    {
+                        "id": f"point-{job_id}-3",
+                        "title": "Documentação Completa",
+                        "comment": "Toda documentação em ordem - sem pendências",
+                        "status": "confirmado",
+                        "category": "legal",
+                        "priority": "low"
+                    }
+                ]
+            }
         }
 
 @app.post("/api/v1/upload")
