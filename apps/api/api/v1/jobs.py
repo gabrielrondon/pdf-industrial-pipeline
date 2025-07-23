@@ -82,6 +82,14 @@ async def upload_pdf(
         db.commit()
         db.refresh(job)
         
+        # Invalidate user's dashboard cache since they now have a new job
+        try:
+            from cache.redis_cache import invalidate_user_stats
+            invalidate_user_stats(current_user.id)
+            logger.info(f"📊 Invalidated cache for user {current_user.id} after new job upload")
+        except Exception as e:
+            logger.warning(f"Failed to invalidate user cache: {str(e)}")
+        
         # Start processing pipeline
         if settings.enable_async_processing:
             task = process_complete_pdf_pipeline.delay(job_id, temp_file_path)
@@ -352,7 +360,7 @@ async def get_dashboard_stats(
     current_user: Optional[User] = Depends(get_current_user_optional)
 ):
     """
-    Get dashboard statistics for the current user
+    Get dashboard statistics for the current user with caching
     """
     # If no user, return empty stats
     if not current_user:
@@ -372,12 +380,44 @@ async def get_dashboard_stats(
             "topPerformingDocumentType": "edital"
         }
     
-    # Optimized: Use SQL aggregations instead of loading all jobs into memory
-    base_query = db.query(Job).filter(Job.user_id == current_user.id)
+    # Try to get from cache first
+    try:
+        from cache.redis_cache import get_cached_dashboard_stats, cache_dashboard_stats
+        from core.monitoring import track_cache_access
+        
+        cached_stats = get_cached_dashboard_stats(current_user.id)
+        if cached_stats:
+            logger.info(f"📊 Dashboard stats served from cache for user {current_user.id}")
+            # Track cache hit for monitoring
+            hit, miss = track_cache_access("dashboard")
+            hit()
+            return cached_stats
+        else:
+            # Track cache miss for monitoring
+            hit, miss = track_cache_access("dashboard")
+            miss()
+    except Exception as e:
+        logger.warning(f"Cache error, falling back to database: {str(e)}")
+        # Track cache miss due to error
+        try:
+            hit, miss = track_cache_access("dashboard")
+            miss()
+        except:
+            pass
     
-    # Get basic counts with single query
-    total_analyses = base_query.count()
-    valid_leads = base_query.filter(Job.status == "completed").count()
+    # Optimized: Use SQL aggregations instead of loading all jobs into memory
+    from core.monitoring import track_database_query
+    
+    @track_database_query("dashboard_stats")
+    async def get_dashboard_data():
+        base_query = db.query(Job).filter(Job.user_id == current_user.id)
+        
+        # Get basic counts with single query
+        total_analyses = base_query.count()
+        valid_leads = base_query.filter(Job.status == "completed").count()
+        return total_analyses, valid_leads, base_query
+    
+    total_analyses, valid_leads, base_query = await get_dashboard_data()
     shared_leads = int(valid_leads * 0.4)  # Simulate 40% shared
     credits = 100  # Default credits, should come from user profile
     
@@ -437,7 +477,7 @@ async def get_dashboard_stats(
         {"month": "Jun", "analyses": int(total_analyses * 0.1), "leads": int(valid_leads * 0.1)},
     ]
     
-    return {
+    stats_result = {
         "totalAnalyses": total_analyses,
         "validLeads": valid_leads,
         "sharedLeads": shared_leads,
@@ -452,6 +492,15 @@ async def get_dashboard_stats(
         "averageConfidence": 0.87,
         "topPerformingDocumentType": document_types[0]["type"] if document_types else "edital"
     }
+    
+    # Cache the results for 5 minutes
+    try:
+        cache_dashboard_stats(current_user.id, stats_result, ttl=300)
+        logger.info(f"📊 Dashboard stats cached for user {current_user.id}")
+    except Exception as e:
+        logger.warning(f"Failed to cache dashboard stats: {str(e)}")
+    
+    return stats_result
 
 
 @router.get("/{job_id}/page/{page_number}")

@@ -92,6 +92,14 @@ def start_analysis_pipeline(self, job_id: str) -> Dict[str, Any]:
                     'categories': list(set([p.get('category', 'geral') for p in results['points']]))
                 }
                 db.commit()
+                
+                # Invalidate user's dashboard cache after job completion
+                try:
+                    from cache.redis_cache import invalidate_user_stats
+                    invalidate_user_stats(job.user_id)
+                    logger.info(f"📊 Invalidated cache for user {job.user_id} after job {job_id} completion")
+                except Exception as e:
+                    logger.warning(f"Failed to invalidate user cache: {str(e)}")
         
         logger.info(f"Analysis completed for job {job_id}: {len(results['points'])} points found")
         return results
@@ -107,6 +115,14 @@ def start_analysis_pipeline(self, job_id: str) -> Dict[str, Any]:
                     job.status = "failed"
                     job.error_message = f"Analysis failed: {str(exc)}"
                     db.commit()
+                    
+                    # Invalidate user's dashboard cache after job failure
+                    try:
+                        from cache.redis_cache import invalidate_user_stats
+                        invalidate_user_stats(job.user_id)
+                        logger.info(f"📊 Invalidated cache for user {job.user_id} after job {job_id} failure")
+                    except Exception as e:
+                        logger.warning(f"Failed to invalidate user cache: {str(e)}")
         except Exception:
             pass
         

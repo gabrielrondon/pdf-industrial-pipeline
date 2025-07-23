@@ -328,3 +328,219 @@ class DashboardCache(Base, TimestampMixin):
             return False
         age_minutes = (datetime.utcnow() - self.updated_at).total_seconds() / 60
         return age_minutes <= max_age_minutes
+
+
+# Admin System Models
+
+class AdminRole(Base, TimestampMixin):
+    """Admin roles and permissions system"""
+    __tablename__ = "admin_roles"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=generate_uuid)
+    name = Column(String(50), unique=True, nullable=False)
+    description = Column(Text)
+    permissions = Column(JSONB, default=list)  # List of permission strings
+    is_active = Column(Boolean, default=True, nullable=False)
+    
+    # Relationships
+    admin_users = relationship("AdminUser", back_populates="role")
+    
+    __table_args__ = (
+        Index("idx_admin_roles_name_active", "name", "is_active"),
+    )
+
+
+class AdminUser(Base, TimestampMixin):
+    """Admin users with enhanced permissions"""  
+    __tablename__ = "admin_users"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=generate_uuid)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, unique=True)
+    role_id = Column(UUID(as_uuid=True), ForeignKey("admin_roles.id"), nullable=False)
+    
+    # Admin-specific fields
+    admin_level = Column(Integer, default=1)  # 1=Admin, 2=Super Admin, 3=System Admin
+    can_manage_admins = Column(Boolean, default=False)
+    can_access_logs = Column(Boolean, default=True)
+    can_manage_users = Column(Boolean, default=True)
+    can_view_analytics = Column(Boolean, default=True)
+    can_system_config = Column(Boolean, default=False)
+    
+    # Security
+    last_login_at = Column(DateTime(timezone=True))
+    login_count = Column(Integer, default=0)
+    is_active = Column(Boolean, default=True, nullable=False)
+    
+    # Relationships
+    user = relationship("User", backref="admin_profile")
+    role = relationship("AdminRole", back_populates="admin_users")
+    invited_by_user = relationship("User", foreign_keys=[user_id])
+    admin_invitations = relationship("AdminInvitation", back_populates="invited_by")
+    admin_sessions = relationship("AdminSession", back_populates="admin_user")
+    
+    __table_args__ = (
+        Index("idx_admin_users_user_active", "user_id", "is_active"),
+        Index("idx_admin_users_level", "admin_level"),
+    )
+
+
+class AdminInvitation(Base, TimestampMixin):
+    """System for inviting new admins"""
+    __tablename__ = "admin_invitations"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=generate_uuid)
+    email = Column(String(255), nullable=False, index=True)
+    token = Column(String(255), unique=True, nullable=False, index=True)
+    invited_by_id = Column(UUID(as_uuid=True), ForeignKey("admin_users.id"), nullable=False)
+    role_id = Column(UUID(as_uuid=True), ForeignKey("admin_roles.id"), nullable=False)
+    
+    # Status tracking
+    status = Column(String(20), default="pending")  # pending, accepted, expired, cancelled
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+    accepted_at = Column(DateTime(timezone=True))
+    cancelled_at = Column(DateTime(timezone=True))
+    
+    # Invitation details
+    personal_message = Column(Text)
+    permissions_preview = Column(JSONB, default=dict)
+    
+    # Relationships
+    invited_by = relationship("AdminUser", back_populates="admin_invitations")
+    role = relationship("AdminRole")
+    
+    __table_args__ = (
+        Index("idx_admin_invitations_email_status", "email", "status"),
+        Index("idx_admin_invitations_token", "token"),
+        Index("idx_admin_invitations_expires", "expires_at"),
+    )
+    
+    def is_expired(self) -> bool:
+        """Check if invitation is expired"""
+        return datetime.utcnow() > self.expires_at
+    
+    def is_valid(self) -> bool:
+        """Check if invitation is valid and can be accepted"""
+        return self.status == "pending" and not self.is_expired()
+
+
+class AdminSession(Base, TimestampMixin):
+    """Track admin sessions for security monitoring"""
+    __tablename__ = "admin_sessions"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=generate_uuid)
+    admin_user_id = Column(UUID(as_uuid=True), ForeignKey("admin_users.id"), nullable=False)
+    session_token = Column(String(255), unique=True, nullable=False, index=True)
+    
+    # Session details
+    ip_address = Column(String(45))  # IPv4 or IPv6
+    user_agent = Column(Text)
+    login_at = Column(DateTime(timezone=True), server_default=func.now())
+    logout_at = Column(DateTime(timezone=True))
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+    
+    # Security tracking
+    is_active = Column(Boolean, default=True, nullable=False)
+    last_activity_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    # Relationships
+    admin_user = relationship("AdminUser", back_populates="admin_sessions")
+    
+    __table_args__ = (
+        Index("idx_admin_sessions_token_active", "session_token", "is_active"),
+        Index("idx_admin_sessions_user_active", "admin_user_id", "is_active"),
+        Index("idx_admin_sessions_expires", "expires_at"),
+    )
+    
+    def is_expired(self) -> bool:
+        """Check if session is expired"""
+        return datetime.utcnow() > self.expires_at
+    
+    def is_valid(self) -> bool:
+        """Check if session is valid"""
+        return self.is_active and not self.is_expired()
+
+
+class AdminAuditLog(Base, TimestampMixin):
+    """Comprehensive audit log for admin actions"""
+    __tablename__ = "admin_audit_logs"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=generate_uuid)
+    admin_user_id = Column(UUID(as_uuid=True), ForeignKey("admin_users.id"), nullable=False)
+    
+    # Action details
+    action = Column(String(100), nullable=False, index=True)  # create_user, delete_document, etc.
+    resource_type = Column(String(50), nullable=False, index=True)  # user, document, system, etc.
+    resource_id = Column(String(255), index=True)  # ID of affected resource
+    
+    # Context
+    details = Column(JSONB, default=dict)  # Additional context
+    ip_address = Column(String(45))
+    user_agent = Column(Text)
+    
+    # Results
+    success = Column(Boolean, nullable=False, index=True)
+    error_message = Column(Text)
+    
+    # Relationships
+    admin_user = relationship("AdminUser")
+    
+    __table_args__ = (
+        Index("idx_admin_audit_action_date", "action", "created_at"),
+        Index("idx_admin_audit_resource", "resource_type", "resource_id"),
+        Index("idx_admin_audit_admin_date", "admin_user_id", "created_at"),
+        Index("idx_admin_audit_success_date", "success", "created_at"),
+    )
+
+
+class SystemMonitoring(Base, TimestampMixin):
+    """System monitoring and health metrics"""
+    __tablename__ = "system_monitoring"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=generate_uuid)
+    
+    # Metric details
+    metric_type = Column(String(50), nullable=False, index=True)  # cpu_usage, memory_usage, etc.
+    metric_name = Column(String(100), nullable=False, index=True)
+    value = Column(Float, nullable=False)
+    unit = Column(String(20))  # percentage, bytes, count, etc.
+    
+    # Context
+    source = Column(String(50), default="system")  # system, database, cache, etc.
+    tags = Column(JSONB, default=dict)  # Additional metadata
+    
+    __table_args__ = (
+        Index("idx_system_monitoring_type_date", "metric_type", "created_at"),
+        Index("idx_system_monitoring_name_date", "metric_name", "created_at"),
+        Index("idx_system_monitoring_source_date", "source", "created_at"),
+    )
+
+
+class UserActivityLog(Base, TimestampMixin):
+    """Enhanced user activity tracking for admin monitoring"""
+    __tablename__ = "user_activity_logs"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=generate_uuid)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)  # Nullable for anonymous
+    
+    # Activity details
+    activity_type = Column(String(50), nullable=False, index=True)  # login, upload, download, etc.
+    activity_details = Column(JSONB, default=dict)
+    
+    # Request context
+    ip_address = Column(String(45))
+    user_agent = Column(Text)
+    endpoint = Column(String(255))
+    method = Column(String(10))
+    
+    # Performance metrics
+    response_time_ms = Column(Integer)
+    status_code = Column(Integer)
+    
+    # Relationships
+    user = relationship("User")
+    
+    __table_args__ = (
+        Index("idx_user_activity_type_date", "activity_type", "created_at"),
+        Index("idx_user_activity_user_date", "user_id", "created_at"),
+        Index("idx_user_activity_status_date", "status_code", "created_at"),
+    )

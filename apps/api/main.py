@@ -3,6 +3,7 @@ import logging
 import json
 import hashlib
 import importlib.util
+from datetime import datetime
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
@@ -112,6 +113,21 @@ app.add_middleware(
     max_age=3600,
 )
 
+# Include API routers
+try:
+    from api.v1.admin import router as admin_router
+    app.include_router(admin_router, prefix="/api/v1")
+    logger.info("✅ Admin router included successfully")
+except Exception as e:
+    logger.warning(f"⚠️ Failed to include admin router: {str(e)}")
+
+try:
+    from api.v1.jobs import router as jobs_router
+    app.include_router(jobs_router, prefix="/api/v1/jobs")
+    logger.info("✅ Jobs router included successfully")
+except Exception as e:
+    logger.warning(f"⚠️ Failed to include jobs router: {str(e)}")
+
 # Add middleware to handle large requests
 @app.middleware("http")
 async def add_large_request_support(request, call_next):
@@ -130,22 +146,123 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint for Railway"""
+    """Health check endpoint for Railway with Redis monitoring"""
+    # Check Redis connection status
+    redis_status = "not_configured"
+    redis_details = {}
+    
+    try:
+        from cache.redis_cache import cache
+        if cache.is_connected:
+            # Test actual Redis connectivity
+            test_key = "health_check_test"
+            test_value = {"timestamp": "test", "status": "ok"}
+            
+            # Try to set and get a test value
+            set_success = cache.set(test_key, test_value, ttl=5, namespace="health")
+            if set_success:
+                retrieved_value = cache.get(test_key, namespace="health")
+                if retrieved_value:
+                    redis_status = "connected"
+                    redis_details = {
+                        "connection": "active",
+                        "test_write": "success",
+                        "test_read": "success"
+                    }
+                    # Clean up test key
+                    cache.delete(test_key, namespace="health")
+                else:
+                    redis_status = "read_error"
+                    redis_details = {"connection": "active", "test_write": "success", "test_read": "failed"}
+            else:
+                redis_status = "write_error"
+                redis_details = {"connection": "active", "test_write": "failed"}
+        else:
+            redis_status = "disconnected"
+            redis_details = {"connection": "inactive", "error": "Redis not connected"}
+            
+    except Exception as e:
+        redis_status = "error"
+        redis_details = {"error": str(e)[:100]}  # Limit error message length
+    
     health_status = {
         "status": "healthy",
         "version": "2.0.0",
+        "timestamp": json.dumps(datetime.utcnow(), default=str),
         "services": {
             "api": "running",
             "database": "connected" if async_session_maker else "disconnected",
-            "redis": "connected" if os.getenv("REDIS_URL") else "not_configured"
+            "redis": redis_status,
+            "cache": {
+                "status": redis_status,
+                "details": redis_details
+            }
         }
     }
     
     # Return 503 if critical services are down
     if not async_session_maker and os.getenv("ENVIRONMENT") == "production":
         health_status["status"] = "degraded"
+        
+    # Mark as degraded if Redis is not working properly
+    if redis_status not in ["connected", "not_configured"]:
+        health_status["status"] = "degraded"
     
     return health_status
+
+@app.get("/metrics")
+async def get_prometheus_metrics():
+    """Expose Prometheus metrics including cache performance"""
+    try:
+        from core.monitoring import MetricsEndpoint
+        return MetricsEndpoint.get_metrics()
+    except Exception as e:
+        logger.error(f"Error generating metrics: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error generating metrics")
+
+@app.get("/cache/stats")
+async def get_cache_stats():
+    """Get cache performance statistics"""
+    try:
+        from cache.redis_cache import cache
+        
+        if not cache.is_connected:
+            return {
+                "status": "disconnected",
+                "error": "Redis cache not connected"
+            }
+        
+        # Get Redis info
+        redis_info = cache.redis_client.info()
+        
+        return {
+            "status": "connected",
+            "connection_details": {
+                "redis_version": redis_info.get("redis_version"),
+                "connected_clients": redis_info.get("connected_clients"),
+                "used_memory_human": redis_info.get("used_memory_human"),
+                "keyspace_hits": redis_info.get("keyspace_hits", 0),
+                "keyspace_misses": redis_info.get("keyspace_misses", 0),
+                "total_commands_processed": redis_info.get("total_commands_processed", 0)
+            },
+            "cache_performance": {
+                "hit_rate": (
+                    redis_info.get("keyspace_hits", 0) / 
+                    max(redis_info.get("keyspace_hits", 0) + redis_info.get("keyspace_misses", 0), 1)
+                ) * 100,
+                "total_keys": sum([
+                    redis_info.get(f"db{i}", {}).get("keys", 0) 
+                    for i in range(16)
+                ]) if any(f"db{i}" in redis_info for i in range(16)) else 0
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting cache stats: {str(e)}")
+        return {
+            "status": "error",
+            "error": str(e)[:200]
+        }
 
 @app.get("/api/v1/jobs/stats/dashboard")
 async def get_dashboard_stats():
