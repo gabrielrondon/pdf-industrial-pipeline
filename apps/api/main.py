@@ -302,8 +302,8 @@ async def upload_file(file: UploadFile = File(...), user_id: str = Form(...)):
                     # Create job record using raw SQL to avoid import issues
                     await session.execute(
                         text("""
-                            INSERT INTO jobs (id, user_id, filename, title, file_size, mime_type, status, config)
-                            VALUES (CAST(:id AS uuid), CAST(:user_id AS uuid), :filename, :title, :file_size, :mime_type, :status, CAST(:config AS jsonb))
+                            INSERT INTO jobs (id, user_id, filename, title, file_size, mime_type, status, priority, retry_count, config)
+                            VALUES (CAST(:id AS uuid), CAST(:user_id AS uuid), :filename, :title, :file_size, :mime_type, :status, :priority, :retry_count, CAST(:config AS jsonb))
                         """),
                         {
                             "id": job_id,
@@ -313,6 +313,8 @@ async def upload_file(file: UploadFile = File(...), user_id: str = Form(...)):
                             "file_size": file_size,
                             "mime_type": "application/pdf",
                             "status": "uploaded",
+                            "priority": 0,
+                            "retry_count": 0,
                             "config": json.dumps({"uploaded": True})  # Don't store file content in database
                         }
                     )
