@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { DocumentAnalysis, AnalysisStatus } from '@/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
