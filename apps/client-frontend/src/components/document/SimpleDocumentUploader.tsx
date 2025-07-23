@@ -324,17 +324,19 @@ export function SimpleDocumentUploader({ onAnalysisComplete }: SimpleDocumentUpl
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full">
       {/* Premium Upload Card */}
-      <div className="bg-gradient-to-r from-arremate-navy-600 to-arremate-navy-700 p-8 rounded-xl border border-arremate-navy-800 shadow-lg mb-6">
-        <div className="text-center mb-6">
-          <div className="bg-arremate-gold-500 p-4 rounded-full w-fit mx-auto mb-4">
-            <FileText className="h-8 w-8 text-white" />
+      <div className="bg-gradient-to-r from-arremate-navy-600 to-arremate-navy-700 p-12 rounded-xl border border-arremate-navy-800 shadow-lg mb-6">
+        <div className="text-center mb-8">
+          <div className="bg-arremate-gold-500 p-4 rounded-full w-fit mx-auto mb-6">
+            <svg className="h-12 w-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
           </div>
-          <h2 className="text-3xl font-bold text-white mb-2">
+          <h1 className="text-4xl font-bold text-white mb-4">
             Análise Inteligente de Documentos
-          </h2>
-          <p className="text-arremate-navy-200 text-lg">
+          </h1>
+          <p className="text-xl text-arremate-navy-200 max-w-3xl mx-auto leading-relaxed">
             Faça upload de editais de leilão e processos judiciais para identificação automática de oportunidades
           </p>
         </div>

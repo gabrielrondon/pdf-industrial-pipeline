@@ -56,25 +56,8 @@ export default function UploadPage() {
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-arremate-navy-50 to-arremate-charcoal-50">
-      <div className="container py-8">
-        {/* Premium Upload Header */}
-        <div className="text-center mb-12">
-          <div className="bg-gradient-to-r from-arremate-navy-600 to-arremate-navy-700 p-12 rounded-xl border border-arremate-navy-800 shadow-lg">
-            <div className="bg-arremate-gold-500 p-4 rounded-full w-fit mx-auto mb-6">
-              <svg className="h-12 w-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-              </svg>
-            </div>
-            <h1 className="text-4xl font-bold text-white mb-4">
-              Análise Inteligente de Documentos
-            </h1>
-            <p className="text-xl text-arremate-navy-200 max-w-3xl mx-auto leading-relaxed">
-              Descubra oportunidades valiosas em editais de leilão e processos judiciais com nossa IA especializada em documentação brasileira
-            </p>
-          </div>
-        </div>
-        
-        <div className="max-w-4xl mx-auto space-y-10">
+      <div className="container py-8">        
+        <div className="space-y-10">
         {isProcessing ? (
           <ProcessingLoader />
         ) : analysis ? (
@@ -98,9 +81,11 @@ export default function UploadPage() {
         ) : (
           <div className="space-y-10">
             {/* Upload Component */}
-            <SimpleDocumentUploader 
-              onAnalysisComplete={handleAnalysisComplete} 
-            />
+            <div className="max-w-6xl mx-auto">
+              <SimpleDocumentUploader 
+                onAnalysisComplete={handleAnalysisComplete} 
+              />
+            </div>
             
             <FeaturesSection />
             
