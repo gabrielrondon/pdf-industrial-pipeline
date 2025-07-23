@@ -98,6 +98,11 @@ class RailwayApiService {
       const response = await fetch(`${API_BASE_URL}/api/v1/upload`, {
         method: 'POST',
         body: formData,
+        headers: {
+          // Don't set Content-Type header - let the browser set it with boundary for multipart/form-data
+        },
+        // Increase timeout for large files (5 minutes)
+        signal: AbortSignal.timeout(300000)
       });
 
       if (!response.ok) {

@@ -97,7 +97,7 @@ export function SimpleDocumentUploader({ onAnalysisComplete }: SimpleDocumentUpl
       return 'Apenas arquivos PDF são permitidos';
     }
 
-    const maxSize = parseInt(import.meta.env.VITE_MAX_FILE_SIZE || '104857600'); // 100MB default
+    const maxSize = parseInt(import.meta.env.VITE_MAX_FILE_SIZE || '209715200'); // 200MB default
     if (file.size > maxSize) {
       const maxSizeMB = Math.round(maxSize / (1024 * 1024));
       return `Arquivo muito grande. Máximo permitido: ${maxSizeMB}MB`;

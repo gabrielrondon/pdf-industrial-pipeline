@@ -6,6 +6,7 @@ import importlib.util
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import text
@@ -78,7 +79,10 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="PDF Industrial Pipeline API",
     version="2.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
+    # Increase request body size limit to 200MB
+    docs_url="/docs",
+    redoc_url="/redoc"
 )
 
 # Configure CORS with proper settings for production domains
@@ -107,6 +111,13 @@ app.add_middleware(
     expose_headers=["*"],
     max_age=3600,
 )
+
+# Add middleware to handle large requests
+@app.middleware("http")
+async def add_large_request_support(request, call_next):
+    """Add support for large file uploads"""
+    response = await call_next(request)
+    return response
 
 @app.get("/")
 async def root():
@@ -358,6 +369,34 @@ async def upload_options():
     """Handle preflight requests for upload endpoint"""
     return {"message": "OK"}
 
+@app.post("/api/v1/test-upload")
+async def test_upload(file: UploadFile = File(...)):
+    """Test endpoint to debug file upload issues"""
+    try:
+        # Basic file info
+        logger.info(f"🧪 Test upload: {file.filename}")
+        logger.info(f"🧪 Content type: {file.content_type}")
+        
+        # Try to read file size without full content
+        content = await file.read()
+        size = len(content)
+        
+        logger.info(f"🧪 File size: {size:,} bytes ({size // (1024*1024)}MB)")
+        
+        return {
+            "success": True,
+            "filename": file.filename,
+            "content_type": file.content_type,
+            "size": size,
+            "size_mb": round(size / (1024*1024), 2)
+        }
+    except Exception as e:
+        logger.error(f"🧪 Test upload error: {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
 @app.post("/api/v1/upload")
 async def upload_file(file: UploadFile = File(...), user_id: str = Form(...)):
     """Handle file upload and trigger processing pipeline"""
@@ -378,13 +417,15 @@ async def upload_file(file: UploadFile = File(...), user_id: str = Form(...)):
             user_hash = hashlib.md5(user_id.encode()).hexdigest()
             validated_user_id = str(uuid.UUID(user_hash))
         
-        # Read file for validation with size limit (50MB max)
+        # Read file for validation with size limit
         file_content = await file.read()
         file_size = len(file_content)
         
-        # Check file size limit (20MB for inline processing, 50MB max)
-        inline_max_size = 20971520  # 20MB for inline processing
-        max_file_size = 52428800  # 50MB absolute max
+        logger.info(f"📁 File upload: {file.filename}, Size: {file_size:,} bytes ({file_size // (1024*1024)}MB)")
+        
+        # Check file size limit (100MB for inline processing, 200MB max)
+        inline_max_size = 104857600  # 100MB for inline processing
+        max_file_size = 209715200  # 200MB absolute max
         
         if file_size > max_file_size:
             raise HTTPException(
@@ -888,5 +929,11 @@ if __name__ == "__main__":
         host=host, 
         port=port,
         log_level=log_level,
-        access_log=True
+        access_log=True,
+        # Increase request body size limits
+        limit_max_requests=1000,
+        limit_concurrency=500,
+        timeout_keep_alive=30,
+        # Allow up to 200MB uploads
+        app_dir=None
     )
