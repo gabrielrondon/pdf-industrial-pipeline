@@ -35,14 +35,10 @@ export function ApiTest({ compact = false }: ApiTestProps) {
       const healthData = await railwayApi.healthCheck();
       console.log('Health check:', healthData);
 
-      // Test database connection
-      const dbData = await railwayApi.testDatabase();
-      console.log('Database test:', dbData);
-
       setStatus({
-        health: healthData.status === 'healthy',
-        database: dbData.services?.database === 'connected' || false,
-        redis: dbData.services?.redis === 'connected' || false,
+        health: healthData.status === 'healthy' || healthData.status === 'degraded',
+        database: healthData.services?.database === 'connected' || false,
+        redis: healthData.services?.redis === 'connected' || false,
         environment: 'production',
       });
 
