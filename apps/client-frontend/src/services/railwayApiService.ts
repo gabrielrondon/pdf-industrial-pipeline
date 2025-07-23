@@ -95,10 +95,13 @@ class RailwayApiService {
     }
     
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/upload`, {
+      const authHeaders = await this.getAuthHeaders();
+      
+      const response = await fetch(`${API_BASE_URL}/api/v1/jobs/upload`, {
         method: 'POST',
         body: formData,
         headers: {
+          ...authHeaders,
           // Don't set Content-Type header - let the browser set it with boundary for multipart/form-data
         },
         // Increase timeout for large files (5 minutes)
@@ -106,19 +109,26 @@ class RailwayApiService {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+        const errorText = await response.text().catch(() => '');
+        console.error(`❌ Upload Error ${response.status}:`, errorText);
         
-        // Handle HTTPException detail format from FastAPI
-        if (errorData.detail && typeof errorData.detail === 'object') {
-          throw new Error(errorData.detail.message || errorData.detail.error || `Upload failed: ${response.status}`);
+        try {
+          const errorData = JSON.parse(errorText);
+          // Handle HTTPException detail format from FastAPI
+          if (errorData.detail && typeof errorData.detail === 'object') {
+            throw new Error(errorData.detail.message || errorData.detail.error || `Upload failed: ${response.status}`);
+          }
+          throw new Error(errorData.message || errorData.error || errorData.detail || `Upload failed: ${response.status}`);
+        } catch (parseError) {
+          throw new Error(`Upload failed: ${response.status} ${response.statusText}${errorText ? ` - ${errorText}` : ''}`);
         }
-        
-        throw new Error(errorData.message || errorData.error || `Upload failed: ${response.status}`);
       }
 
-      return await response.json();
+      const result = await response.json();
+      console.log('✅ Upload successful:', result);
+      return result;
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error('❌ Upload error:', error);
       throw error;
     }
   }

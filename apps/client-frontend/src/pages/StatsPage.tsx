@@ -70,6 +70,14 @@ export default function StatsPage() {
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
+  // Calculate recent activity (last 7 days) - must be defined first
+  const recentDocuments = documents.filter(doc => {
+    const docDate = new Date(doc.analyzedAt);
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    return docDate >= weekAgo;
+  });
+
   // Calculate additional metrics using real document counts
   const totalDocs = documents.length;
   const recentLeads = Math.max(Math.floor(recentDocuments.length * 0.6), recentDocuments.length > 0 ? 1 : 0);
@@ -78,14 +86,6 @@ export default function StatsPage() {
   
   const successRate = totalDocs > 0 ? (totalLeads / totalDocs) * 100 : 0;
   const shareRate = totalDocs > 0 ? (sharedLeads / totalDocs) * 100 : 0;
-  
-  // Calculate recent activity (last 7 days)
-  const recentDocuments = documents.filter(doc => {
-    const docDate = new Date(doc.analyzedAt);
-    const weekAgo = new Date();
-    weekAgo.setDate(weekAgo.getDate() - 7);
-    return docDate >= weekAgo;
-  });
 
   const getDocumentTypeLabel = (type: string): string => {
     const types: Record<string, string> = {
