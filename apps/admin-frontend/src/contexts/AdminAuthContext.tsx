@@ -152,6 +152,13 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error('Login failed - no user data')
       }
 
+      // Debug logging to see user data
+      console.log('Auth successful, checking admin profile for:', {
+        userId: authData.user.id,
+        email: authData.user.email,
+        userMetadata: authData.user.user_metadata
+      })
+
       // Check if user is admin
       const { data: adminProfile, error: adminError } = await supabase
         .from('admin_profiles')
@@ -174,9 +181,25 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
         .single()
 
       if (adminError || !adminProfile) {
+        // Debug logging to understand the issue
+        console.error('Admin authentication failed:', {
+          userId: authData.user.id,
+          email: authData.user.email,
+          adminError: adminError,
+          adminProfile: adminProfile,
+          errorCode: adminError?.code,
+          errorMessage: adminError?.message
+        })
+        
         // Sign out the user if they're not an admin
         await supabase.auth.signOut()
-        throw new Error('Acesso negado - usuário não é administrador')
+        
+        // More specific error messages
+        if (adminError) {
+          throw new Error(`Erro na verificação de admin: ${adminError.message}`)
+        } else {
+          throw new Error('Acesso negado - usuário não é administrador')
+        }
       }
 
       // Update login tracking
