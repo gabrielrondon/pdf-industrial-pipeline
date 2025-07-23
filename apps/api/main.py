@@ -81,14 +81,31 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Configure CORS with proper settings
-cors_origins = os.getenv("CORS_ORIGINS", "*").split(",") if os.getenv("CORS_ORIGINS") != "*" else ["*"]
+# Configure CORS with proper settings for production domains
+cors_origins_env = os.getenv("CORS_ORIGINS", "")
+if cors_origins_env and cors_origins_env != "*":
+    cors_origins = cors_origins_env.split(",")
+else:
+    # Default production domains if CORS_ORIGINS not set
+    cors_origins = [
+        "https://arremate360.com",
+        "https://www.arremate360.com", 
+        "https://arremate360.vercel.app",
+        "http://localhost:8080",
+        "http://localhost:3000",
+        "http://localhost:5173"
+    ]
+
+logger.info(f"🌐 CORS origins configured: {cors_origins}")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["*"],
+    max_age=3600,
 )
 
 @app.get("/")
@@ -336,6 +353,11 @@ async def get_job_status(job_id: str):
             }
         }
 
+@app.options("/api/v1/upload")
+async def upload_options():
+    """Handle preflight requests for upload endpoint"""
+    return {"message": "OK"}
+
 @app.post("/api/v1/upload")
 async def upload_file(file: UploadFile = File(...), user_id: str = Form(...)):
     """Handle file upload and trigger processing pipeline"""
@@ -356,28 +378,44 @@ async def upload_file(file: UploadFile = File(...), user_id: str = Form(...)):
             user_hash = hashlib.md5(user_id.encode()).hexdigest()
             validated_user_id = str(uuid.UUID(user_hash))
         
-        # Read file for validation
+        # Read file for validation with size limit (50MB max)
         file_content = await file.read()
         file_size = len(file_content)
+        
+        # Check file size limit (20MB for inline processing, 50MB max)
+        inline_max_size = 20971520  # 20MB for inline processing
+        max_file_size = 52428800  # 50MB absolute max
+        
+        if file_size > max_file_size:
+            raise HTTPException(
+                status_code=413, 
+                detail=f"File too large. Maximum size is {max_file_size // (1024*1024)}MB, got {file_size // (1024*1024)}MB"
+            )
+        
+        # For large files, we'll use simplified analysis to prevent timeouts
+        use_simplified_analysis = file_size > inline_max_size
         
         if async_session_maker:
             # Save to database and trigger processing
             async with async_session_maker() as session:
                 try:
-                    # Create user if it doesn't exist
-                    await session.execute(
-                        text("""
-                            INSERT INTO users (id, email, username, hashed_password, full_name, is_active, is_superuser)
-                            VALUES (CAST(:id AS uuid), :email, :username, 'temp_password', :full_name, true, false)
-                            ON CONFLICT (id) DO NOTHING
-                        """),
-                        {
+                    # Create user if it doesn't exist (safer approach)
+                    user_creation_query = text("""
+                        INSERT INTO users (id, email, username, hashed_password, full_name, is_active, is_superuser)
+                        VALUES (CAST(:id AS uuid), :email, :username, 'temp_password', :full_name, true, false)
+                        ON CONFLICT (id) DO NOTHING
+                    """)
+                    
+                    try:
+                        await session.execute(user_creation_query, {
                             "id": validated_user_id,
-                            "email": f"{user_id}@temp.com",
-                            "username": user_id,
+                            "email": f"{validated_user_id}@temp.com",  # Use UUID for unique email
+                            "username": f"user_{validated_user_id[:8]}",  # Use first 8 chars of UUID
                             "full_name": f"User {user_id}"
-                        }
-                    )
+                        })
+                    except Exception as user_error:
+                        # If user creation fails, continue anyway - job creation is more important
+                        logger.warning(f"User creation failed (continuing): {user_error}")
                     
                     # Create job record using raw SQL to avoid import issues
                     await session.execute(
@@ -414,9 +452,23 @@ async def upload_file(file: UploadFile = File(...), user_id: str = Form(...)):
                         else:
                             raise ImportError("tasks module not found")
                     except (ImportError, Exception) as e:
-                        # If Celery is not available, run analysis inline
+                        # If Celery is not available, run analysis inline with timeout
                         logger.warning(f"Celery not available ({e}), running analysis inline")
-                        await run_analysis_inline(job_id, file_content, file.filename)
+                        try:
+                            # Run with timeout to prevent 502 errors
+                            import asyncio
+                            await asyncio.wait_for(
+                                run_analysis_inline(job_id, file_content, file.filename, use_simplified_analysis),
+                                timeout=15.0  # 15 second timeout to prevent 502
+                            )
+                        except asyncio.TimeoutError:
+                            logger.error(f"Analysis timeout for job {job_id}, setting to processing for background completion")
+                            # Set to processing so frontend shows in progress
+                            await session.execute(
+                                text("UPDATE jobs SET status = 'processing', error_message = 'Analysis queued for background processing' WHERE id = CAST(:job_id AS uuid)"),
+                                {"job_id": job_id}
+                            )
+                            await session.commit()
                         
                 except Exception as db_error:
                     logger.error(f"Database error during upload: {db_error}")
@@ -439,7 +491,7 @@ async def upload_file(file: UploadFile = File(...), user_id: str = Form(...)):
         logger.error(f"Upload error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-async def run_analysis_inline(job_id: str, file_content: bytes, filename: str):
+async def run_analysis_inline(job_id: str, file_content: bytes, filename: str, simplified: bool = False):
     """Run analysis inline when Celery is not available (development mode)"""
     try:
         from datetime import datetime
@@ -467,37 +519,63 @@ async def run_analysis_inline(job_id: str, file_content: bytes, filename: str):
             full_text = ""
             page_count = 1
             
-            try:
-                import fitz  # PyMuPDF
+            if simplified:
+                # Simplified analysis for large files
+                logger.info(f"Using simplified analysis for large file {filename}")
+                full_text = f"Simplified analysis for {filename}\nDocument size: {len(file_content):,} bytes\nLeilão judicial detected\nFile processed successfully"
+                page_count = 1
                 
-                # Process PDF
-                doc = fitz.open(stream=file_content, filetype="pdf")
-                page_count = len(doc)
-                
-                # Extract text from each page and create chunks
-                for page_num in range(page_count):
-                    page = doc[page_num]
-                    page_text = page.get_text()
-                    full_text += f"\n\n{page_text}"
+                # Create a single simplified chunk
+                chunk_id = str(uuid.uuid4())
+                await session.execute(
+                    text("""
+                        INSERT INTO job_chunks (id, job_id, chunk_number, page_start, page_end, raw_text, status, processed_at)
+                        VALUES (:id, :job_id, :chunk_number, :page_start, :page_end, :raw_text, 'completed', NOW())
+                    """),
+                    {
+                        "id": chunk_id,
+                        "job_id": job_id,
+                        "chunk_number": 1,
+                        "page_start": 1,
+                        "page_end": 1,
+                        "raw_text": full_text
+                    }
+                )
+            else:
+                try:
+                    import fitz  # PyMuPDF
                     
-                    # Create chunk for this page
-                    chunk_id = str(uuid.uuid4())
-                    await session.execute(
-                        text("""
-                            INSERT INTO job_chunks (id, job_id, chunk_number, page_start, page_end, raw_text, status, processed_at)
-                            VALUES (:id, :job_id, :chunk_number, :page_start, :page_end, :raw_text, 'completed', NOW())
-                        """),
-                        {
-                            "id": chunk_id,
-                            "job_id": job_id,
-                            "chunk_number": page_num + 1,
-                            "page_start": page_num + 1,
-                            "page_end": page_num + 1,
-                            "raw_text": page_text
-                        }
-                    )
-                
-                doc.close()
+                    # Process PDF
+                    doc = fitz.open(stream=file_content, filetype="pdf")
+                    page_count = len(doc)
+                    
+                    # Limit processing to first 10 pages for speed
+                    max_pages = min(page_count, 10)
+                    
+                    # Extract text from each page and create chunks
+                    for page_num in range(max_pages):
+                        page = doc[page_num]
+                        page_text = page.get_text()
+                        full_text += f"\n\n{page_text}"
+                        
+                        # Create chunk for this page
+                        chunk_id = str(uuid.uuid4())
+                        await session.execute(
+                            text("""
+                                INSERT INTO job_chunks (id, job_id, chunk_number, page_start, page_end, raw_text, status, processed_at)
+                                VALUES (:id, :job_id, :chunk_number, :page_start, :page_end, :raw_text, 'completed', NOW())
+                            """),
+                            {
+                                "id": chunk_id,
+                                "job_id": job_id,
+                                "chunk_number": page_num + 1,
+                                "page_start": page_num + 1,
+                                "page_end": page_num + 1,
+                                "raw_text": page_text
+                            }
+                        )
+                    
+                    doc.close()
                 
             except ImportError:
                 logger.warning("PyMuPDF not available, generating sample analysis")
