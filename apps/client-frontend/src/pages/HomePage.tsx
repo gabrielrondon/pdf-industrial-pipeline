@@ -65,7 +65,7 @@ export default function HomePage() {
               <Button 
                 size="lg" 
                 variant="outline" 
-                className="text-xl px-12 py-4 border-2 border-white text-white hover:bg-white hover:text-arremate-navy-700 font-semibold" 
+                className="text-xl px-12 py-4 border-2 border-arremate-gold-400 text-arremate-gold-400 hover:bg-arremate-gold-400 hover:text-arremate-navy-700 font-semibold transition-all duration-300" 
                 onClick={() => navigate('/signup')}
               >
                 Criar Conta Gratuita
