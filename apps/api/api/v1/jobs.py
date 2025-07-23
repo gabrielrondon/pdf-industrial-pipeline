@@ -372,36 +372,37 @@ async def get_dashboard_stats(
             "topPerformingDocumentType": "edital"
         }
     
-    # Get user's jobs
-    user_jobs = db.query(Job).filter(Job.user_id == current_user.id).all()
+    # Optimized: Use SQL aggregations instead of loading all jobs into memory
+    base_query = db.query(Job).filter(Job.user_id == current_user.id)
     
-    total_analyses = len(user_jobs)
-    completed_jobs = [job for job in user_jobs if job.status == "completed"]
-    
-    # Calculate basic stats
-    valid_leads = len(completed_jobs)  # Simplified - count completed jobs as valid leads
+    # Get basic counts with single query
+    total_analyses = base_query.count()
+    valid_leads = base_query.filter(Job.status == "completed").count()
     shared_leads = int(valid_leads * 0.4)  # Simulate 40% shared
     credits = 100  # Default credits, should come from user profile
     
-    # Document types distribution
+    # Document types distribution - optimized with SQL
     document_types = []
-    type_counts = {}
-    for job in user_jobs:
-        # Determine type from filename
-        filename = job.filename.lower()
-        if 'edital' in filename:
-            doc_type = 'edital'
-        elif 'processo' in filename:
-            doc_type = 'processo'
-        elif 'laudo' in filename:
-            doc_type = 'laudo'
-        else:
-            doc_type = 'outro'
+    if total_analyses > 0:
+        # Get filenames only for type classification (much faster than full objects)
+        filenames_query = base_query.with_entities(Job.filename).all()
+        type_counts = {}
         
-        type_counts[doc_type] = type_counts.get(doc_type, 0) + 1
-    
-    for doc_type, count in type_counts.items():
-        document_types.append({"type": doc_type, "count": count})
+        for (filename,) in filenames_query:
+            filename_lower = filename.lower() if filename else ""
+            if 'edital' in filename_lower:
+                doc_type = 'edital'
+            elif 'processo' in filename_lower:
+                doc_type = 'processo'
+            elif 'laudo' in filename_lower:
+                doc_type = 'laudo'
+            else:
+                doc_type = 'outro'
+            
+            type_counts[doc_type] = type_counts.get(doc_type, 0) + 1
+        
+        for doc_type, count in type_counts.items():
+            document_types.append({"type": doc_type, "count": count})
     
     # Status distribution (simulated)
     status_distribution = []
@@ -447,7 +448,7 @@ async def get_dashboard_stats(
         "monthlyAnalyses": monthly_analyses,
         "successRate": (valid_leads / max(total_analyses, 1)) * 100,
         "averageProcessingTime": 2.3,
-        "totalFileSize": sum(job.file_size or 0 for job in user_jobs),
+        "totalFileSize": db.query(func.sum(Job.file_size)).filter(Job.user_id == current_user.id).scalar() or 0,
         "averageConfidence": 0.87,
         "topPerformingDocumentType": document_types[0]["type"] if document_types else "edital"
     }

@@ -37,30 +37,52 @@ app.conf.update(
         'tasks.notification_tasks.*': {'queue': 'notifications'},
     },
     
-    # Worker settings
-    worker_prefetch_multiplier=settings.celery_worker_prefetch_multiplier,
-    worker_max_tasks_per_child=1000,
+    # Worker settings - Otimizado para Railway 8GB/8vCPU
+    worker_prefetch_multiplier=2,  # Aumentado para melhor throughput
+    worker_max_tasks_per_child=500,  # Reduzido para evitar memory leaks
     worker_disable_rate_limits=True,
+    worker_concurrency=6,  # Otimizado para Railway Hobby plan (8 vCPU)
     
-    # Task execution settings
-    task_time_limit=settings.celery_task_time_limit,
-    task_soft_time_limit=settings.celery_task_soft_time_limit,
+    # Task execution settings - Timeouts dinâmicos
+    task_time_limit=1800,  # 30min padrão (reduzido de 1h)
+    task_soft_time_limit=1500,  # 25min soft limit
     task_acks_late=True,
     task_reject_on_worker_lost=True,
     
-    # Result backend settings
-    result_expires=3600,  # 1 hour
+    # Task timeouts específicos por tipo
+    task_annotations={
+        'tasks.pdf_tasks.process_pdf_upload': {'time_limit': 300, 'soft_time_limit': 240},  # 5min para upload
+        'tasks.pdf_tasks.chunk_pdf': {'time_limit': 600, 'soft_time_limit': 480},  # 10min para chunking
+        'tasks.analysis_tasks.start_analysis_pipeline': {'time_limit': 1200, 'soft_time_limit': 900},  # 20min para análise
+        'tasks.ml_tasks.*': {'time_limit': 900, 'soft_time_limit': 720},  # 15min para ML
+    },
+    
+    # Result backend settings - Otimizado
+    result_expires=1800,  # 30min (reduzido para economizar memória)
     result_backend_transport_options={
         'master_name': 'redis-master',
         'retry_on_timeout': True,
+        'max_connections': 20,  # Pool de conexões
     },
     
-    # Broker settings
+    # Broker settings - Performance melhorada
     broker_transport_options={
-        'visibility_timeout': 3600,  # 1 hour
+        'visibility_timeout': 1800,  # 30min (reduzido)
         'fanout_prefix': True,
         'fanout_patterns': True,
+        'max_connections': 20,  # Pool de conexões
+        'retry_on_timeout': True,
+        'socket_keepalive': True,
+        'socket_keepalive_options': {
+            'TCP_KEEPIDLE': 1,
+            'TCP_KEEPINTVL': 3,
+            'TCP_KEEPCNT': 5,
+        },
     },
+    
+    # Compressão para reduzir tráfego de rede
+    task_compression='gzip',
+    result_compression='gzip',
     
     # Queue definitions
     task_default_queue='default',
