@@ -1,4 +1,10 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react'
+import { createClient } from '@supabase/supabase-js'
+
+// Supabase client
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'your-supabase-url'
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-supabase-anon-key'
+const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Types
 interface AdminUser {
@@ -127,38 +133,92 @@ const AdminAuthContext = createContext<AdminAuthContextType | undefined>(undefin
 export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(adminAuthReducer, initialState)
 
-  // API Base URL
-  const API_BASE_URL = import.meta.env.VITE_RAILWAY_API_URL || 'http://localhost:8000'
-
-  // Login function
+  // Login function with Supabase
   const login = async (email: string, password: string): Promise<boolean> => {
     dispatch({ type: 'LOGIN_START' })
     
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/admin/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, password })
+      // Authenticate with Supabase
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.detail || 'Login failed')
+      if (authError) {
+        throw new Error(authError.message)
       }
 
-      const data = await response.json()
+      if (!authData.user) {
+        throw new Error('Login failed - no user data')
+      }
+
+      // Check if user is admin
+      const { data: adminProfile, error: adminError } = await supabase
+        .from('admin_profiles')
+        .select(`
+          id,
+          admin_level,
+          role_name,
+          permissions,
+          can_manage_admins,
+          can_access_logs,
+          can_manage_users,
+          can_view_analytics,
+          can_system_config,
+          is_active,
+          last_login_at,
+          login_count
+        `)
+        .eq('user_id', authData.user.id)
+        .eq('is_active', true)
+        .single()
+
+      if (adminError || !adminProfile) {
+        // Sign out the user if they're not an admin
+        await supabase.auth.signOut()
+        throw new Error('Acesso negado - usuário não é administrador')
+      }
+
+      // Update login tracking
+      await supabase
+        .from('admin_profiles')
+        .update({
+          last_login_at: new Date().toISOString(),
+          login_count: (adminProfile.login_count || 0) + 1
+        })
+        .eq('id', adminProfile.id)
+
+      // Create admin session record for security tracking
+      const sessionToken = authData.session?.access_token || ''
       
-      // Store token in localStorage
-      localStorage.setItem('admin_token', data.access_token)
-      
+      if (sessionToken) {
+        await supabase
+          .from('admin_sessions')
+          .insert({
+            admin_id: adminProfile.id,
+            session_token: sessionToken,
+            expires_at: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString(), // 8 hours
+            ip_address: null, // Will be filled by middleware if available
+            user_agent: navigator.userAgent
+          })
+      }
+
+      // Create user object
+      const adminUser: AdminUser = {
+        id: adminProfile.id,
+        email: authData.user.email || '',
+        full_name: authData.user.user_metadata?.full_name || authData.user.email || '',
+        role: adminProfile.role_name,
+        admin_level: adminProfile.admin_level,
+        last_login: adminProfile.last_login_at
+      }
+
       dispatch({
         type: 'LOGIN_SUCCESS',
         payload: {
-          user: data.admin_info,
-          token: data.access_token,
-          permissions: data.permissions
+          user: adminUser,
+          token: sessionToken,
+          permissions: Array.isArray(adminProfile.permissions) ? adminProfile.permissions : []
         }
       })
       
@@ -173,17 +233,23 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  // Logout function
+  // Logout function with Supabase
   const logout = async () => {
     try {
-      if (state.token) {
-        await fetch(`${API_BASE_URL}/api/v1/admin/logout`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${state.token}`
-          }
-        })
+      // Mark session as inactive
+      if (state.token && state.user) {
+        await supabase
+          .from('admin_sessions')
+          .update({
+            is_active: false,
+            logout_at: new Date().toISOString()
+          })
+          .eq('session_token', state.token)
       }
+
+      // Sign out from Supabase
+      await supabase.auth.signOut()
+      
     } catch (error) {
       console.error('Logout error:', error)
     } finally {
@@ -192,35 +258,59 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  // Check authentication status
+  // Check authentication status with Supabase
   const checkAuth = async () => {
-    const token = localStorage.getItem('admin_token')
-    
-    if (!token) {
-      dispatch({ type: 'CHECK_AUTH_FAILURE' })
-      return
-    }
-
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/admin/dashboard`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error('Authentication check failed')
+      // Get current session from Supabase
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session?.user) {
+        dispatch({ type: 'CHECK_AUTH_FAILURE' })
+        return
       }
 
-      const data = await response.json()
-      
+      // Check if user is still an active admin
+      const { data: adminProfile, error: adminError } = await supabase
+        .from('admin_profiles')
+        .select(`
+          id,
+          admin_level,
+          role_name,
+          permissions,
+          is_active,
+          last_login_at
+        `)
+        .eq('user_id', session.user.id)
+        .eq('is_active', true)
+        .single()
+
+      if (adminError || !adminProfile) {
+        await supabase.auth.signOut()
+        dispatch({ type: 'CHECK_AUTH_FAILURE' })
+        return
+      }
+
+      const adminUser: AdminUser = {
+        id: adminProfile.id,
+        email: session.user.email || '',
+        full_name: session.user.user_metadata?.full_name || session.user.email || '',
+        role: adminProfile.role_name,
+        admin_level: adminProfile.admin_level,
+        last_login: adminProfile.last_login_at
+      }
+
       dispatch({
         type: 'CHECK_AUTH_SUCCESS',
         payload: {
-          user: data.admin_info,
-          permissions: data.admin_info.permissions || []
+          user: adminUser,
+          permissions: Array.isArray(adminProfile.permissions) ? adminProfile.permissions : []
         }
       })
+
+      // Store session token for future use
+      if (session.access_token) {
+        localStorage.setItem('admin_token', session.access_token)
+      }
       
     } catch (error) {
       localStorage.removeItem('admin_token')
