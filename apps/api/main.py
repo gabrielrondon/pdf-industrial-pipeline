@@ -143,15 +143,68 @@ async def get_dashboard_stats():
 
 @app.get("/api/v1/jobs")
 async def get_jobs(user_id: str = None):
-    """Get user jobs"""
+    """Get user jobs with real analysis results"""
     if not user_id:
         return []
     
     if async_session_maker:
-        # TODO: Implement real database queries
-        return []
+        async with async_session_maker() as session:
+            try:
+                # Query user jobs with analysis results
+                result = await session.execute(
+                    text("""
+                        SELECT id, user_id, filename, title, file_size, page_count, status,
+                               created_at, updated_at, processing_started_at, processing_completed_at,
+                               error_message, config
+                        FROM jobs 
+                        WHERE user_id = CAST(:user_id AS uuid)
+                        ORDER BY created_at DESC
+                    """),
+                    {"user_id": user_id}
+                )
+                jobs_data = result.fetchall()
+                
+                if not jobs_data:
+                    logger.info(f"No jobs found for user_id: {user_id}")
+                    return []
+                
+                # Convert to list of dictionaries with analysis results
+                jobs = []
+                for job_row in jobs_data:
+                    job_dict = {
+                        "id": str(job_row.id),
+                        "user_id": str(job_row.user_id),
+                        "filename": job_row.filename,
+                        "title": job_row.title,
+                        "file_size": job_row.file_size,
+                        "page_count": job_row.page_count,
+                        "status": job_row.status,
+                        "created_at": job_row.created_at.isoformat() if job_row.created_at else None,
+                        "updated_at": job_row.updated_at.isoformat() if job_row.updated_at else None,
+                        "processing_started_at": job_row.processing_started_at.isoformat() if job_row.processing_started_at else None,
+                        "processing_completed_at": job_row.processing_completed_at.isoformat() if job_row.processing_completed_at else None,
+                        "error_message": job_row.error_message
+                    }
+                    
+                    # Add analysis results if available
+                    if job_row.config and isinstance(job_row.config, dict):
+                        if "analysis_results" in job_row.config:
+                            job_dict["results"] = job_row.config["analysis_results"]
+                            job_dict["analysis_results"] = job_row.config["analysis_results"]
+                            # Also expose points directly for compatibility
+                            if "points" in job_row.config["analysis_results"]:
+                                job_dict["points"] = job_row.config["analysis_results"]["points"]
+                    
+                    jobs.append(job_dict)
+                
+                logger.info(f"Found {len(jobs)} jobs for user_id: {user_id}")
+                return jobs
+                
+            except Exception as db_error:
+                logger.error(f"Database error in get_jobs: {db_error}")
+                return []
     else:
-        # Mock data
+        # Mock data fallback
         return [
             {
                 "id": "demo-job-1",
@@ -161,7 +214,19 @@ async def get_jobs(user_id: str = None):
                 "status": "completed",
                 "created_at": "2025-07-13T10:30:00Z",
                 "page_count": 5,
-                "file_size": 1024000
+                "file_size": 1024000,
+                "results": {
+                    "points": [
+                        {
+                            "id": "demo-point-1",
+                            "title": "Leilão Judicial Identificado",
+                            "comment": "Documento contém informações sobre leilão judicial.",
+                            "status": "confirmado",
+                            "category": "leilao",
+                            "priority": "high"
+                        }
+                    ]
+                }
             }
         ]
 
