@@ -57,24 +57,43 @@ export function SimpleDocumentUploader({ onAnalysisComplete }: SimpleDocumentUpl
   const [jobStatus, setJobStatus] = useState<JobStatus | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Smooth progress animation
+  // Smooth progress animation - flui até 100%
   useEffect(() => {
     if (!isUploading) return;
     
     const smoothProgressUpdate = () => {
       setDisplayProgress(prev => {
         if (prev < progress) {
-          // Incrementally increase by 1-2% every 200ms
-          const increment = Math.min(Math.random() * 2 + 0.5, progress - prev);
+          // Incremento mais suave e consistente
+          const increment = Math.min(Math.random() * 1.5 + 0.3, progress - prev);
           return Math.min(prev + increment, progress);
         }
         return prev;
       });
     };
 
-    const progressInterval = setInterval(smoothProgressUpdate, 200);
+    const progressInterval = setInterval(smoothProgressUpdate, 150);
     return () => clearInterval(progressInterval);
   }, [progress, isUploading]);
+
+  // Progress simulation for better UX - garante que chegue a 100%
+  useEffect(() => {
+    if (!isUploading) return;
+    
+    const simulateProgress = () => {
+      setProgress(prev => {
+        if (prev < 90) {
+          // Progresso automático até 90% baseado no tempo
+          const timeIncrement = Math.random() * 0.8 + 0.2;
+          return Math.min(prev + timeIncrement, 90);
+        }
+        return prev;
+      });
+    };
+
+    const simulationInterval = setInterval(simulateProgress, 300);
+    return () => clearInterval(simulationInterval);
+  }, [isUploading]);
 
   // Update message every 2-3 seconds
   useEffect(() => {
@@ -225,10 +244,11 @@ export function SimpleDocumentUploader({ onAnalysisComplete }: SimpleDocumentUpl
               setProgress(30);
               break;
             case 'processing':
-              setProgress(status.progress || 70);
+              const processingProgress = status.progress || 70;
+              setProgress(Math.min(processingProgress, 95)); // Máximo 95% durante processing
               break;
             case 'completed':
-              setProgress(100);
+              setProgress(100); // Só vai para 100% quando realmente completed
               toast({
                 title: "Análise concluída!",
                 description: "Processamento finalizado com sucesso.",
@@ -300,109 +320,157 @@ export function SimpleDocumentUploader({ onAnalysisComplete }: SimpleDocumentUpl
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <FileText className="h-5 w-5" />
-          Upload de Documento PDF
-        </CardTitle>
-        <CardDescription>
-          Envie um arquivo PDF para análise usando nossa API
-        </CardDescription>
-      </CardHeader>
-
-      <CardContent className="space-y-4">
-        {/* File Input */}
-        <div className="space-y-2">
-          <Input
-            ref={fileInputRef}
-            type="file"
-            accept=".pdf"
-            onChange={handleFileChange}
-            disabled={isUploading}
-            className="cursor-pointer"
-          />
-          {file && (
-            <div className="text-sm text-muted-foreground">
-              Arquivo selecionado: {file.name} ({Math.round(file.size / (1024 * 1024))}MB)
-            </div>
-          )}
+    <div className="w-full max-w-2xl mx-auto">
+      {/* Premium Upload Card */}
+      <div className="bg-gradient-to-r from-arremate-navy-600 to-arremate-navy-700 p-8 rounded-xl border border-arremate-navy-800 shadow-lg mb-6">
+        <div className="text-center mb-6">
+          <div className="bg-arremate-gold-500 p-4 rounded-full w-fit mx-auto mb-4">
+            <FileText className="h-8 w-8 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-2">
+            Upload de Documento PDF
+          </h2>
+          <p className="text-arremate-navy-200">
+            Envie um arquivo PDF para análise inteligente usando nossa IA especializada
+          </p>
         </div>
 
-        {/* Progress */}
-        {isUploading && (
-          <div className="space-y-2">
-            <Progress value={displayProgress} className="w-full h-3 transition-all duration-300 ease-out" />
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-blue-600 font-medium animate-pulse">
-                  {getStatusMessage()}
-                </span>
-                <span className="font-mono text-blue-700">
+        {/* Premium File Input */}
+        <div className="bg-white p-6 rounded-lg border-2 border-dashed border-arremate-navy-300 hover:border-arremate-gold-500 transition-all">
+          <div className="space-y-4">
+            <Input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf"
+              onChange={handleFileChange}
+              disabled={isUploading}
+              className="cursor-pointer border-arremate-navy-200 focus:border-arremate-gold-500 focus:ring-arremate-gold-500"
+            />
+            {file && (
+              <div className="flex items-center gap-3 p-3 bg-arremate-navy-50 rounded-lg border border-arremate-navy-200">
+                <FileText className="h-5 w-5 text-arremate-navy-600" />
+                <div className="flex-1">
+                  <div className="font-semibold text-arremate-navy-900">{file.name}</div>
+                  <div className="text-sm text-arremate-navy-600">({Math.round(file.size / (1024 * 1024))}MB)</div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Progress Card */}
+      {isUploading && (
+        <div className="bg-white p-6 rounded-xl border border-arremate-charcoal-200 shadow-sm mb-6">
+          <div className="space-y-4">
+            {/* Enhanced Progress Bar */}
+            <div className="space-y-3">
+              <div className="w-full bg-arremate-navy-100 rounded-full h-4 overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-arremate-gold-500 to-arremate-gold-600 rounded-full transition-all duration-500 ease-out relative"
+                  style={{ width: `${displayProgress}%` }}
+                >
+                  <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+                </div>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-arremate-gold-500 rounded-full animate-pulse"></div>
+                  <span className="text-arremate-navy-700 font-medium">
+                    {getStatusMessage()}
+                  </span>
+                </div>
+                <span className="font-mono text-lg font-bold text-arremate-gold-700">
                   {Math.floor(displayProgress)}%
                 </span>
               </div>
-              {isUploading && (
-                <div className="text-xs text-gray-500 text-center">
-                  💡 Dica: Enquanto isso, que tal preparar seus documentos para o próximo leilão?
-                </div>
-              )}
             </div>
+            
+            {/* Processing Tip */}
+            <div className="bg-arremate-gold-50 p-4 rounded-lg border border-arremate-gold-200">
+              <div className="flex items-center gap-2 text-sm text-arremate-gold-800">
+                <span className="text-lg">💡</span>
+                <span className="font-medium">
+                  Dica: Enquanto isso, que tal preparar seus documentos para o próximo leilão?
+                </span>
+              </div>
+            </div>
+            
             {currentJobId && (
-              <div className="text-xs text-center text-muted-foreground">
+              <div className="text-xs text-center text-arremate-charcoal-500 font-mono bg-arremate-charcoal-50 p-2 rounded">
                 Job ID: {currentJobId}
               </div>
             )}
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Error */}
-        {error && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Erro</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
 
-        {/* Success */}
-        {jobStatus?.status === 'completed' && (
-          <Alert>
-            <CheckCircle className="h-4 w-4" />
-            <AlertTitle>Sucesso!</AlertTitle>
-            <AlertDescription>
-              Documento processado com sucesso.
-            </AlertDescription>
-          </Alert>
-        )}
-      </CardContent>
+      {/* Error Card */}
+      {error && (
+        <div className="bg-red-50 p-6 rounded-xl border border-red-200 shadow-sm mb-6">
+          <div className="flex items-center gap-3">
+            <div className="bg-red-100 p-2 rounded-lg">
+              <AlertCircle className="h-5 w-5 text-red-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-red-900">Erro no Upload</h3>
+              <p className="text-red-700">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
-      <CardFooter className="flex gap-2">
+      {/* Success Card */}
+      {jobStatus?.status === 'completed' && (
+        <div className="bg-green-50 p-6 rounded-xl border border-green-200 shadow-sm mb-6">
+          <div className="flex items-center gap-3">
+            <div className="bg-green-100 p-2 rounded-lg">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-green-900">Sucesso!</h3>
+              <p className="text-green-700">Documento processado com sucesso.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Premium Action Buttons */}
+      <div className="flex gap-4">
         <Button
           onClick={handleUpload}
           disabled={!file || isUploading || !user}
-          className="flex-1"
+          size="lg"
+          className="flex-1 bg-arremate-gold-500 hover:bg-arremate-gold-600 text-arremate-gold-900 font-semibold py-3 shadow-lg"
         >
           {isUploading ? (
             <>
-              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+              <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
               Processando...
             </>
           ) : (
             <>
-              <Upload className="h-4 w-4 mr-2" />
+              <Upload className="h-5 w-5 mr-2" />
               Fazer Upload
             </>
           )}
         </Button>
 
         {(file || error) && (
-          <Button variant="outline" onClick={handleReset} disabled={isUploading}>
+          <Button 
+            variant="outline" 
+            onClick={handleReset} 
+            disabled={isUploading}
+            size="lg"
+            className="border-arremate-charcoal-300 text-arremate-charcoal-700 hover:bg-arremate-charcoal-50"
+          >
             <X className="h-4 w-4 mr-2" />
             Limpar
           </Button>
         )}
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 }

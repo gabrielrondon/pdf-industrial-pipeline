@@ -146,93 +146,115 @@ export default function StatsPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold">Estatísticas</h1>
-          <p className="text-muted-foreground">
-            Análise detalhada do seu desempenho e atividade
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-arremate-navy-50 to-arremate-charcoal-50">
+      <div className="container mx-auto p-6 space-y-8">
+        {/* Premium Header */}
+        <div className="bg-gradient-to-r from-arremate-navy-600 to-arremate-navy-700 p-8 rounded-xl border border-arremate-navy-800 shadow-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="bg-arremate-gold-500 p-3 rounded-lg">
+                <BarChart className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-white">Estatísticas</h1>
+                <p className="text-arremate-navy-200 mt-1">
+                  Análise detalhada do seu desempenho e atividade na plataforma
+                </p>
+              </div>
+            </div>
+            <Button 
+              onClick={loadStats} 
+              disabled={refreshing} 
+              className="bg-arremate-gold-500 hover:bg-arremate-gold-600 text-arremate-gold-900 font-semibold px-6 py-2 shadow-lg"
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+              Atualizar
+            </Button>
+          </div>
         </div>
-        <Button onClick={loadStats} disabled={refreshing} variant="outline">
-          <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-          Atualizar
-        </Button>
-      </div>
 
-      {/* Main Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardContent className="p-6">
+        {/* Premium Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-gradient-to-r from-arremate-navy-50 to-arremate-navy-100 p-6 rounded-xl border border-arremate-navy-200 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total de Análises</p>
-                <p className="text-2xl font-bold">{stats?.totalAnalyses || 0}</p>
+                <p className="text-sm font-semibold text-arremate-navy-700 uppercase tracking-wide">Total de Análises</p>
+                <p className="text-3xl font-bold text-arremate-navy-900 mt-1">{stats?.totalAnalyses || 0}</p>
+                <p className="text-xs text-arremate-navy-600 mt-1">
+                  {recentDocuments.length} nos últimos 7 dias
+                </p>
               </div>
-              <FileText className="h-8 w-8 text-blue-500" />
+              <div className="bg-arremate-navy-500 p-3 rounded-lg">
+                <FileText className="h-8 w-8 text-white" />
+              </div>
             </div>
-            <div className="mt-4">
-              <p className="text-xs text-muted-foreground">
-                {recentDocuments.length} nos últimos 7 dias
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        <Card>
-          <CardContent className="p-6">
+          <div className="bg-gradient-to-r from-green-50 to-green-100 p-6 rounded-xl border border-green-200 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Leads Válidos</p>
-                <p className="text-2xl font-bold text-green-600">{stats?.validLeads || 0}</p>
+                <p className="text-sm font-semibold text-green-700 uppercase tracking-wide">Leads Válidos</p>
+                <p className="text-3xl font-bold text-green-900 mt-1">{stats?.validLeads || 0}</p>
+                <div className="mt-2">
+                  <div className="w-full bg-green-200 rounded-full h-2">
+                    <div 
+                      className="bg-green-600 h-2 rounded-full transition-all" 
+                      style={{ width: `${Math.min(successRate, 100)}%` }}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-green-600 mt-1">
+                    {successRate.toFixed(1)}% taxa de sucesso
+                  </p>
+                </div>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-500" />
+              <div className="bg-green-500 p-3 rounded-lg">
+                <CheckCircle className="h-8 w-8 text-white" />
+              </div>
             </div>
-            <div className="mt-4">
-              <Progress value={successRate} className="h-2" />
-              <p className="text-xs text-muted-foreground mt-1">
-                {successRate.toFixed(1)}% taxa de sucesso
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        <Card>
-          <CardContent className="p-6">
+          <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Leads Compartilhados</p>
-                <p className="text-2xl font-bold text-purple-600">{stats?.sharedLeads || 0}</p>
+                <p className="text-sm font-semibold text-purple-700 uppercase tracking-wide">Leads Compartilhados</p>
+                <p className="text-3xl font-bold text-purple-900 mt-1">{stats?.sharedLeads || 0}</p>
+                <div className="mt-2">
+                  <div className="w-full bg-purple-200 rounded-full h-2">
+                    <div 
+                      className="bg-purple-600 h-2 rounded-full transition-all" 
+                      style={{ width: `${Math.min(shareRate, 100)}%` }}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-purple-600 mt-1">
+                    {shareRate.toFixed(1)}% taxa de compartilhamento
+                  </p>
+                </div>
               </div>
-              <Users className="h-8 w-8 text-purple-500" />
+              <div className="bg-purple-500 p-3 rounded-lg">
+                <Users className="h-8 w-8 text-white" />
+              </div>
             </div>
-            <div className="mt-4">
-              <Progress value={shareRate} className="h-2" />
-              <p className="text-xs text-muted-foreground mt-1">
-                {shareRate.toFixed(1)}% taxa de compartilhamento
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        <Card>
-          <CardContent className="p-6">
+          <div className="bg-gradient-to-r from-arremate-gold-50 to-arremate-gold-100 p-6 rounded-xl border border-arremate-gold-200 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Créditos Disponíveis</p>
-                <p className="text-2xl font-bold text-orange-600">{stats?.credits || 0}</p>
+                <p className="text-sm font-semibold text-arremate-gold-700 uppercase tracking-wide">Créditos Disponíveis</p>
+                <p className="text-3xl font-bold text-arremate-gold-900 mt-1">{stats?.credits || 0}</p>
+                <div className="mt-2">
+                  <div className="bg-arremate-gold-200 px-3 py-1 rounded-full w-fit">
+                    <span className="text-xs font-semibold text-arremate-gold-800 capitalize">
+                      Plano {user?.plan || 'free'}
+                    </span>
+                  </div>
+                </div>
               </div>
-              <DollarSign className="h-8 w-8 text-orange-500" />
+              <div className="bg-arremate-gold-500 p-3 rounded-lg">
+                <DollarSign className="h-8 w-8 text-white" />
+              </div>
             </div>
-            <div className="mt-4">
-              <Badge variant="outline" className="text-xs">
-                {user?.plan || 'free'} plan
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </div>
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -406,6 +428,7 @@ export default function StatsPage() {
             </div>
           </CardContent>
         </Card>
+      </div>
       </div>
     </div>
   );
