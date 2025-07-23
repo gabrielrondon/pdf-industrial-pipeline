@@ -33,13 +33,17 @@ const DocumentTester: React.FC = () => {
     setProcessingResult(null)
 
     try {
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://pdf-industrial-pipeline-production.up.railway.app'
       const formData = new FormData()
       formData.append('file', selectedFile)
       formData.append('analysis_type', analysisType)
 
-      const response = await fetch('/api/upload', {
+      const response = await fetch(`${apiBaseUrl}/api/v1/upload`, {
         method: 'POST',
-        body: formData
+        body: formData,
+        headers: {
+          // Don't set Content-Type for FormData, let browser set it with boundary
+        }
       })
 
       if (response.ok) {

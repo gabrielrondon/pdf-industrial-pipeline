@@ -27,36 +27,78 @@ const Dashboard: React.FC = () => {
   const fetchSystemStats = async () => {
     setLoading(true)
     try {
-      // Replace with actual API endpoint
-      const response = await fetch('/api/v1/system/stats')
-      if (response.ok) {
-        const data = await response.json()
-        setStats({
-          ...data,
-          lastUpdate: new Date().toLocaleTimeString()
-        })
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://pdf-industrial-pipeline-production.up.railway.app'
+      
+      // Fetch real data from Railway API
+      const [healthResponse, jobsResponse] = await Promise.allSettled([
+        fetch(`${apiBaseUrl}/health`),
+        fetch(`${apiBaseUrl}/api/v1/jobs/stats`)
+      ])
+
+      let totalDocuments = 0
+      let activeJobs = 0
+      let apiStatus: 'healthy' | 'warning' | 'error' = 'error'
+      let dbConnections = 0
+      let systemUptime = '0h 0m'
+
+      // Check API health
+      if (healthResponse.status === 'fulfilled' && healthResponse.value.ok) {
+        const healthData = await healthResponse.value.json()
+        apiStatus = 'healthy'
+        dbConnections = healthData.database_connections || 0
+        systemUptime = healthData.uptime || '0h 0m'
       } else {
-        // Mock data for now
+        apiStatus = 'warning'
+      }
+
+      // Get job statistics
+      if (jobsResponse.status === 'fulfilled' && jobsResponse.value.ok) {
+        const jobsData = await jobsResponse.value.json()
+        totalDocuments = jobsData.total_jobs || 0
+        activeJobs = jobsData.active_jobs || 0
+      }
+
+      setStats({
+        totalDocuments,
+        activeJobs,
+        systemUptime,
+        dbConnections,
+        apiStatus,
+        lastUpdate: new Date().toLocaleTimeString()
+      })
+
+    } catch (error) {
+      console.error('Failed to fetch system stats:', error)
+      
+      // Try to get basic Railway API health at least
+      try {
+        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://pdf-industrial-pipeline-production.up.railway.app'
+        const basicHealthResponse = await fetch(`${apiBaseUrl}/health`)
+        
+        if (basicHealthResponse.ok) {
+          const healthData = await basicHealthResponse.json()
+          setStats({
+            totalDocuments: 0,
+            activeJobs: 0,
+            systemUptime: healthData.uptime || 'Unknown',
+            dbConnections: healthData.database_connections || 0,
+            apiStatus: 'healthy',
+            lastUpdate: new Date().toLocaleTimeString()
+          })
+        } else {
+          throw new Error('API not accessible')
+        }
+      } catch (fallbackError) {
+        // Complete fallback
         setStats({
-          totalDocuments: 1247,
-          activeJobs: 3,
-          systemUptime: '2d 14h 32m',
-          dbConnections: 8,
-          apiStatus: 'healthy',
+          totalDocuments: 0,
+          activeJobs: 0,
+          systemUptime: 'Unknown',
+          dbConnections: 0,
+          apiStatus: 'error',
           lastUpdate: new Date().toLocaleTimeString()
         })
       }
-    } catch (error) {
-      console.error('Failed to fetch system stats:', error)
-      // Mock data fallback
-      setStats({
-        totalDocuments: 1247,
-        activeJobs: 3,
-        systemUptime: '2d 14h 32m',
-        dbConnections: 8,
-        apiStatus: 'warning',
-        lastUpdate: new Date().toLocaleTimeString()
-      })
     } finally {
       setLoading(false)
     }

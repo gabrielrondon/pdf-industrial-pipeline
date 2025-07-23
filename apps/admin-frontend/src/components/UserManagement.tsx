@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAdminAuth, AdminPermissions } from '../contexts/AdminAuthContext'
+import { createClient } from '@supabase/supabase-js'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
@@ -14,6 +15,11 @@ import {
   Calendar, Activity, FileText, Shield
 } from 'lucide-react'
 import { Checkbox } from './ui/checkbox'
+
+// Supabase client
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://rjbiyndpxqaallhjmbwm.supabase.co'
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-supabase-anon-key'
+const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 interface User {
   id: string
@@ -73,7 +79,7 @@ export default function UserManagement() {
   const [selectedUserDetails, setSelectedUserDetails] = useState<UserDetails | null>(null)
   const [isDetailsLoading, setIsDetailsLoading] = useState(false)
 
-  const API_BASE_URL = import.meta.env.VITE_RAILWAY_API_URL || 'http://localhost:8000'
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://pdf-industrial-pipeline-production.up.railway.app'
   const usersPerPage = 20
 
   const fetchUsers = async (page = 1, search = '', status = 'all') => {
@@ -81,29 +87,85 @@ export default function UserManagement() {
       setIsLoading(true)
       setError(null)
 
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: usersPerPage.toString(),
-        ...(search && { search }),
-        ...(status !== 'all' && { status })
-      })
+      // First try to get users from Supabase profiles (which we know exist)
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select(`
+          id,
+          email,
+          full_name,
+          credits,
+          plan,
+          created_at,
+          last_active_at
+        `)
+        .order('created_at', { ascending: false })
+        .range((page - 1) * usersPerPage, page * usersPerPage - 1)
 
-      const response = await fetch(`${API_BASE_URL}/api/v1/admin/users?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch users')
+      if (profilesError) {
+        console.error('Supabase profiles error:', profilesError)
+        throw new Error('Failed to fetch user profiles')
       }
 
-      const data = await response.json()
-      setUsers(data.users)
-      setFilteredUsers(data.users)
-      setTotalPages(data.pagination.pages)
+      // Transform Supabase profiles data to match User interface
+      const transformedUsers: User[] = profilesData?.map(profile => ({
+        id: profile.id,
+        email: profile.email || '',
+        username: profile.email?.split('@')[0] || '',
+        full_name: profile.full_name || profile.email || '',
+        is_active: true,
+        is_superuser: false,
+        is_admin: false,
+        created_at: profile.created_at,
+        job_count: 0, // We'll try to get this from Railway API
+        recent_activity: profile.last_active_at ? 
+          Math.floor((new Date().getTime() - new Date(profile.last_active_at).getTime()) / (1000 * 60 * 60 * 24)) : 
+          0
+      })) || []
+
+      // Try to enrich with Railway API data (job counts)
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/v1/jobs/stats`, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+
+        if (response.ok) {
+          const railwayStats = await response.json()
+          // If we get Railway data, we could enrich user job counts here
+          console.log('Railway stats available:', railwayStats)
+        }
+      } catch (railwayError) {
+        console.log('Railway API not available for enrichment:', railwayError)
+      }
+
+      // Apply client-side filtering
+      let filtered = transformedUsers
+      if (search) {
+        filtered = filtered.filter(user => 
+          user.email.toLowerCase().includes(search.toLowerCase()) ||
+          user.full_name.toLowerCase().includes(search.toLowerCase())
+        )
+      }
+      if (status !== 'all') {
+        filtered = filtered.filter(user => 
+          status === 'active' ? user.is_active : !user.is_active
+        )
+      }
+
+      setUsers(transformedUsers)
+      setFilteredUsers(filtered)
+      
+      // Get total count for pagination
+      const { count } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+      
+      setTotalPages(Math.ceil((count || 0) / usersPerPage))
       
     } catch (err) {
+      console.error('Error fetching users:', err)
       setError(err instanceof Error ? err.message : 'Unknown error')
     } finally {
       setIsLoading(false)

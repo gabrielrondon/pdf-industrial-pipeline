@@ -19,8 +19,23 @@ const APITester: React.FC = () => {
     const startTime = Date.now()
     
     try {
-      const res = await fetch(endpoint, { method })
-      const data = await res.json()
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://pdf-industrial-pipeline-production.up.railway.app'
+      const fullUrl = endpoint.startsWith('http') ? endpoint : `${apiBaseUrl}${endpoint}`
+      
+      const res = await fetch(fullUrl, { 
+        method,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      
+      let data
+      try {
+        data = await res.json()
+      } catch {
+        data = { message: await res.text() }
+      }
+      
       const responseTime = Date.now() - startTime
       
       setResponse({
@@ -31,7 +46,7 @@ const APITester: React.FC = () => {
     } catch (error) {
       setResponse({
         status: 0,
-        data: { error: 'Network error' },
+        data: { error: error instanceof Error ? error.message : 'Network error' },
         responseTime: Date.now() - startTime
       })
     } finally {
@@ -40,10 +55,10 @@ const APITester: React.FC = () => {
   }
 
   const endpoints = [
-    { name: 'Health Check', path: '/api/v1/health', method: 'GET' },
-    { name: 'System Stats', path: '/api/v1/system/stats', method: 'GET' },
-    { name: 'Models List', path: '/api/v1/models', method: 'GET' },
-    { name: 'Active Jobs', path: '/api/v1/jobs/active', method: 'GET' },
+    { name: 'Health Check', path: '/health', method: 'GET' },
+    { name: 'Jobs Stats', path: '/api/v1/jobs/stats', method: 'GET' },
+    { name: 'Jobs List', path: '/api/v1/jobs', method: 'GET' },
+    { name: 'System Info', path: '/api/v1/system/info', method: 'GET' },
   ]
 
   const getStatusColor = (status: number) => {
