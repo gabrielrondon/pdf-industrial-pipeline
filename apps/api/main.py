@@ -577,27 +577,27 @@ async def run_analysis_inline(job_id: str, file_content: bytes, filename: str, s
                     
                     doc.close()
                 
-            except ImportError:
-                logger.warning("PyMuPDF not available, generating sample analysis")
-                full_text = f"Sample analysis for {filename}\nDocument uploaded successfully.\nLeilão judicial identificado.\nValor: R$ 150.000,00\nContato: (11) 99999-9999"
-                page_count = 1
-                
-                # Create a sample chunk
-                chunk_id = str(uuid.uuid4())
-                await session.execute(
-                    text("""
-                        INSERT INTO job_chunks (id, job_id, chunk_number, page_start, page_end, raw_text, status, processed_at)
-                        VALUES (:id, :job_id, :chunk_number, :page_start, :page_end, :raw_text, 'completed', NOW())
-                    """),
-                    {
-                        "id": chunk_id,
-                        "job_id": job_id,
-                        "chunk_number": 1,
-                        "page_start": 1,
-                        "page_end": 1,
-                        "raw_text": full_text
-                    }
-                )
+                except ImportError:
+                    logger.warning("PyMuPDF not available, generating sample analysis")
+                    full_text = f"Sample analysis for {filename}\nDocument uploaded successfully.\nLeilão judicial identificado.\nValor: R$ 150.000,00\nContato: (11) 99999-9999"
+                    page_count = 1
+                    
+                    # Create a sample chunk
+                    chunk_id = str(uuid.uuid4())
+                    await session.execute(
+                        text("""
+                            INSERT INTO job_chunks (id, job_id, chunk_number, page_start, page_end, raw_text, status, processed_at)
+                            VALUES (:id, :job_id, :chunk_number, :page_start, :page_end, :raw_text, 'completed', NOW())
+                        """),
+                        {
+                            "id": chunk_id,
+                            "job_id": job_id,
+                            "chunk_number": 1,
+                            "page_start": 1,
+                            "page_end": 1,
+                            "raw_text": full_text
+                        }
+                    )
             
             # Update page count
             await session.execute(
