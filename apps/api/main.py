@@ -1,6 +1,7 @@
 import os
 import logging
 import json
+import hashlib
 import importlib.util
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
@@ -281,6 +282,15 @@ async def upload_file(file: UploadFile = File(...), user_id: str = Form(...)):
         # Generate job ID
         job_id = str(uuid.uuid4())
         
+        # Validate or generate user_id UUID
+        try:
+            # Try to parse as UUID
+            validated_user_id = str(uuid.UUID(user_id))
+        except ValueError:
+            # If not a valid UUID, generate one based on the provided user_id
+            user_hash = hashlib.md5(user_id.encode()).hexdigest()
+            validated_user_id = str(uuid.UUID(user_hash))
+        
         # Read file for validation
         file_content = await file.read()
         file_size = len(file_content)
@@ -297,7 +307,7 @@ async def upload_file(file: UploadFile = File(...), user_id: str = Form(...)):
                         """),
                         {
                             "id": job_id,
-                            "user_id": user_id,
+                            "user_id": validated_user_id,
                             "filename": file.filename,
                             "title": file.filename,
                             "file_size": file_size,
