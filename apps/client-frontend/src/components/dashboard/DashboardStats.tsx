@@ -122,73 +122,81 @@ export function DashboardStats() {
   
   return (
     <div className="space-y-8">
-      {/* Stat cards */}
+      {/* Premium Stat cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              Total de análises
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalAnalyses}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              documentos processados
-            </p>
-          </CardContent>
-        </Card>
+        <div className="bg-gradient-to-r from-arremate-navy-50 to-arremate-navy-100 p-6 rounded-xl border border-arremate-navy-200 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold text-arremate-navy-700 uppercase tracking-wide">Total de análises</p>
+              <p className="text-3xl font-bold text-arremate-navy-900 mt-1">{stats.totalAnalyses}</p>
+              <p className="text-xs text-arremate-navy-600 mt-1">documentos processados</p>
+            </div>
+            <div className="bg-arremate-navy-500 p-3 rounded-lg">
+              <FileText className="h-8 w-8 text-white" />
+            </div>
+          </div>
+        </div>
         
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              Leads válidos
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.validLeads}</div>
-            <div className="mt-2">
-              <Progress value={conversionRate} />
-              <p className="text-xs text-muted-foreground mt-1">
-                {conversionRate.toFixed(1)}% de conversão
+        <div className="bg-gradient-to-r from-green-50 to-green-100 p-6 rounded-xl border border-green-200 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold text-green-700 uppercase tracking-wide">Leads válidos</p>
+              <p className="text-3xl font-bold text-green-900 mt-1">{stats.validLeads}</p>
+              <div className="mt-2">
+                <div className="w-full bg-green-200 rounded-full h-2">
+                  <div 
+                    className="bg-green-600 h-2 rounded-full transition-all" 
+                    style={{ width: `${Math.min(conversionRate, 100)}%` }}
+                  ></div>
+                </div>
+                <p className="text-xs text-green-600 mt-1">
+                  {conversionRate.toFixed(1)}% de conversão
+                </p>
+              </div>
+            </div>
+            <div className="bg-green-500 p-3 rounded-lg">
+              <TrendingUp className="h-8 w-8 text-white" />
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold text-purple-700 uppercase tracking-wide">Leads compartilhados</p>
+              <p className="text-3xl font-bold text-purple-900 mt-1">{stats.sharedLeads}</p>
+              <div className="mt-2">
+                <div className="w-full bg-purple-200 rounded-full h-2">
+                  <div 
+                    className="bg-purple-600 h-2 rounded-full transition-all" 
+                    style={{ width: `${Math.min(shareRate, 100)}%` }}
+                  ></div>
+                </div>
+                <p className="text-xs text-purple-600 mt-1">
+                  {shareRate.toFixed(1)}% dos leads válidos
+                </p>
+              </div>
+            </div>
+            <div className="bg-purple-500 p-3 rounded-lg">
+              <Users className="h-8 w-8 text-white" />
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-gradient-to-r from-arremate-gold-50 to-arremate-gold-100 p-6 rounded-xl border border-arremate-gold-200 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold text-arremate-gold-700 uppercase tracking-wide">Créditos disponíveis</p>
+              <p className="text-3xl font-bold text-arremate-gold-900 mt-1">{stats.credits}</p>
+              <p className="text-xs text-arremate-gold-600 mt-1">
+                {user?.plan === 'free' ? 'Upgrade para usar IA' : 'créditos para análises IA'}
               </p>
             </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Leads compartilhados
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.sharedLeads}</div>
-            <div className="mt-2">
-              <Progress value={shareRate} />
-              <p className="text-xs text-muted-foreground mt-1">
-                {shareRate.toFixed(1)}% dos leads válidos
-              </p>
+            <div className="bg-arremate-gold-500 p-3 rounded-lg">
+              <Database className="h-8 w-8 text-white" />
             </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Database className="h-4 w-4" />
-              Créditos disponíveis
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.credits}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {user?.plan === 'free' ? 'Upgrade para usar IA' : 'créditos para análises IA'}
-            </p>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
       
       {/* Charts - only show if there's data */}
