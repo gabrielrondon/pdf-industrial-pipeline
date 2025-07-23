@@ -258,6 +258,64 @@ async def get_jobs(user_id: str = None):
             }
         ]
 
+@app.get("/api/v1/jobs/{job_id}/page/{page_number}")
+async def get_job_page_content(job_id: str, page_number: int):
+    """Get the content of a specific page from a job"""
+    if async_session_maker:
+        async with async_session_maker() as session:
+            try:
+                # Get the job to verify it exists
+                job_result = await session.execute(
+                    text("SELECT id, filename, page_count FROM jobs WHERE id = :job_id"),
+                    {"job_id": job_id}
+                )
+                job_data = job_result.first()
+                
+                if not job_data:
+                    raise HTTPException(status_code=404, detail="Job not found")
+                
+                # Get the chunk for the requested page
+                chunk_result = await session.execute(
+                    text("""
+                        SELECT raw_text, page_start, page_end 
+                        FROM job_chunks 
+                        WHERE job_id = :job_id 
+                        AND :page_number >= page_start 
+                        AND :page_number <= page_end
+                        ORDER BY chunk_number
+                        LIMIT 1
+                    """),
+                    {"job_id": job_id, "page_number": page_number}
+                )
+                chunk_data = chunk_result.first()
+                
+                if not chunk_data:
+                    raise HTTPException(
+                        status_code=404, 
+                        detail=f"Page {page_number} not found for this document"
+                    )
+                
+                return {
+                    "page_content": chunk_data.raw_text,
+                    "filename": job_data.filename,
+                    "total_pages": job_data.page_count or 1,
+                    "page_number": page_number
+                }
+                
+            except HTTPException:
+                raise
+            except Exception as e:
+                logger.error(f"Error getting page content: {e}")
+                raise HTTPException(status_code=500, detail=str(e))
+    else:
+        # Mock data for development
+        return {
+            "page_content": f"Mock content for page {page_number} of job {job_id}\n\nThis is simulated page content.",
+            "filename": "documento_exemplo.pdf",
+            "total_pages": 10,
+            "page_number": page_number
+        }
+
 @app.get("/api/v1/jobs/{job_id}")
 async def get_job_status(job_id: str):
     """Get individual job status with real results"""
@@ -594,10 +652,12 @@ async def run_analysis_inline(job_id: str, file_content: bytes, filename: str, s
                     max_pages = min(page_count, 10)
                     
                     # Extract text from each page and create chunks
+                    pages_text = []
                     for page_num in range(max_pages):
                         page = doc[page_num]
                         page_text = page.get_text()
                         full_text += f"\n\n{page_text}"
+                        pages_text.append((page_num + 1, page_text))
                         
                         # Create chunk for this page
                         chunk_id = str(uuid.uuid4())
@@ -647,7 +707,11 @@ async def run_analysis_inline(job_id: str, file_content: bytes, filename: str, s
             )
             
             # Run analysis similar to the Celery task
-            analysis_results = await generate_analysis_results(job_id, full_text, filename)
+            # If we have pages_text, pass it for page-specific analysis
+            if 'pages_text' in locals() and pages_text:
+                analysis_results = await generate_analysis_results(job_id, full_text, filename, page_count, pages_text)
+            else:
+                analysis_results = await generate_analysis_results(job_id, full_text, filename, page_count)
             
             # Store results in job config
             await session.execute(
@@ -681,7 +745,7 @@ async def run_analysis_inline(job_id: str, file_content: bytes, filename: str, s
             pass
 
 
-async def generate_analysis_results(job_id: str, full_text: str, filename: str):
+async def generate_analysis_results(job_id: str, full_text: str, filename: str, total_pages: int = 1, pages_text: list = None):
     """Generate analysis results similar to the Celery task"""
     import re
     from datetime import datetime
@@ -694,27 +758,54 @@ async def generate_analysis_results(job_id: str, full_text: str, filename: str):
         'points': []
     }
     
-    # 1. Basic document analysis
-    basic_analysis = analyze_document_structure_inline(full_text, filename)
-    results['points'].extend(basic_analysis)
-    
-    # 2. Judicial/Legal analysis (Brazilian focus)
-    if is_judicial_document_inline(full_text):
-        judicial_analysis = analyze_judicial_content_inline(full_text)
-        results['points'].extend(judicial_analysis)
-    
-    # 3. Financial/Investment analysis
-    financial_analysis = analyze_financial_opportunities_inline(full_text)
-    results['points'].extend(financial_analysis)
-    
-    # 4. Contact and deadline analysis
-    contact_analysis = extract_contacts_and_deadlines_inline(full_text)
-    results['points'].extend(contact_analysis)
+    # If we have pages_text, analyze per page for better page references
+    if pages_text:
+        # Analyze each page separately for more accurate page references
+        for page_num, page_text in pages_text:
+            # Skip empty pages
+            if not page_text.strip():
+                continue
+                
+            # 1. Basic document analysis (only for first page)
+            if page_num == 1:
+                basic_analysis = analyze_document_structure_inline(page_text, filename, page_num)
+                results['points'].extend(basic_analysis)
+            
+            # 2. Judicial/Legal analysis (Brazilian focus)
+            if is_judicial_document_inline(page_text):
+                judicial_analysis = analyze_judicial_content_inline(page_text, page_num)
+                results['points'].extend(judicial_analysis)
+            
+            # 3. Financial/Investment analysis
+            financial_analysis = analyze_financial_opportunities_inline(page_text, page_num)
+            results['points'].extend(financial_analysis)
+            
+            # 4. Contact and deadline analysis
+            contact_analysis = extract_contacts_and_deadlines_inline(page_text, page_num)
+            results['points'].extend(contact_analysis)
+    else:
+        # Fallback to full text analysis if no pages_text
+        # 1. Basic document analysis
+        basic_analysis = analyze_document_structure_inline(full_text, filename)
+        results['points'].extend(basic_analysis)
+        
+        # 2. Judicial/Legal analysis (Brazilian focus)
+        if is_judicial_document_inline(full_text):
+            judicial_analysis = analyze_judicial_content_inline(full_text)
+            results['points'].extend(judicial_analysis)
+        
+        # 3. Financial/Investment analysis
+        financial_analysis = analyze_financial_opportunities_inline(full_text)
+        results['points'].extend(financial_analysis)
+        
+        # 4. Contact and deadline analysis
+        contact_analysis = extract_contacts_and_deadlines_inline(full_text)
+        results['points'].extend(contact_analysis)
     
     return results
 
 
-def analyze_document_structure_inline(text: str, filename: str):
+def analyze_document_structure_inline(text: str, filename: str, page_num: int = 1):
     """Analyze basic document structure"""
     points = []
     
@@ -758,7 +849,7 @@ def is_judicial_document_inline(text: str) -> bool:
     return any(indicator in text_lower for indicator in judicial_indicators)
 
 
-def analyze_judicial_content_inline(text: str):
+def analyze_judicial_content_inline(text: str, page_num: int = 1):
     """Analyze judicial/legal document content"""
     points = []
     text_lower = text.lower()
@@ -772,7 +863,8 @@ def analyze_judicial_content_inline(text: str):
             'comment': 'Documento contém informações sobre leilão judicial. Verifique datas, valores e condições.',
             'status': 'confirmado',
             'category': 'leilao',
-            'priority': 'high'
+            'priority': 'high',
+            'page_reference': page_num
         })
     
     # Property types
@@ -792,14 +884,15 @@ def analyze_judicial_content_inline(text: str):
                 'comment': f'Identificado bem do tipo {prop_type} no documento.',
                 'status': 'confirmado',
                 'category': 'investimento',
-                'priority': 'medium'
+                'priority': 'medium',
+                'page_reference': page_num
             })
             break
     
     return points
 
 
-def analyze_financial_opportunities_inline(text: str):
+def analyze_financial_opportunities_inline(text: str, page_num: int = 1):
     """Extract financial and investment information"""
     import re
     points = []
@@ -835,13 +928,14 @@ def analyze_financial_opportunities_inline(text: str):
             'status': 'confirmado',
             'category': 'financeiro',
             'priority': 'high' if max_value > 100000 else 'medium',
-            'value': f'R$ {max_value:,.2f}'
+            'value': f'R$ {max_value:,.2f}',
+            'page_reference': page_num
         })
     
     return points
 
 
-def extract_contacts_and_deadlines_inline(text: str):
+def extract_contacts_and_deadlines_inline(text: str, page_num: int = 1):
     """Extract contact information and important deadlines"""
     import re
     points = []
@@ -856,7 +950,8 @@ def extract_contacts_and_deadlines_inline(text: str):
             'comment': f'Telefones identificados: {", ".join(phones[:3])}{"..." if len(phones) > 3 else ""}',
             'status': 'confirmado',
             'category': 'contato',
-            'priority': 'medium'
+            'priority': 'medium',
+            'page_reference': page_num
         })
     
     # Date patterns for deadlines
@@ -879,7 +974,8 @@ def extract_contacts_and_deadlines_inline(text: str):
             'comment': f'Datas importantes encontradas: {", ".join(dates_found[:3])}{"..." if len(dates_found) > 3 else ""}',
             'status': 'alerta',
             'category': 'prazo',
-            'priority': 'high'
+            'priority': 'high',
+            'page_reference': page_num
         })
     
     return points
