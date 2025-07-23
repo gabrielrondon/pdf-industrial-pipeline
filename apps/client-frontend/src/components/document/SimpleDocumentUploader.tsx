@@ -45,7 +45,7 @@ let messageIndex = 0;
 
 export function SimpleDocumentUploader({ onAnalysisComplete }: SimpleDocumentUploaderProps) {
   const { user } = useAuth();
-  const { addDocument } = useDocuments();
+  const { addDocument, refreshDocuments } = useDocuments();
   const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
   const [progress, setProgress] = useState(0);
@@ -178,20 +178,11 @@ export function SimpleDocumentUploader({ onAnalysisComplete }: SimpleDocumentUpl
       // Se temos um job_id, monitorar o progresso
       if (uploadResult.job_id) {
         setCurrentJobId(uploadResult.job_id);
-        // Start monitoring but don't wait for it
-        monitorJob(uploadResult.job_id);
+        // Start monitoring and wait for completion before redirecting
+        await monitorJob(uploadResult.job_id);
         
-        // Redirect after showing success
-        setProgress(100);
-        toast({
-          title: "Upload concluído!",
-          description: "Redirecionando para análise...",
-        });
-        
-        setTimeout(() => {
-          console.log('🚀 Redirecionando para página de análise...');
-          navigate(`/documents/${documentAnalysis.id}`);
-        }, 2000);
+        console.log('🚀 Redirecionando para página de análise...');
+        navigate(`/documents/${documentAnalysis.id}`);
       } else {
         // Upload simples sem job tracking
         setProgress(100);
@@ -219,48 +210,62 @@ export function SimpleDocumentUploader({ onAnalysisComplete }: SimpleDocumentUpl
     }
   };
 
-  const monitorJob = async (jobId: string) => {
-    let attempts = 0;
-    const maxAttempts = 60; // 5 minutos máximo (5s intervalo)
+  const monitorJob = async (jobId: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      let attempts = 0;
+      const maxAttempts = 60; // 5 minutos máximo (5s intervalo)
 
-    const checkStatus = async () => {
-      try {
-        const status = await railwayApi.getJobStatus(jobId);
-        setJobStatus(status);
+      const checkStatus = async () => {
+        try {
+          const status = await railwayApi.getJobStatus(jobId);
+          setJobStatus(status);
 
-        switch (status.status) {
-          case 'pending':
-            setProgress(30);
-            break;
-          case 'processing':
-            setProgress(status.progress || 70);
-            break;
-          case 'completed':
-            setProgress(100);
-            toast({
-              title: "Análise concluída!",
-              description: "Processamento finalizado com sucesso.",
-            });
-            return; // Para o loop
-          case 'failed':
-            throw new Error(status.error || 'Processamento falhou');
+          switch (status.status) {
+            case 'pending':
+              setProgress(30);
+              break;
+            case 'processing':
+              setProgress(status.progress || 70);
+              break;
+            case 'completed':
+              setProgress(100);
+              toast({
+                title: "Análise concluída!",
+                description: "Processamento finalizado com sucesso.",
+              });
+              // Refresh documents to get the analysis results
+              console.log('🔄 Análise concluída, atualizando lista de documentos...');
+              try {
+                await refreshDocuments();
+                console.log('✅ Lista de documentos atualizada com resultados da análise!');
+                resolve(); // Resolve the promise when completed
+              } catch (error) {
+                console.error('❌ Erro ao atualizar documentos:', error);
+                resolve(); // Still resolve even if refresh fails
+              }
+              return; // Para o loop
+            case 'failed':
+              reject(new Error(status.error || 'Processamento falhou'));
+              return;
+          }
+
+          // Continuar monitorando se não terminou
+          attempts++;
+          if (attempts < maxAttempts) {
+            setTimeout(checkStatus, 5000); // Check a cada 5 segundos
+          } else {
+            reject(new Error('Timeout: processamento demorou mais que o esperado'));
+          }
+
+        } catch (error: any) {
+          console.error('Erro ao verificar status:', error);
+          setError(`Erro no processamento: ${error.message}`);
+          reject(error);
         }
+      };
 
-        // Continuar monitorando se não terminou
-        attempts++;
-        if (attempts < maxAttempts) {
-          setTimeout(checkStatus, 5000); // Check a cada 5 segundos
-        } else {
-          throw new Error('Timeout: processamento demorou mais que o esperado');
-        }
-
-      } catch (error: any) {
-        console.error('Erro ao verificar status:', error);
-        setError(`Erro no processamento: ${error.message}`);
-      }
-    };
-
-    checkStatus();
+      checkStatus();
+    });
   };
 
   const handleReset = () => {
