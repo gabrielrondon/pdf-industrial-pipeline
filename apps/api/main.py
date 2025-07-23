@@ -877,17 +877,44 @@ def analyze_judicial_content_inline(text: str, page_num: int = 1):
     }
     
     for prop_type, keywords in property_types.items():
-        if any(keyword in text_lower for keyword in keywords):
-            points.append({
-                'id': f'property_{prop_type}_{len(points)}',
-                'title': f'Bem do Tipo: {prop_type.title()}',
-                'comment': f'Identificado bem do tipo {prop_type} no documento.',
-                'status': 'confirmado',
-                'category': 'investimento',
-                'priority': 'medium',
-                'page_reference': page_num
-            })
-            break
+        for keyword in keywords:
+            if keyword in text_lower:
+                # Extract context around the keyword
+                context = extract_context_around_keyword(text, keyword, 100)
+                
+                # Try to extract specific details
+                details = {}
+                
+                # For imóvel, try to find area, location, etc
+                if prop_type in ['imóvel', 'apartamento', 'casa']:
+                    import re
+                    # Look for area in m²
+                    area_match = re.search(r'(\d+(?:\.\d+)?)\s*m[²2]', text, re.IGNORECASE)
+                    if area_match:
+                        details['area'] = f"{area_match.group(1)} m²"
+                    
+                    # Look for number of rooms
+                    rooms_match = re.search(r'(\d+)\s*(?:quartos?|dormitórios?)', text, re.IGNORECASE)
+                    if rooms_match:
+                        details['quartos'] = f"{rooms_match.group(1)} quartos"
+                    
+                    # Look for location/address
+                    location_match = re.search(r'(?:localizado|situado|endereço)[:\s]+([^.]+)', text, re.IGNORECASE)
+                    if location_match:
+                        details['localização'] = location_match.group(1).strip()[:100]
+                
+                points.append({
+                    'id': f'property_{prop_type}_{len(points)}',
+                    'title': f'Bem do Tipo: {prop_type.title()}',
+                    'comment': f'Identificado bem do tipo {prop_type} no documento.',
+                    'status': 'confirmado',
+                    'category': 'investimento',
+                    'priority': 'medium',
+                    'page_reference': page_num,
+                    'details': details if details else None,
+                    'raw_value': context
+                })
+                break
     
     return points
 
@@ -921,15 +948,52 @@ def analyze_financial_opportunities_inline(text: str, page_num: int = 1):
         max_value = max(values_found)
         min_value = min(values_found)
         
+        # Try to extract more specific financial details
+        details = {}
+        
+        # Find the context around the highest value
+        max_value_str = f"R$ {max_value:,.2f}".replace(",", ".")
+        for pattern in value_patterns:
+            matches = re.finditer(pattern, text, re.IGNORECASE)
+            for match in matches:
+                try:
+                    clean_value = match.group(1).replace('.', '').replace(',', '.')
+                    value = float(clean_value)
+                    if abs(value - max_value) < 0.01:  # Found the max value
+                        context = extract_context_around_keyword(text, match.group(0), 150)
+                        break
+                except ValueError:
+                    continue
+        
+        # Try to determine value type
+        value_type = "Valor"
+        if "avaliação" in text.lower():
+            value_type = "Valor de Avaliação"
+            details['tipo'] = "Avaliação oficial"
+        elif "lance" in text.lower():
+            value_type = "Lance Mínimo"
+            details['tipo'] = "Lance inicial"
+        elif "venda" in text.lower():
+            value_type = "Valor de Venda"
+            details['tipo'] = "Preço de venda"
+        
+        # Check for payment conditions
+        if "entrada" in text.lower():
+            entrada_match = re.search(r'entrada.*?(\d+%)', text, re.IGNORECASE)
+            if entrada_match:
+                details['entrada'] = entrada_match.group(1)
+        
         points.append({
             'id': f'values_{len(points)}',
-            'title': f'Valores Identificados: R$ {min_value:,.2f} - R$ {max_value:,.2f}',
+            'title': f'{value_type}: R$ {min_value:,.2f} - R$ {max_value:,.2f}',
             'comment': f'Encontrados {len(values_found)} valores monetários no documento. Maior valor: R$ {max_value:,.2f}',
             'status': 'confirmado',
             'category': 'financeiro',
             'priority': 'high' if max_value > 100000 else 'medium',
             'value': f'R$ {max_value:,.2f}',
-            'page_reference': page_num
+            'page_reference': page_num,
+            'details': details if details else None,
+            'raw_value': context if 'context' in locals() else f"Valores encontrados: R$ {min_value:,.2f} - R$ {max_value:,.2f}"
         })
     
     return points
@@ -944,6 +1008,34 @@ def extract_contacts_and_deadlines_inline(text: str, page_num: int = 1):
     phone_pattern = r'(?:\(\d{2}\)|\d{2})\s*\d{4,5}[-\s]?\d{4}'
     phones = re.findall(phone_pattern, text)
     if phones:
+        # Extract additional contact details
+        details = {}
+        
+        # Look for contact context
+        first_phone = phones[0]
+        context = extract_context_around_keyword(text, first_phone, 100)
+        
+        # Try to identify contact type
+        if "leiloeiro" in text.lower():
+            details['tipo'] = "Leiloeiro oficial"
+        elif "advogado" in text.lower():
+            details['tipo'] = "Advogado responsável"
+        elif "cartório" in text.lower():
+            details['tipo'] = "Cartório"
+        elif "tribunal" in text.lower():
+            details['tipo'] = "Tribunal"
+        
+        # Look for email addresses
+        email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+        emails = re.findall(email_pattern, text)
+        if emails:
+            details['email'] = emails[0]
+        
+        # Look for names
+        name_match = re.search(r'(?:Dr\.|Dra\.|Sr\.|Sra\.)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)', text)
+        if name_match:
+            details['responsável'] = name_match.group(1)
+        
         points.append({
             'id': f'phones_{len(points)}',
             'title': f'Contatos Telefônicos: {len(phones)} encontrados',
@@ -951,7 +1043,9 @@ def extract_contacts_and_deadlines_inline(text: str, page_num: int = 1):
             'status': 'confirmado',
             'category': 'contato',
             'priority': 'medium',
-            'page_reference': page_num
+            'page_reference': page_num,
+            'details': details if details else None,
+            'raw_value': context
         })
     
     # Date patterns for deadlines
@@ -968,18 +1062,85 @@ def extract_contacts_and_deadlines_inline(text: str, page_num: int = 1):
         dates_found.extend(matches)
     
     if dates_found:
+        # Try to identify types of dates
+        details = {}
+        
+        # Look for specific types of dates
+        if "leilão" in text.lower() or "hasta" in text.lower():
+            details['tipo'] = "Data do leilão"
+        elif "prazo" in text.lower():
+            details['tipo'] = "Prazo legal"
+        elif "vencimento" in text.lower():
+            details['tipo'] = "Data de vencimento"
+        
+        # Find context around the first date
+        first_date = dates_found[0]
+        context = extract_context_around_keyword(text, first_date, 120)
+        
+        # Check if dates are close (within 30 days from today)
+        from datetime import datetime, timedelta
+        import re
+        
+        urgent_dates = []
+        for date_str in dates_found[:3]:
+            # Try to parse common Brazilian date formats
+            date_match = re.match(r'(\d{1,2})/(\d{1,2})/(\d{4})', date_str)
+            if date_match:
+                try:
+                    day, month, year = map(int, date_match.groups())
+                    date_obj = datetime(year, month, day)
+                    days_until = (date_obj - datetime.now()).days
+                    if 0 <= days_until <= 30:
+                        urgent_dates.append(f"{date_str} ({days_until} dias)")
+                except ValueError:
+                    pass
+        
+        if urgent_dates:
+            details['urgente'] = f"Próximos: {', '.join(urgent_dates)}"
+        
+        priority = 'high' if urgent_dates else 'medium'
+        status = 'alerta' if urgent_dates else 'confirmado'
+        
         points.append({
             'id': f'deadlines_{len(points)}',
             'title': f'Prazos e Datas: {len(dates_found)} identificados',
             'comment': f'Datas importantes encontradas: {", ".join(dates_found[:3])}{"..." if len(dates_found) > 3 else ""}',
-            'status': 'alerta',
+            'status': status,
             'category': 'prazo',
-            'priority': 'high',
-            'page_reference': page_num
+            'priority': priority,
+            'page_reference': page_num,
+            'details': details if details else None,
+            'raw_value': context
         })
     
     return points
 
+
+def extract_context_around_keyword(text: str, keyword: str, context_length: int = 100) -> str:
+    """Extract context around a keyword for better lead information"""
+    import re
+    
+    # Find the keyword (case insensitive)
+    pattern = re.escape(keyword)
+    match = re.search(pattern, text, re.IGNORECASE)
+    
+    if not match:
+        return ""
+    
+    start_pos = match.start()
+    end_pos = match.end()
+    
+    # Get context before and after
+    context_start = max(0, start_pos - context_length)
+    context_end = min(len(text), end_pos + context_length)
+    
+    context = text[context_start:context_end].strip()
+    
+    # Clean up context
+    context = re.sub(r'\s+', ' ', context)  # Remove extra whitespace
+    context = context.replace('\n', ' ')    # Remove newlines
+    
+    return context
 
 def detect_document_type_inline(text: str, filename: str) -> str:
     """Detect document type based on content and filename"""
