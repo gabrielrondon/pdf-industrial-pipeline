@@ -361,6 +361,41 @@ export function SimpleDocumentUploader({ onAnalysisComplete }: SimpleDocumentUpl
                 </div>
               </div>
             )}
+            
+            {/* Botão de Upload dentro do quadro azul */}
+            <div className="flex gap-4 pt-2">
+              <Button
+                onClick={handleUpload}
+                disabled={!file || isUploading || !user}
+                size="lg"
+                className="flex-1 bg-arremate-gold-500 hover:bg-arremate-gold-600 text-arremate-gold-900 font-semibold py-3 shadow-lg"
+              >
+                {isUploading ? (
+                  <>
+                    <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
+                    Processando...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-5 w-5 mr-2" />
+                    Fazer Upload
+                  </>
+                )}
+              </Button>
+
+              {(file || error) && (
+                <Button 
+                  variant="outline" 
+                  onClick={handleReset} 
+                  disabled={isUploading}
+                  size="lg"
+                  className="border-arremate-charcoal-300 text-arremate-charcoal-700 hover:bg-arremate-charcoal-50"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Limpar
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -443,40 +478,6 @@ export function SimpleDocumentUploader({ onAnalysisComplete }: SimpleDocumentUpl
         </div>
       )}
 
-      {/* Premium Action Buttons */}
-      <div className="flex gap-4">
-        <Button
-          onClick={handleUpload}
-          disabled={!file || isUploading || !user}
-          size="lg"
-          className="flex-1 bg-arremate-gold-500 hover:bg-arremate-gold-600 text-arremate-gold-900 font-semibold py-3 shadow-lg"
-        >
-          {isUploading ? (
-            <>
-              <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
-              Processando...
-            </>
-          ) : (
-            <>
-              <Upload className="h-5 w-5 mr-2" />
-              Fazer Upload
-            </>
-          )}
-        </Button>
-
-        {(file || error) && (
-          <Button 
-            variant="outline" 
-            onClick={handleReset} 
-            disabled={isUploading}
-            size="lg"
-            className="border-arremate-charcoal-300 text-arremate-charcoal-700 hover:bg-arremate-charcoal-50"
-          >
-            <X className="h-4 w-4 mr-2" />
-            Limpar
-          </Button>
-        )}
-      </div>
     </div>
   );
 }

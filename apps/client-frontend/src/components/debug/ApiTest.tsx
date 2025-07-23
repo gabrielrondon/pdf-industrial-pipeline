@@ -18,7 +18,11 @@ interface ApiStatus {
   error?: string;
 }
 
-export function ApiTest() {
+interface ApiTestProps {
+  compact?: boolean;
+}
+
+export function ApiTest({ compact = false }: ApiTestProps) {
   const [status, setStatus] = useState<ApiStatus | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -72,6 +76,34 @@ export function ApiTest() {
     return isOk ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
   };
 
+  // Versão compacta - apenas uma linha com status
+  if (compact) {
+    return (
+      <div className="inline-flex items-center gap-1">
+        {isLoading ? (
+          <>
+            <RefreshCw className="h-3 w-3 animate-spin" />
+            <span>Testando...</span>
+          </>
+        ) : status ? (
+          <>
+            {status.health ? (
+              <CheckCircle className="h-3 w-3 text-green-500" />
+            ) : (
+              <XCircle className="h-3 w-3 text-red-500" />
+            )}
+            <span className={status.health ? 'text-green-600' : 'text-red-600'}>
+              {status.health ? 'Online' : 'Offline'}
+            </span>
+          </>
+        ) : (
+          <span className="text-gray-500">Carregando...</span>
+        )}
+      </div>
+    );
+  }
+
+  // Versão completa (existente)
   return (
     <Card className="w-full max-w-md">
       <CardHeader>

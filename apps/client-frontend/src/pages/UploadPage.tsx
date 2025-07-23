@@ -89,14 +89,12 @@ export default function UploadPage() {
             
             <FeaturesSection />
             
-            {/* Railway Status no rodé */}
-            <div className="mt-16 pt-8 border-t border-arremate-charcoal-200">
-              <div className="flex justify-center">
-                <div className="bg-arremate-charcoal-50 p-4 rounded-lg">
-                  <h3 className="text-sm font-semibold text-arremate-charcoal-700 mb-3 text-center">
-                    Status da API Railway
-                  </h3>
-                  <ApiTest />
+            {/* Status da API - versão discreta no rodapé */}
+            <div className="mt-12">
+              <div className="text-center">
+                <div className="inline-flex items-center gap-2 text-xs text-arremate-charcoal-500 bg-arremate-charcoal-50 px-3 py-1 rounded-full">
+                  <span>Status da API:</span>
+                  <ApiTest compact={true} />
                 </div>
               </div>
             </div>
