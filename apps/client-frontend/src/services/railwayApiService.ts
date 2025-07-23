@@ -97,7 +97,7 @@ class RailwayApiService {
     try {
       const authHeaders = await this.getAuthHeaders();
       
-      const response = await fetch(`${API_BASE_URL}/api/v1/jobs/upload`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/upload`, {
         method: 'POST',
         body: formData,
         headers: {
