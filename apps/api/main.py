@@ -95,7 +95,10 @@ else:
     cors_origins = [
         "https://arremate360.com",
         "https://www.arremate360.com", 
+        "https://admin.arremate360.com",
         "https://arremate360.vercel.app",
+        "https://admin-frontend-mlmjy8t78-gabrielrondons-projects.vercel.app",
+        "https://admin-frontend-gabrielrondons-projects.vercel.app",
         "http://localhost:8080",
         "http://localhost:3000",
         "http://localhost:5173"
