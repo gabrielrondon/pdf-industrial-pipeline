@@ -299,6 +299,21 @@ async def upload_file(file: UploadFile = File(...), user_id: str = Form(...)):
             # Save to database and trigger processing
             async with async_session_maker() as session:
                 try:
+                    # Create user if it doesn't exist
+                    await session.execute(
+                        text("""
+                            INSERT INTO users (id, email, username, hashed_password, full_name, is_active, is_superuser)
+                            VALUES (CAST(:id AS uuid), :email, :username, 'temp_password', :full_name, true, false)
+                            ON CONFLICT (id) DO NOTHING
+                        """),
+                        {
+                            "id": validated_user_id,
+                            "email": f"{user_id}@temp.com",
+                            "username": user_id,
+                            "full_name": f"User {user_id}"
+                        }
+                    )
+                    
                     # Create job record using raw SQL to avoid import issues
                     await session.execute(
                         text("""
