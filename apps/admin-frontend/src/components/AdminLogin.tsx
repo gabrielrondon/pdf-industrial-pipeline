@@ -129,19 +129,6 @@ export default function AdminLogin() {
               </Button>
             </form>
 
-            {/* Demo Credentials */}
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <p className="text-sm font-medium text-blue-800 mb-2">
-                Credenciais de Demonstração:
-              </p>
-              <div className="space-y-1 text-sm text-blue-700">
-                <p><strong>Email:</strong> grondon@gmail.com</p>
-                <p><strong>Senha:</strong> admin123</p>
-              </div>
-              <p className="text-xs text-blue-600 mt-2">
-                ⚠️ Altere a senha após o primeiro login
-              </p>
-            </div>
           </CardContent>
         </Card>
 
