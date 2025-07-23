@@ -327,11 +327,11 @@ export function SimpleDocumentUploader({ onAnalysisComplete }: SimpleDocumentUpl
           <div className="bg-arremate-gold-500 p-4 rounded-full w-fit mx-auto mb-4">
             <FileText className="h-8 w-8 text-white" />
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2">
-            Upload de Documento PDF
+          <h2 className="text-3xl font-bold text-white mb-2">
+            Análise Inteligente de Documentos
           </h2>
-          <p className="text-arremate-navy-200">
-            Envie um arquivo PDF para análise inteligente usando nossa IA especializada
+          <p className="text-arremate-navy-200 text-lg">
+            Faça upload de editais de leilão e processos judiciais para identificação automática de oportunidades
           </p>
         </div>
 

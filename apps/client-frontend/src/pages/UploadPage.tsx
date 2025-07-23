@@ -97,19 +97,24 @@ export default function UploadPage() {
           </div>
         ) : (
           <div className="space-y-10">
-            <UploadIntro />
-            
-            {/* Teste de conectividade com API Railway */}
-            <div className="flex justify-center">
-              <ApiTest />
-            </div>
-            
-            {/* Usando SimpleDocumentUploader que usa nossa API Railway */}
+            {/* Upload Component */}
             <SimpleDocumentUploader 
               onAnalysisComplete={handleAnalysisComplete} 
             />
             
             <FeaturesSection />
+            
+            {/* Railway Status no rodé */}
+            <div className="mt-16 pt-8 border-t border-arremate-charcoal-200">
+              <div className="flex justify-center">
+                <div className="bg-arremate-charcoal-50 p-4 rounded-lg">
+                  <h3 className="text-sm font-semibold text-arremate-charcoal-700 mb-3 text-center">
+                    Status da API Railway
+                  </h3>
+                  <ApiTest />
+                </div>
+              </div>
+            </div>
           </div>
         )}
         </div>
