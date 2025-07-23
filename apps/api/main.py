@@ -303,7 +303,7 @@ async def upload_file(file: UploadFile = File(...), user_id: str = Form(...)):
                     await session.execute(
                         text("""
                             INSERT INTO jobs (id, user_id, filename, title, file_size, mime_type, status, config)
-                            VALUES (:id::uuid, :user_id::uuid, :filename, :title, :file_size, :mime_type, :status, :config::jsonb)
+                            VALUES (CAST(:id AS uuid), CAST(:user_id AS uuid), :filename, :title, :file_size, :mime_type, :status, CAST(:config AS jsonb))
                         """),
                         {
                             "id": job_id,
