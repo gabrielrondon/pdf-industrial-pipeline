@@ -82,16 +82,20 @@ export function SimpleDocumentUploader({ onAnalysisComplete }: SimpleDocumentUpl
     
     const simulateProgress = () => {
       setProgress(prev => {
-        if (prev < 90) {
-          // Progresso automático até 90% baseado no tempo
+        if (prev < 85) {
+          // Progresso mais rápido até 85%
           const timeIncrement = Math.random() * 0.8 + 0.2;
-          return Math.min(prev + timeIncrement, 90);
+          return Math.min(prev + timeIncrement, 85);
+        } else if (prev < 95) {
+          // Progresso mais lento entre 85-95% para parecer mais realístico
+          const timeIncrement = Math.random() * 0.3 + 0.1;
+          return Math.min(prev + timeIncrement, 95);
         }
         return prev;
       });
     };
 
-    const simulationInterval = setInterval(simulateProgress, 300);
+    const simulationInterval = setInterval(simulateProgress, 400);
     return () => clearInterval(simulationInterval);
   }, [isUploading]);
 

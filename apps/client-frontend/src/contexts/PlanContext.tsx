@@ -31,6 +31,8 @@ const PLAN_DETAILS: PlanDetails[] = [
       { title: 'Ganhar créditos por compartilhamento', free: false, pro: true, premium: true },
       { title: 'Histórico de documentos', free: true, pro: true, premium: true },
       { title: 'Dashboard com estatísticas', free: true, pro: true, premium: true },
+      { title: 'Notificações por Email', free: false, pro: true, premium: true },
+      { title: 'Notificações por SMS', free: false, pro: false, premium: true },
       { title: 'Suporte prioritário', free: false, pro: false, premium: true },
     ]
   },
@@ -50,6 +52,8 @@ const PLAN_DETAILS: PlanDetails[] = [
       { title: 'Ganhar créditos por compartilhamento', free: false, pro: true, premium: true },
       { title: 'Histórico de documentos', free: true, pro: true, premium: true },
       { title: 'Dashboard com estatísticas', free: true, pro: true, premium: true },
+      { title: 'Notificações por Email', free: false, pro: true, premium: true },
+      { title: 'Notificações por SMS', free: false, pro: false, premium: true },
       { title: 'Suporte prioritário', free: false, pro: false, premium: true },
     ]
   },
@@ -70,6 +74,8 @@ const PLAN_DETAILS: PlanDetails[] = [
       { title: 'Ganhar créditos por compartilhamento', free: false, pro: true, premium: true },
       { title: 'Histórico de documentos', free: true, pro: true, premium: true },
       { title: 'Dashboard com estatísticas', free: true, pro: true, premium: true },
+      { title: 'Notificações por Email', free: false, pro: true, premium: true },
+      { title: 'Notificações por SMS', free: false, pro: false, premium: true },
       { title: 'Suporte prioritário', free: false, pro: false, premium: true },
     ]
   }
