@@ -1,5 +1,6 @@
 import os
 import logging
+import json
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
@@ -164,21 +165,71 @@ async def get_jobs(user_id: str = None):
 
 @app.get("/api/v1/jobs/{job_id}")
 async def get_job_status(job_id: str):
-    """Get individual job status"""
+    """Get individual job status with real results"""
     if async_session_maker:
-        # TODO: Implement real database query for job by ID
-        # Query the actual job from the database
-        return {
-            "id": job_id,
-            "status": "processing", 
-            "progress": 50,
-            "created_at": "2025-07-22T23:30:00Z",
-            "updated_at": "2025-07-22T23:31:00Z",
-            "error_message": None,
-            "result_url": None
-        }
+        async with async_session_maker() as session:
+            # Query the actual job from the database
+            result = await session.execute(
+                text("""
+                    SELECT id, status, filename, title, file_size, page_count, 
+                           created_at, updated_at, processing_started_at, processing_completed_at,
+                           error_message, config
+                    FROM jobs 
+                    WHERE id = :job_id
+                """),
+                {"job_id": job_id}
+            )
+            job_data = result.first()
+            
+            if not job_data:
+                raise HTTPException(status_code=404, detail="Job not found")
+            
+            # Calculate progress based on status
+            progress_map = {
+                "uploaded": 10,
+                "processing": 50,
+                "completed": 100,
+                "failed": 0
+            }
+            progress = progress_map.get(job_data.status, 0)
+            
+            # Build response
+            response = {
+                "id": str(job_data.id),
+                "status": job_data.status,
+                "progress": progress,
+                "filename": job_data.filename,
+                "title": job_data.title,
+                "file_size": job_data.file_size,
+                "page_count": job_data.page_count,
+                "created_at": job_data.created_at.isoformat() if job_data.created_at else None,
+                "updated_at": job_data.updated_at.isoformat() if job_data.updated_at else None,
+                "processing_started_at": job_data.processing_started_at.isoformat() if job_data.processing_started_at else None,
+                "processing_completed_at": job_data.processing_completed_at.isoformat() if job_data.processing_completed_at else None,
+                "error_message": job_data.error_message
+            }
+            
+            # Add results if analysis is completed
+            if job_data.status == "completed" and job_data.config:
+                config = job_data.config
+                if isinstance(config, dict) and "analysis_results" in config:
+                    response["results"] = config["analysis_results"]
+                elif isinstance(config, str):
+                    # Try to parse as JSON if it's a string
+                    try:
+                        import json
+                        parsed_config = json.loads(config)
+                        if "analysis_results" in parsed_config:
+                            response["results"] = parsed_config["analysis_results"]
+                    except json.JSONDecodeError:
+                        pass
+                
+                # Add result URL for completed jobs
+                response["result_url"] = f"/api/v1/jobs/{job_id}/result"
+            
+            return response
     else:
-        # Mock data based on job ID
+        # Mock data based on job ID (fallback when database not available)
         return {
             "id": job_id,
             "status": "completed",
@@ -220,7 +271,7 @@ async def get_job_status(job_id: str):
 
 @app.post("/api/v1/upload")
 async def upload_file(file: UploadFile = File(...), user_id: str = Form(...)):
-    """Handle file upload"""
+    """Handle file upload and trigger processing pipeline"""
     try:
         # Validate file type
         if not file.filename or not file.filename.lower().endswith('.pdf'):
@@ -234,13 +285,43 @@ async def upload_file(file: UploadFile = File(...), user_id: str = Form(...)):
         file_size = len(file_content)
         
         if async_session_maker:
-            # TODO: Save to database and trigger processing
-            logger.info(f"Would save job {job_id} to database")
+            # Save to database and trigger processing
+            async with async_session_maker() as session:
+                # Import database models
+                from database.models import Job
+                
+                # Create job record
+                job = Job(
+                    id=job_id,
+                    user_id=user_id,
+                    filename=file.filename,
+                    title=file.filename,  # Default title to filename
+                    file_size=file_size,
+                    mime_type="application/pdf",
+                    status="uploaded",
+                    config={"file_content": file_content.hex()}  # Store file content temporarily
+                )
+                
+                session.add(job)
+                await session.commit()
+                
+                logger.info(f"Job {job_id} saved to database, triggering analysis pipeline")
+                
+                # Trigger analysis pipeline (Celery task)
+                try:
+                    from tasks.analysis_tasks import start_analysis_pipeline
+                    # For now, trigger analysis directly since we have the file content
+                    task_result = start_analysis_pipeline.delay(job_id)
+                    logger.info(f"Analysis pipeline triggered for job {job_id}: {task_result.id}")
+                except ImportError:
+                    # If Celery is not available, run analysis inline (development mode)
+                    logger.warning("Celery not available, running analysis inline")
+                    await run_analysis_inline(job_id, file_content, file.filename)
         
         return {
             "success": True,
             "job_id": job_id,
-            "message": "File uploaded successfully",
+            "message": "File uploaded successfully and processing started",
             "file_size": file_size,
             "user_id": user_id,
             "filename": file.filename,
@@ -252,6 +333,329 @@ async def upload_file(file: UploadFile = File(...), user_id: str = Form(...)):
     except Exception as e:
         logger.error(f"Upload error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+async def run_analysis_inline(job_id: str, file_content: bytes, filename: str):
+    """Run analysis inline when Celery is not available (development mode)"""
+    try:
+        from datetime import datetime
+        import fitz  # PyMuPDF
+        
+        async with async_session_maker() as session:
+            from database.models import Job, JobChunk
+            
+            # Get job
+            result = await session.execute(
+                text("SELECT * FROM jobs WHERE id = :job_id"),
+                {"job_id": job_id}
+            )
+            job_data = result.first()
+            
+            if not job_data:
+                logger.error(f"Job {job_id} not found")
+                return
+            
+            # Update job status
+            await session.execute(
+                text("UPDATE jobs SET status = 'processing', processing_started_at = NOW() WHERE id = :job_id"),
+                {"job_id": job_id}
+            )
+            await session.commit()
+            
+            # Process PDF
+            doc = fitz.open(stream=file_content, filetype="pdf")
+            page_count = len(doc)
+            
+            # Update page count
+            await session.execute(
+                text("UPDATE jobs SET page_count = :page_count WHERE id = :job_id"),
+                {"job_id": job_id, "page_count": page_count}
+            )
+            
+            # Extract text from each page and create chunks
+            full_text = ""
+            for page_num in range(page_count):
+                page = doc[page_num]
+                page_text = page.get_text()
+                full_text += f"\n\n{page_text}"
+                
+                # Create chunk for this page
+                chunk_id = str(uuid.uuid4())
+                await session.execute(
+                    text("""
+                        INSERT INTO job_chunks (id, job_id, chunk_number, page_start, page_end, raw_text, status, processed_at)
+                        VALUES (:id, :job_id, :chunk_number, :page_start, :page_end, :raw_text, 'completed', NOW())
+                    """),
+                    {
+                        "id": chunk_id,
+                        "job_id": job_id,
+                        "chunk_number": page_num + 1,
+                        "page_start": page_num + 1,
+                        "page_end": page_num + 1,
+                        "raw_text": page_text
+                    }
+                )
+            
+            doc.close()
+            
+            # Run analysis similar to the Celery task
+            analysis_results = await generate_analysis_results(job_id, full_text, filename)
+            
+            # Store results in job config
+            await session.execute(
+                text("""
+                    UPDATE jobs 
+                    SET status = 'completed', 
+                        processing_completed_at = NOW(),
+                        config = config || :analysis_config
+                    WHERE id = :job_id
+                """),
+                {
+                    "job_id": job_id,
+                    "analysis_config": json.dumps({"analysis_results": analysis_results})
+                }
+            )
+            await session.commit()
+            
+            logger.info(f"Inline analysis completed for job {job_id}: {len(analysis_results.get('points', []))} points found")
+            
+    except Exception as e:
+        logger.error(f"Inline analysis failed for job {job_id}: {str(e)}")
+        # Update job status to failed
+        try:
+            async with async_session_maker() as session:
+                await session.execute(
+                    text("UPDATE jobs SET status = 'failed', error_message = :error WHERE id = :job_id"),
+                    {"job_id": job_id, "error": f"Analysis failed: {str(e)}"}
+                )
+                await session.commit()
+        except Exception:
+            pass
+
+
+async def generate_analysis_results(job_id: str, full_text: str, filename: str):
+    """Generate analysis results similar to the Celery task"""
+    import re
+    from datetime import datetime
+    
+    results = {
+        'job_id': job_id,
+        'filename': filename,
+        'analysis_type': 'comprehensive',
+        'analysis_date': datetime.utcnow().isoformat(),
+        'points': []
+    }
+    
+    # 1. Basic document analysis
+    basic_analysis = analyze_document_structure_inline(full_text, filename)
+    results['points'].extend(basic_analysis)
+    
+    # 2. Judicial/Legal analysis (Brazilian focus)
+    if is_judicial_document_inline(full_text):
+        judicial_analysis = analyze_judicial_content_inline(full_text)
+        results['points'].extend(judicial_analysis)
+    
+    # 3. Financial/Investment analysis
+    financial_analysis = analyze_financial_opportunities_inline(full_text)
+    results['points'].extend(financial_analysis)
+    
+    # 4. Contact and deadline analysis
+    contact_analysis = extract_contacts_and_deadlines_inline(full_text)
+    results['points'].extend(contact_analysis)
+    
+    return results
+
+
+def analyze_document_structure_inline(text: str, filename: str):
+    """Analyze basic document structure"""
+    points = []
+    
+    # Document type detection
+    doc_type = detect_document_type_inline(text, filename)
+    if doc_type:
+        points.append({
+            'id': f'doc_type_{len(points)}',
+            'title': f'Tipo de Documento: {doc_type}',
+            'comment': f'Documento identificado como {doc_type} baseado no conteúdo e nome do arquivo.',
+            'status': 'confirmado',
+            'category': 'geral',
+            'priority': 'medium'
+        })
+    
+    # Page count and length analysis
+    estimated_pages = max(1, len(text) // 2000)
+    points.append({
+        'id': f'doc_size_{len(points)}',
+        'title': f'Tamanho do Documento: ~{estimated_pages} páginas',
+        'comment': f'Documento contém aproximadamente {len(text):,} caracteres em ~{estimated_pages} páginas.',
+        'status': 'confirmado',
+        'category': 'geral',
+        'priority': 'low'
+    })
+    
+    return points
+
+
+def is_judicial_document_inline(text: str) -> bool:
+    """Check if document appears to be judicial/legal"""
+    judicial_indicators = [
+        'leilão', 'leilao', 'hasta pública', 'hasta publica',
+        'tribunal', 'vara', 'juiz', 'processo',
+        'código de processo civil', 'cpc',
+        'arrematação', 'arremataçao', 'adjudicação',
+        'penhora', 'execução', 'execucao'
+    ]
+    
+    text_lower = text.lower()
+    return any(indicator in text_lower for indicator in judicial_indicators)
+
+
+def analyze_judicial_content_inline(text: str):
+    """Analyze judicial/legal document content"""
+    points = []
+    text_lower = text.lower()
+    
+    # Auction detection
+    auction_keywords = ['leilão', 'leilao', 'hasta pública', 'hasta publica', 'arrematação']
+    if any(keyword in text_lower for keyword in auction_keywords):
+        points.append({
+            'id': f'auction_{len(points)}',
+            'title': 'Leilão Judicial Identificado',
+            'comment': 'Documento contém informações sobre leilão judicial. Verifique datas, valores e condições.',
+            'status': 'confirmado',
+            'category': 'leilao',
+            'priority': 'high'
+        })
+    
+    # Property types
+    property_types = {
+        'imóvel': ['imovel', 'imóvel', 'propriedade', 'terreno', 'lote'],
+        'apartamento': ['apartamento', 'apt', 'unidade'],
+        'casa': ['casa', 'residencia', 'residência'],
+        'comercial': ['comercial', 'loja', 'escritorio', 'escritório', 'sala comercial'],
+        'veículo': ['veiculo', 'veículo', 'automóvel', 'automovel', 'carro', 'moto']
+    }
+    
+    for prop_type, keywords in property_types.items():
+        if any(keyword in text_lower for keyword in keywords):
+            points.append({
+                'id': f'property_{prop_type}_{len(points)}',
+                'title': f'Bem do Tipo: {prop_type.title()}',
+                'comment': f'Identificado bem do tipo {prop_type} no documento.',
+                'status': 'confirmado',
+                'category': 'investimento',
+                'priority': 'medium'
+            })
+            break
+    
+    return points
+
+
+def analyze_financial_opportunities_inline(text: str):
+    """Extract financial and investment information"""
+    import re
+    points = []
+    
+    # Value extraction patterns
+    value_patterns = [
+        r'R\$\s*([\d.,]+)',
+        r'valor.*?R\$\s*([\d.,]+)',
+        r'avaliação.*?R\$\s*([\d.,]+)',
+        r'lance.*?R\$\s*([\d.,]+)'
+    ]
+    
+    values_found = []
+    for pattern in value_patterns:
+        matches = re.findall(pattern, text, re.IGNORECASE)
+        for match in matches:
+            try:
+                clean_value = match.replace('.', '').replace(',', '.')
+                value = float(clean_value)
+                if value > 1000:
+                    values_found.append(value)
+            except ValueError:
+                continue
+    
+    if values_found:
+        max_value = max(values_found)
+        min_value = min(values_found)
+        
+        points.append({
+            'id': f'values_{len(points)}',
+            'title': f'Valores Identificados: R$ {min_value:,.2f} - R$ {max_value:,.2f}',
+            'comment': f'Encontrados {len(values_found)} valores monetários no documento. Maior valor: R$ {max_value:,.2f}',
+            'status': 'confirmado',
+            'category': 'financeiro',
+            'priority': 'high' if max_value > 100000 else 'medium',
+            'value': f'R$ {max_value:,.2f}'
+        })
+    
+    return points
+
+
+def extract_contacts_and_deadlines_inline(text: str):
+    """Extract contact information and important deadlines"""
+    import re
+    points = []
+    
+    # Phone number patterns
+    phone_pattern = r'(?:\(\d{2}\)|\d{2})\s*\d{4,5}[-\s]?\d{4}'
+    phones = re.findall(phone_pattern, text)
+    if phones:
+        points.append({
+            'id': f'phones_{len(points)}',
+            'title': f'Contatos Telefônicos: {len(phones)} encontrados',
+            'comment': f'Telefones identificados: {", ".join(phones[:3])}{"..." if len(phones) > 3 else ""}',
+            'status': 'confirmado',
+            'category': 'contato',
+            'priority': 'medium'
+        })
+    
+    # Date patterns for deadlines
+    date_patterns = [
+        r'\d{1,2}/\d{1,2}/\d{4}',
+        r'\d{1,2}\s+de\s+\w+\s+de\s+\d{4}',
+        r'até\s+\d{1,2}/\d{1,2}/\d{4}',
+        r'prazo.*?\d{1,2}/\d{1,2}/\d{4}'
+    ]
+    
+    dates_found = []
+    for pattern in date_patterns:
+        matches = re.findall(pattern, text, re.IGNORECASE)
+        dates_found.extend(matches)
+    
+    if dates_found:
+        points.append({
+            'id': f'deadlines_{len(points)}',
+            'title': f'Prazos e Datas: {len(dates_found)} identificados',
+            'comment': f'Datas importantes encontradas: {", ".join(dates_found[:3])}{"..." if len(dates_found) > 3 else ""}',
+            'status': 'alerta',
+            'category': 'prazo',
+            'priority': 'high'
+        })
+    
+    return points
+
+
+def detect_document_type_inline(text: str, filename: str) -> str:
+    """Detect document type based on content and filename"""
+    text_lower = text.lower()
+    filename_lower = filename.lower()
+    
+    types = {
+        'Edital de Leilão': ['edital', 'leilão', 'leilao', 'hasta'],
+        'Processo Judicial': ['processo', 'autos', 'vara', 'tribunal'],
+        'Laudo de Avaliação': ['laudo', 'avaliação', 'avaliacao', 'perito'],
+        'Certidão': ['certidao', 'certidão', 'registro'],
+        'Contrato': ['contrato', 'acordo', 'ajuste'],
+        'Escritura': ['escritura', 'tabeliao', 'tabelião', 'cartorio']
+    }
+    
+    for doc_type, keywords in types.items():
+        if any(keyword in text_lower or keyword in filename_lower for keyword in keywords):
+            return doc_type
+    
+    return 'Documento Jurídico'
+
 
 if __name__ == "__main__":
     import uvicorn
