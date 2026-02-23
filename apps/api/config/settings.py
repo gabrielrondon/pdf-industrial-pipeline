@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 from typing import Optional, List, Dict
 import os
 from functools import lru_cache
@@ -98,16 +98,32 @@ class Settings(BaseSettings):
         env_file = ".env"
         case_sensitive = False
         
-    @validator("cors_origins", pre=True)
+    @field_validator("cors_origins", mode="before")
+    @classmethod
     def parse_cors_origins(cls, v):
         if isinstance(v, str):
-            return [origin.strip() for origin in v.split(",")]
+            v = v.strip()
+            if v.startswith("["):
+                import json
+                try:
+                    return json.loads(v)
+                except Exception:
+                    pass
+            return [origin.strip() for origin in v.split(",") if origin.strip()]
         return v
-    
-    @validator("ocr_languages", pre=True)
+
+    @field_validator("ocr_languages", mode="before")
+    @classmethod
     def parse_ocr_languages(cls, v):
         if isinstance(v, str):
-            return [lang.strip() for lang in v.split(",")]
+            v = v.strip()
+            if v.startswith("["):
+                import json
+                try:
+                    return json.loads(v)
+                except Exception:
+                    pass
+            return [lang.strip() for lang in v.split(",") if lang.strip()]
         return v
     
     @property
@@ -150,7 +166,8 @@ class ProductionSettings(Settings):
     log_level: str = "INFO"
     rate_limit_enabled: bool = True
     
-    @validator("secret_key")
+    @field_validator("secret_key", mode="before")
+    @classmethod
     def validate_secret_key(cls, v):
         if v == "change-me-in-production":
             raise ValueError("Secret key must be changed in production")

@@ -33,7 +33,7 @@ class RedisCache:
         try:
             # Parse Redis URL to get connection params
             import urllib.parse
-            parsed = urllib.parse.urlparse(settings.celery_result_backend)
+            parsed = urllib.parse.urlparse(settings.redis_url)
             
             self.redis_client = redis.Redis(
                 host=parsed.hostname or 'localhost',

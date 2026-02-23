@@ -99,6 +99,8 @@ else:
         "https://arremate360.vercel.app",
         "https://admin-frontend-mlmjy8t78-gabrielrondons-projects.vercel.app",
         "https://admin-frontend-gabrielrondons-projects.vercel.app",
+        "http://localhost:9080",
+        "http://localhost:9081",
         "http://localhost:8080",
         "http://localhost:3000",
         "http://localhost:5173"
